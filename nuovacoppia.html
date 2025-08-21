@@ -43,7 +43,7 @@
             }
 
             // 1. Creare la coppia
-            let response = await fetch('https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}', {
+            let response = await fetch(`https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({nome_coppia: nome})
@@ -57,7 +57,7 @@
             // 2. Caricare la foto
             const formData = new FormData();
             formData.append("foto", fotoFile);
-            response = await fetch('https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}', {
+            response = await fetch(`https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}`, {
                 method: "POST",
                 body: formData
             });
@@ -81,7 +81,7 @@
                 }
             };
 
-            response = await ("/admin/aggiorna_coppia", {
+            response = await fetch(`https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(aggiornaConfig)
