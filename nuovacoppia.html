@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Nuova Coppia</title>
-    <!-- <link rel="stylesheet" href="style.css"> --> 
 </head>
 <body>
     <div class="container">
@@ -33,67 +32,26 @@
             const colorSfondo = document.getElementById("colorSfondo").value;
             const colorTesto = document.getElementById("colorTesto").value;
 
-            if (!nome) {
-                alert("Inserisci un nome per la coppia");
-                return;
-            }
-            if (!fotoFile) {
-                alert("Seleziona una foto della coppia");
-                return;
-            }
+            if (!nome) { alert("Inserisci un nome per la coppia"); return; }
+            if (!fotoFile) { alert("Seleziona una foto della coppia"); return; }
 
-            // 1. Creare la coppia
-            let response = await fetch(`https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({nome_coppia: nome})
-            });
-            let data = await response.json();
-            if (!data.success) {
-                document.getElementById("msg").innerText = "Errore: " + (data.error || "Imprevisto");
-                return;
-            }
-
-            // 2. Caricare la foto
             const formData = new FormData();
-            formData.append("foto", fotoFile);
-            response = await fetch(`https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}`, {
+            formData.append("nome_coppia", nome);
+            formData.append("foto_coppia", fotoFile);
+            formData.append("style_css_colore_sfondo", colorSfondo);
+            formData.append("style_css_colore_testo", colorTesto);
+
+            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_coppia', {
                 method: "POST",
                 body: formData
             });
-            data = await response.json();
-            if (!data.success) {
-                document.getElementById("msg").innerText = "Errore upload foto: " + (data.error || "Imprevisto");
-                return;
-            }
 
-            const fotoUrl = data.files[0].file_url;
-
-            // 3. Aggiornare la coppia con colori e foto
-            const aggiornaConfig = {
-                nome_coppia: nome,
-                titolo_index: nome,
-                foto_url: fotoUrl,
-                colori: {
-                    sfondo: colorSfondo,
-                    testo: colorTesto,
-                    font: "Arial"
-                }
-            };
-
-            response = await fetch(`https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(aggiornaConfig)
-            });
-            data = await response.json();
+            const data = await res.json();
             if (data.success) {
                 document.getElementById("msg").innerText = "Coppia creata con successo!";
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 1000);
+                setTimeout(() => { window.location.href = "index.html"; }, 1000);
             } else {
-                document.getElementById("msg").innerText = "Errore aggiornamento: " + (data.error || "Imprevisto");
+                document.getElementById("msg").innerText = "Errore: " + (data.error || "Imprevisto");
             }
         });
     </script>
