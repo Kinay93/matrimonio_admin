@@ -126,29 +126,27 @@ async function generaQRCode(coppiaNome, btnGenera) {
 }
 
 // Mostra QR in popup (fetch + blob)
-async function vediQRCode(coppiaNome) {
-    try {
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
-        if (!res.ok) throw new Error('QR non trovato');
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
+function vediQRCode(coppiaNome) {
+    const qr_url = `https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`;
 
-        const modal = document.getElementById('qrcode-modal');
-        const img = document.getElementById('qrcode-fullscreen');
-        const downloadBtn = document.getElementById('download-qrcode');
+    const modal = document.getElementById('qrcode-modal');
+    const img = document.getElementById('qrcode-fullscreen');
+    const downloadBtn = document.getElementById('download-qrcode');
 
-        img.src = url;
-        downloadBtn.href = url;
-        modal.style.display = 'flex';
+    img.src = qr_url;
 
-        // Chiudi automaticamente dopo il download
-        downloadBtn.onclick = () => {
-            modal.style.display = 'none';
-            URL.revokeObjectURL(url);
-        }
-    } catch(e) {
-        alert(e.message);
-    }
+    // Gestione errore caricamento immagine
+    img.onerror = () => {
+        alert("Impossibile caricare il QR code. Controlla che esista o la connessione.");
+        modal.style.display = 'none';
+    };
+
+    downloadBtn.href = qr_url;
+    modal.style.display = 'flex';
+
+    downloadBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
 }
 
 // Chiudi modal
