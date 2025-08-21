@@ -37,6 +37,13 @@
             <button>Scarica QR</button>
         </a>
     </div>
+    <div id="qrcode-modal" class="modal" style="display:none;">
+        <span class="close">&times;</span>
+        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia" style="max-width:80%; max-height:80%;">
+        <a id="download-qrcode" href="" download="qrcode.jpg">
+            <button>Scarica QR</button>
+        </a>
+    </div>
 
     <script>
         // Reindirizza a admin.html per creare nuova coppia
@@ -96,10 +103,27 @@
 
         function mostraQRCode(qr_url) {
             const modal = document.getElementById('qrcode-modal');
-            document.getElementById('qrcode-fullscreen').src = qr_url;
-            document.getElementById('download-qrcode').href = qr_url;
+            const img = document.getElementById('qrcode-fullscreen');
+            const downloadBtn = document.getElementById('download-qrcode');
+            
+            // Aggiorna src e href
+            img.src = qr_url;
+            downloadBtn.href = qr_url;
+
+            // Mostra modal
             modal.style.display = 'flex';
+
+            // Chiudi il modal automaticamente dopo il download
+            downloadBtn.onclick = () => {
+                modal.style.display = 'none';
+            }
         }
+
+// Chiudi modal cliccando sulla X
+document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
+    document.getElementById('qrcode-modal').style.display = 'none';
+});
+
 
         // Chiudi modal
         document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
