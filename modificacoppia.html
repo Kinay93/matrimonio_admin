@@ -2,84 +2,86 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Modifica Coppia</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Aggiorna Coppia</title>
 </head>
 <body>
-    <div class="container">
-        <h1 id="nomeCoppiaHeader"></h1>
+    <h1>Aggiorna Coppia</h1>
 
-        <label for="titoloIndex">Titolo della Index:</label>
-        <input type="text" id="titoloIndex">
+    <label for="nomeCoppia">Nome della Coppia:</label>
+    <input type="text" id="nomeCoppia" disabled>
 
-        <label for="sfondo">Colore Sfondo:</label>
-        <input type="color" id="sfondo">
+    <label for="fotoCoppia">Foto della coppia:</label>
+    <input type="file" id="fotoCoppia">
 
-        <label for="testo">Colore Testo:</label>
-        <input type="color" id="testo">
+    <label for="titoloIndex">Titolo della pagina:</label>
+    <input type="text" id="titoloIndex">
 
-        <label for="font">Font:</label>
-        <input type="text" id="font">
+    <label for="colorSfondo">Colore sfondo:</label>
+    <input type="color" id="colorSfondo">
 
-        <button id="aggiornaBtn">Aggiorna configurazione</button>
+    <label for="colorTesto">Colore testo:</label>
+    <input type="color" id="colorTesto">
 
-        <div id="msg"></div>
-    </div>
+    <button id="aggiornaCoppiaBtn">Aggiorna configurazione</button>
+
+    <div id="msg"></div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const coppia = urlParams.get("coppia");
-
-        if (!coppia) {
-            alert("Parametro coppia mancante");
-        }
-
-        const nomeHeader = document.getElementById("nomeCoppiaHeader");
-        const titoloIndexInput = document.getElementById("titoloIndex");
-        const sfondoInput = document.getElementById("sfondo");
-        const testoInput = document.getElementById("testo");
-        const fontInput = document.getElementById("font");
+        const params = new URLSearchParams(window.location.search);
+        const coppia = params.get("coppia");
 
         async function caricaCoppia() {
             const res = await fetch(`/admin/get_coppia?coppia=${coppia}`);
             const data = await res.json();
             if (data.error) {
-                alert(data.error);
+                document.getElementById("msg").innerText = data.error;
                 return;
             }
 
-            nomeHeader.innerText = data.nome_coppia;
-            titoloIndexInput.value = data.titolo_index || "";
-            sfondoInput.value = data.colori?.sfondo || "#ffffff";
-            testoInput.value = data.colori?.testo || "#000000";
-            fontInput.value = data.colori?.font || "Arial";
+            document.getElementById("nomeCoppia").value = data.nome_coppia;
+            document.getElementById("titoloIndex").value = data.titolo_index || "";
+            document.getElementById("colorSfondo").value = data.colori?.sfondo || "#ffffff";
+            document.getElementById("colorTesto").value = data.colori?.testo || "#000000";
         }
 
-        document.getElementById("aggiornaBtn").addEventListener("click", async () => {
-            const payload = {
+        document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async () => {
+            const fotoFile = document.getElementById("fotoCoppia").files[0];
+            let fotoUrl;
+
+            if (fotoFile) {
+                const formData = new FormData();
+                formData.append("foto", fotoFile);
+                const res = await fetch(`/upload?coppia=${coppia}`, { method: "POST", body: formData });
+                const data = await res.json();
+                if (!data.success) {
+                    document.getElementById("msg").innerText = "Errore upload foto: " + (data.error || "Imprevisto");
+                    return;
+                }
+                fotoUrl = data.files[0].file_url;
+            }
+
+            const aggiornaConfig = {
                 nome_coppia: coppia,
-                titolo_index: titoloIndexInput.value,
+                titolo_index: document.getElementById("titoloIndex").value,
+                foto_url: fotoUrl || undefined,
                 colori: {
-                    sfondo: sfondoInput.value,
-                    testo: testoInput.value,
-                    font: fontInput.value
+                    sfondo: document.getElementById("colorSfondo").value,
+                    testo: document.getElementById("colorTesto").value,
+                    font: "Arial"
                 }
             };
 
             const res = await fetch("/admin/aggiorna_coppia", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(payload)
+                body: JSON.stringify(aggiornaConfig)
             });
 
             const data = await res.json();
             if (data.success) {
-                document.getElementById("msg").innerText = "Configurazione aggiornata!";
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 1000);
+                document.getElementById("msg").innerText = "Coppia aggiornata con successo!";
             } else {
-                document.getElementById("msg").innerText = "Errore aggiornamento";
+                document.getElementById("msg").innerText = "Errore aggiornamento: " + (data.error || "Imprevisto");
             }
         });
 
