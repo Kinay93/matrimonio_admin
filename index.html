@@ -45,7 +45,7 @@
         });
 
         async function caricaCoppie() {
-            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_coppie_admin'); // endpoint backend che restituisce coppie
+            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_coppie_admin');
             const data = await res.json();
             const tbody = document.querySelector('#coppie-table tbody');
             tbody.innerHTML = '';
@@ -70,7 +70,9 @@
                 const btnVedi = document.createElement('button');
                 btnVedi.textContent = 'Vedi QR';
                 btnVedi.disabled = !coppia.qr_generato;
-                btnVedi.addEventListener('click', () => mostraQRCode(coppia.qr_link));
+                if (coppia.qr_url) {
+                    btnVedi.addEventListener('click', () => mostraQRCode(coppia.qr_url));
+                }
 
                 tdQR.appendChild(btnGenera);
                 tdQR.appendChild(btnVedi);
@@ -86,6 +88,7 @@
             const data = await res.json();
             if (data.success) {
                 btnGenera.disabled = true;
+                mostraQRCode(data.qr_url); // Mostra subito il QR
                 caricaCoppie(); // aggiorna la tabella per abilitare Vedi QR
             } else {
                 alert('Errore generazione QR');
