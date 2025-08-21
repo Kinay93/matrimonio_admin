@@ -97,8 +97,8 @@
 
         function mostraQRCode(qr_url) {
             const modal = document.getElementById('qrcode-modal');
-            document.getElementById('qrcode-fullscreen').src = url;
-            document.getElementById('download-qrcode').href = url;
+            document.getElementById('qrcode-fullscreen').src = qr_url;
+            document.getElementById('download-qrcode').href = qr_url;
             modal.style.display = 'flex';
         }
 
