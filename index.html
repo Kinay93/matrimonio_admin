@@ -1,75 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Matrimonio</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h1 { color: #FF4CAA; }
-    label { display: block; margin-top: 10px; }
-    input, textarea, select {
-      padding: 8px; margin-top: 5px; width: 100%; max-width: 400px;
-    }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #FF4CAA;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amministrazione Matrimonio</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Pannello Admin - Crea Coppia</h1>
+    <header>
+        <h1>Amministrazione Matrimonio</h1>
+        <button id="nuovo-matrimonio" class="top-right">Nuovo Matrimonio</button>
+    </header>
 
-  <label>Nome Coppia (es. vale-luca)</label>
-  <input id="coppia">
+    <main>
+        <section class="coppie-section">
+            <h2>Le tue coppie</h2>
+            <table id="coppie-table">
+                <thead>
+                    <tr>
+                        <th>Coppia</th>
+                        <th>QR Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Le righe verranno caricate dinamicamente dal backend -->
+                </tbody>
+            </table>
+        </section>
+    </main>
 
-  <label>Titolo</label>
-  <input id="titolo">
+    <!-- Modal QR fullscreen -->
+    <div id="qrcode-modal" class="modal" style="display:none;">
+        <span class="close">&times;</span>
+        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia">
+        <a id="download-qrcode" href="" download="qrcode.jpg">
+            <button>Scarica QR</button>
+        </a>
+    </div>
 
-  <label>Sottotitolo</label>
-  <input id="sottotitolo">
+    <script>
+        // Reindirizza a admin.html per creare nuova coppia
+        document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
+            window.location.href = 'admin.html';
+        });
 
-  <label>Colore Sfondo</label>
-  <input type="color" id="bgColor" value="#F7EAEC">
+        async function caricaCoppie() {
+            const res = await fetch('/get_coppie_admin'); // endpoint backend che restituisce coppie
+            const data = await res.json();
+            const tbody = document.querySelector('#coppie-table tbody');
+            tbody.innerHTML = '';
 
-  <label>Colore Testo</label>
-  <input type="color" id="textColor" value="#FF4CAA">
+            data.coppie.forEach(coppia => {
+                const tr = document.createElement('tr');
 
-  <label>Foto Copertina (URL)</label>
-  <input id="cover">
+                // Nome coppia cliccabile
+                const tdNome = document.createElement('td');
+                const link = document.createElement('a');
+                link.href = `modificacoppia.html?coppia=${coppia.nome}`;
+                link.textContent = coppia.nome;
+                tdNome.appendChild(link);
 
-  <label>Storia della Coppia</label>
-  <textarea id="storie" rows="6"></textarea>
+                // QR code
+                const tdQR = document.createElement('td');
+                const btnGenera = document.createElement('button');
+                btnGenera.textContent = 'Genera QR';
+                btnGenera.disabled = coppia.qr_generato; 
+                btnGenera.addEventListener('click', () => generaQRCode(coppia.nome, btnGenera));
 
-  <button onclick="salvaConfig()">Salva Configurazione</button>
-<a href="qrcode.html" class="pulsante">Genera QR-Code</a>
+                const btnVedi = document.createElement('button');
+                btnVedi.textContent = 'Vedi QR';
+                btnVedi.disabled = !coppia.qr_generato;
+                btnVedi.addEventListener('click', () => mostraQRCode(coppia.qr_link));
 
-  <script>
-    function salvaConfig() {
-      const data = {
-        coppia: document.getElementById('coppia').value,
-        titolo: document.getElementById('titolo').value,
-        sottotitolo: document.getElementById('sottotitolo').value,
-        bgColor: document.getElementById('bgColor').value,
-        textColor: document.getElementById('textColor').value,
-        cover: document.getElementById('cover').value,
-        storie: document.getElementById('storie').value
-      };
+                tdQR.appendChild(btnGenera);
+                tdQR.appendChild(btnVedi);
 
-      fetch("https://matrimoniome.appspot.com/saveConfig", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      }).then(r => {
-        if(r.ok) alert("Configurazione salvata!");
-        else alert("Errore nel salvataggio.");
-      });
-    }
-  </script>
+                tr.appendChild(tdNome);
+                tr.appendChild(tdQR);
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function generaQRCode(coppiaNome, btnGenera) {
+            const res = await fetch(`/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+            const data = await res.json();
+            if (data.success) {
+                btnGenera.disabled = true;
+                caricaCoppie(); // aggiorna la tabella per abilitare Vedi QR
+            } else {
+                alert('Errore generazione QR');
+            }
+        }
+
+        function mostraQRCode(url) {
+            const modal = document.getElementById('qrcode-modal');
+            document.getElementById('qrcode-fullscreen').src = url;
+            document.getElementById('download-qrcode').href = url;
+            modal.style.display = 'flex';
+        }
+
+        // Chiudi modal
+        document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
+            document.getElementById('qrcode-modal').style.display = 'none';
+        });
+
+        // Carica coppie al load
+        window.onload = caricaCoppie;
+    </script>
 </body>
 </html>
