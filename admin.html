@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Matrimonio</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { color: #FF4CAA; }
+    label { display: block; margin-top: 10px; }
+    input, textarea, select {
+      padding: 8px; margin-top: 5px; width: 100%; max-width: 400px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #FF4CAA;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pannello Admin - Crea Coppia</h1>
+
+  <label>Nome Coppia (es. vale-luca)</label>
+  <input id="coppia">
+
+  <label>Titolo</label>
+  <input id="titolo">
+
+  <label>Sottotitolo</label>
+  <input id="sottotitolo">
+
+  <label>Colore Sfondo</label>
+  <input type="color" id="bgColor" value="#F7EAEC">
+
+  <label>Colore Testo</label>
+  <input type="color" id="textColor" value="#FF4CAA">
+
+  <label>Foto Copertina (URL)</label>
+  <input id="cover">
+
+  <label>Storia della Coppia</label>
+  <textarea id="storie" rows="6"></textarea>
+
+  <button onclick="salvaConfig()">Salva Configurazione</button>
+
+  <script>
+    function salvaConfig() {
+      const data = {
+        coppia: document.getElementById('coppia').value,
+        titolo: document.getElementById('titolo').value,
+        sottotitolo: document.getElementById('sottotitolo').value,
+        bgColor: document.getElementById('bgColor').value,
+        textColor: document.getElementById('textColor').value,
+        cover: document.getElementById('cover').value,
+        storie: document.getElementById('storie').value
+      };
+
+      fetch("https://matrimoniome.appspot.com/saveConfig", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).then(r => {
+        if(r.ok) alert("Configurazione salvata!");
+        else alert("Errore nel salvataggio.");
+      });
+    }
+  </script>
+</body>
+</html>
