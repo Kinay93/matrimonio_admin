@@ -31,12 +31,8 @@
         const coppia = params.get("coppia");
 
         async function caricaCoppia() {
-            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}');
+            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/config/${coppia}.json`);
             const data = await res.json();
-            if (data.error) {
-                document.getElementById("msg").innerText = data.error;
-                return;
-            }
 
             document.getElementById("nomeCoppia").value = data.nome_coppia;
             document.getElementById("titoloIndex").value = data.titolo_index || "";
@@ -46,35 +42,17 @@
 
         document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async () => {
             const fotoFile = document.getElementById("fotoCoppia").files[0];
-            let fotoUrl;
 
-            if (fotoFile) {
-                const formData = new FormData();
-                formData.append("foto", fotoFile);
-                const res = await fetch('https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}', { method: "POST", body: formData });
-                const data = await res.json();
-                if (!data.success) {
-                    document.getElementById("msg").innerText = "Errore upload foto: " + (data.error || "Imprevisto");
-                    return;
-                }
-                fotoUrl = data.files[0].file_url;
-            }
+            const formData = new FormData();
+            formData.append("nome_coppia", coppia);
+            formData.append("titolo_index", document.getElementById("titoloIndex").value);
+            formData.append("style_css_colore_sfondo", document.getElementById("colorSfondo").value);
+            formData.append("style_css_colore_testo", document.getElementById("colorTesto").value);
+            if (fotoFile) formData.append("foto_coppia", fotoFile);
 
-            const aggiornaConfig = {
-                nome_coppia: coppia,
-                titolo_index: document.getElementById("titoloIndex").value,
-                foto_url: fotoUrl || undefined,
-                colori: {
-                    sfondo: document.getElementById("colorSfondo").value,
-                    testo: document.getElementById("colorTesto").value,
-                    font: "Arial"
-                }
-            };
-
-            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}', {
+            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia', {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(aggiornaConfig)
+                body: formData
             });
 
             const data = await res.json();
