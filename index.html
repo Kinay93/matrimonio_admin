@@ -82,7 +82,7 @@
         }
 
         async function generaQRCode(coppiaNome, btnGenera) {
-            const res = await fetch(`/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
             const data = await res.json();
             if (data.success) {
                 btnGenera.disabled = true;
