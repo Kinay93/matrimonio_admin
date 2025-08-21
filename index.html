@@ -45,7 +45,7 @@
         });
 
         async function caricaCoppie() {
-            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/get_coppie_admin'); // endpoint backend che restituisce coppie
+            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_coppie_admin'); // endpoint backend che restituisce coppie
             const data = await res.json();
             const tbody = document.querySelector('#coppie-table tbody');
             tbody.innerHTML = '';
@@ -82,7 +82,7 @@
         }
 
         async function generaQRCode(coppiaNome, btnGenera) {
-            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
             const data = await res.json();
             if (data.success) {
                 btnGenera.disabled = true;
