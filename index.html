@@ -67,12 +67,11 @@
                 btnGenera.disabled = coppia.qr_generato; 
                 btnGenera.addEventListener('click', () => generaQRCode(coppia.nome, btnGenera));
 
-                const btnVedi = document.createElement('button');
+               const btnVedi = document.createElement('button');
                 btnVedi.textContent = 'Vedi QR';
-                btnVedi.disabled = !coppia.qr_generato;
-                if (coppia.qr_url) {
-                    btnVedi.addEventListener('click', () => mostraQRCode(coppia.qr_url));
-                }
+                btnVedi.disabled = !coppia.qr_generato; // solo se il QR non è generato
+                btnVedi.addEventListener('click', () => mostraQRCode(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppia.nome)}`)
+);
 
                 tdQR.appendChild(btnGenera);
                 tdQR.appendChild(btnVedi);
