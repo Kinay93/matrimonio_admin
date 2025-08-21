@@ -4,12 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amministrazione Matrimonio</title>
-    <!--link rel="stylesheet" href="style.css" -->
+    <style>
+        body { font-family: Arial, sans-serif; margin:0; padding:0; }
+        header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#f2f2f2; }
+        h1 { margin:0; }
+        .top-right { margin-left:10px; padding:5px 15px; cursor:pointer; }
+        table { width:100%; border-collapse: collapse; margin-top:20px; }
+        th, td { border:1px solid #ccc; padding:10px; text-align:left; }
+        th { background:#eee; }
+        .modal { 
+            display:none; 
+            position:fixed; 
+            top:0; left:0; 
+            width:100%; height:100%; 
+            background:rgba(0,0,0,0.8); 
+            justify-content:center; 
+            align-items:center; 
+            opacity:0; 
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.show { display:flex; opacity:1; }
+        .modal-content { position:relative; text-align:center; }
+        .modal-content img { max-width:80vw; max-height:80vh; border:2px solid white; border-radius:10px; }
+        .close { position:absolute; top:10px; right:20px; font-size:2rem; color:white; cursor:pointer; }
+    </style>
 </head>
 <body>
     <header>
         <h1>Amministrazione Matrimonio</h1>
-        <button id="nuovo-matrimonio" class="top-right">Nuovo Matrimonio</button>
+        <div>
+            <button id="nuovo-matrimonio" class="top-right">Nuovo Matrimonio</button>
+            <button id="settings-btn" class="top-right">⚙️</button>
+        </div>
     </header>
 
     <main>
@@ -30,25 +56,26 @@
     </main>
 
     <!-- Modal QR fullscreen -->
-    <div id="qrcode-modal" class="modal" style="display:none;">
-        <span class="close">&times;</span>
-        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia">
-        <a id="download-qrcode" href="" download="qrcode.jpg">
-            <button>Scarica QR</button>
-        </a>
-    </div>
-    <div id="qrcode-modal" class="modal" style="display:none;">
-        <span class="close">&times;</span>
-        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia" style="max-width:80%; max-height:80%;">
-        <a id="download-qrcode" href="" download="qrcode.jpg">
-            <button>Scarica QR</button>
-        </a>
+    <div id="qrcode-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="qrcode-fullscreen" src="" alt="QR Code Coppia">
+            <br>
+            <a id="download-qrcode" href="" download="qrcode.jpg">
+                <button style="margin-top:10px; padding:10px 20px;">Scarica QR</button>
+            </a>
+        </div>
     </div>
 
     <script>
-        // Reindirizza a admin.html per creare nuova coppia
+        // Reindirizza a nuovacoppia.html per creare nuova coppia
         document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
             window.location.href = 'nuovacoppia.html';
+        });
+
+        // Pulsante impostazioni (ancora da implementare)
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            alert("Impostazioni non ancora implementate");
         });
 
         async function caricaCoppie() {
@@ -74,11 +101,12 @@
                 btnGenera.disabled = coppia.qr_generato; 
                 btnGenera.addEventListener('click', () => generaQRCode(coppia.nome, btnGenera));
 
-               const btnVedi = document.createElement('button');
+                const btnVedi = document.createElement('button');
                 btnVedi.textContent = 'Vedi QR';
-                btnVedi.disabled = !coppia.qr_generato; // solo se il QR non è generato
-                btnVedi.addEventListener('click', () => mostraQRCode(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppia.nome)}`)
-);
+                btnVedi.disabled = !coppia.qr_generato;
+                if (coppia.qr_generato && coppia.qr_url) {
+                    btnVedi.addEventListener('click', () => mostraQRCode(coppia.qr_url));
+                }
 
                 tdQR.appendChild(btnGenera);
                 tdQR.appendChild(btnVedi);
@@ -94,8 +122,8 @@
             const data = await res.json();
             if (data.success) {
                 btnGenera.disabled = true;
-                mostraQRCode(data.qr_url); // Mostra subito il QR
-                caricaCoppie(); // aggiorna la tabella per abilitare Vedi QR
+                mostraQRCode(data.qr_url);
+                caricaCoppie();
             } else {
                 alert('Errore generazione QR');
             }
@@ -105,32 +133,28 @@
             const modal = document.getElementById('qrcode-modal');
             const img = document.getElementById('qrcode-fullscreen');
             const downloadBtn = document.getElementById('download-qrcode');
-            
-            // Aggiorna src e href
+
             img.src = qr_url;
             downloadBtn.href = qr_url;
 
-            // Mostra modal
-            modal.style.display = 'flex';
+            modal.classList.add('show');
 
-            // Chiudi il modal automaticamente dopo il download
+            // Chiudi cliccando sulla X
+            modal.querySelector('.close').onclick = () => {
+                modal.classList.remove('show');
+            };
+
+            // Chiudi cliccando fuori dall'immagine
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.classList.remove('show');
+            };
+
+            // Chiudi dopo download
             downloadBtn.onclick = () => {
-                modal.style.display = 'none';
-            }
+                modal.classList.remove('show');
+            };
         }
 
-// Chiudi modal cliccando sulla X
-document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
-    document.getElementById('qrcode-modal').style.display = 'none';
-});
-
-
-        // Chiudi modal
-        document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
-            document.getElementById('qrcode-modal').style.display = 'none';
-        });
-
-        // Carica coppie al load
         window.onload = caricaCoppie;
     </script>
 </body>
