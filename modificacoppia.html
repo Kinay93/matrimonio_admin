@@ -31,7 +31,7 @@
         const coppia = params.get("coppia");
 
         async function caricaCoppia() {
-            const res = await fetch(`/admin/get_coppia?coppia=${coppia}`);
+            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}');
             const data = await res.json();
             if (data.error) {
                 document.getElementById("msg").innerText = data.error;
@@ -51,7 +51,7 @@
             if (fotoFile) {
                 const formData = new FormData();
                 formData.append("foto", fotoFile);
-                const res = await fetch(`/upload?coppia=${coppia}`, { method: "POST", body: formData });
+                const res = await fetch('https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}', { method: "POST", body: formData });
                 const data = await res.json();
                 if (!data.success) {
                     document.getElementById("msg").innerText = "Errore upload foto: " + (data.error || "Imprevisto");
@@ -71,7 +71,7 @@
                 }
             };
 
-            const res = await fetch("/admin/aggiorna_coppia", {
+            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/upload?coppia=${nome}', {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(aggiornaConfig)
