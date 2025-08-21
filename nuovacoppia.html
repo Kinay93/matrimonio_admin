@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuova Coppia</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Nuovo Matrimonio</h1>
+
+        <label for="nomeCoppia">Nome della Coppia:</label>
+        <input type="text" id="nomeCoppia" placeholder="Inserisci nome coppia">
+
+        <button id="creaCoppiaBtn">Crea configurazione</button>
+
+        <div id="msg"></div>
+    </div>
+
+    <script>
+        document.getElementById("creaCoppiaBtn").addEventListener("click", async () => {
+            const nome = document.getElementById("nomeCoppia").value.trim();
+            if (!nome) {
+                alert("Inserisci un nome per la coppia");
+                return;
+            }
+
+            const response = await fetch("/admin/crea_coppia", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({nome_coppia: nome})
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById("msg").innerText = "Coppia creata con successo!";
+                setTimeout(() => {
+                    window.location.href = "amministrazione.html";
+                }, 1000);
+            } else {
+                document.getElementById("msg").innerText = "Errore: " + (data.error || "Imprevisto");
+            }
+        });
+    </script>
+</body>
+</html>
