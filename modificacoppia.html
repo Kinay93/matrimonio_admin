@@ -1,79 +1,80 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Modifica Coppia</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modifica Coppia</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
 </head>
 <body>
 <header>
-    <h1>Modifica Coppia</h1>
-    <button onclick="window.location.href='index.html'">← Torna</button>
+  <h1>Modifica Coppia</h1>
+  <button onclick="window.location.href='index.html'" class="top-right">← Torna</button>
 </header>
 
 <main>
-<div class="two-columns">
-    <div class="form-box">
-        <h2>Dati Coppia</h2>
-        <form id="modifica-coppia-form">
-            <label>Nome coppia</label>
-            <input type="text" id="nomeCoppia" required><br><br>
-
-            <label>Data matrimonio</label>
-            <input type="date" id="dataMatrimonio" required><br><br>
-
-            <button type="submit">Salva</button>
-        </form>
-    </div>
-
-    <div class="preview-box">
-        <h2>Anteprima</h2>
-        <p id="previewNome"></p>
-        <p id="previewData"></p>
-    </div>
-</div>
+  <form id="formModificaCoppia">
+    <label>Nome Coppia:
+      <input type="text" id="nomeCoppia" name="nomeCoppia" required />
+    </label><br><br>
+    <label>Descrizione:
+      <textarea id="descrizioneCoppia" name="descrizioneCoppia"></textarea>
+    </label><br><br>
+    <button type="submit">Salva Modifiche</button>
+  </form>
 </main>
 
-<script src="script.js"></script>
 <script>
-const params = new URLSearchParams(window.location.search);
-const coppiaNome = params.get('coppia');
+window.onload = async () => {
+  await applicaTemaAdmin();
 
-async function caricaDati() {
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppiaNome)}`);
+  const params = new URLSearchParams(window.location.search);
+  const coppia = params.get('coppia');
+  if (!coppia) {
+    alert("Nessuna coppia selezionata");
+    window.location.href = 'index.html';
+    return;
+  }
+
+  // Carica dati coppia esistente
+  try {
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}`);
     const data = await res.json();
-    document.getElementById('nomeCoppia').value = data.nome;
-    document.getElementById('dataMatrimonio').value = data.data;
-    document.getElementById('previewNome').textContent = data.nome;
-    document.getElementById('previewData').textContent = data.data;
-}
-
-document.getElementById('modifica-coppia-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('nomeCoppia').value;
-    const data = document.getElementById('dataMatrimonio').value;
-
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/modifica_coppia?vecchio=${encodeURIComponent(coppiaNome)}&nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}`);
-    const json = await res.json();
-    if(json.success) {
-        alert("Coppia aggiornata");
-        window.location.href = 'index.html';
+    if (data.success) {
+      document.getElementById('nomeCoppia').value = data.coppia.nome || '';
+      document.getElementById('descrizioneCoppia').value = data.coppia.descrizione || '';
     } else {
-        alert("Errore modifica coppia");
+      alert("Coppia non trovata");
+      window.location.href = 'index.html';
     }
-});
+  } catch (e) {
+    alert("Errore caricamento dati");
+    window.location.href = 'index.html';
+  }
 
-document.getElementById('nomeCoppia').addEventListener('input', e => {
-    document.getElementById('previewNome').textContent = e.target.value;
-});
-document.getElementById('dataMatrimonio').addEventListener('input', e => {
-    document.getElementById('previewData').textContent = e.target.value;
-});
+  // Salva modifiche
+  const form = document.getElementById('formModificaCoppia');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('nomeCoppia').value.trim();
+      const descrizione = document.getElementById('descrizioneCoppia').value.trim();
 
-window.onload = () => {
-    caricaDati();
-    applicaTemaAdmin();
+      const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/modifica_coppia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vecchio_nome: coppia, nuovo_nome: nome, descrizione })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Modifiche salvate");
+        window.location.href = 'index.html';
+      } else {
+        alert("Errore nel salvataggio: " + (data.message || ''));
+      }
+    });
+  }
 };
 </script>
 </body>
