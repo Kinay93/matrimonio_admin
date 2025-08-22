@@ -35,7 +35,7 @@
             try {
                 const res = await fetch(
                     `https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}`,
-                    { cache: "no-store" } // evita cache
+                    { cache: "no-store" }
                 );
                 if (!res.ok) throw new Error("Coppia non trovata");
                 const data = await res.json();
@@ -44,6 +44,11 @@
                 document.getElementById("titoloIndex").value = data.titolo_index || "";
                 document.getElementById("colorSfondo").value = data.colori?.sfondo || "#ffffff";
                 document.getElementById("colorTesto").value = data.colori?.testo || "#000000";
+
+                console.log("[DEBUG] Caricati colori:", 
+                            "sfondo=", document.getElementById("colorSfondo").value, 
+                            "testo=", document.getElementById("colorTesto").value);
+
                 document.getElementById("msg").innerText = "";
             } catch(e) {
                 document.getElementById("msg").innerText = "Errore caricamento coppia: " + e.message;
@@ -61,6 +66,11 @@
             formData.append("style_css_colore_testo", document.getElementById("colorTesto").value);
             if (fotoFile) formData.append("foto_coppia", fotoFile);
 
+            console.log("[DEBUG] Invio aggiornamento:", 
+                        "sfondo=", document.getElementById("colorSfondo").value,
+                        "testo=", document.getElementById("colorTesto").value,
+                        "titolo=", document.getElementById("titoloIndex").value);
+
             try {
                 const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia', {
                     method: "POST",
@@ -70,6 +80,7 @@
 
                 if (data.success) {
                     document.getElementById("msg").innerText = "Coppia aggiornata con successo!";
+                    console.log("[DEBUG] Aggiornamento completato:", data.config);
                     // ricarica i dati aggiornati
                     caricaCoppia();
                 } else {
