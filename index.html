@@ -8,18 +8,21 @@
 <style>
     body { font-family: Arial, sans-serif; margin:0; padding:0; }
     header { display:flex; align-items:center; padding:10px; position:relative; background:#f5f5f5; }
-    header h1 { margin-left:10px; }
+    header img { height:40px; margin-left:10px; }
+    header h1 { margin-left:15px; font-size:1.5rem; }
     header button { position:absolute; right:10px; }
     .container { padding:20px; }
     table { width:100%; border-collapse: collapse; }
     th, td { border:1px solid #ccc; padding:8px; text-align:left; }
     .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .top-bar h2 { margin:0; }
+    .top-bar button { padding:6px 12px; }
 </style>
 </head>
 <body>
 
 <header>
-    <img id="admin-logo" src="" alt="Logo" style="height:40px; margin-right:10px;">
+    <img id="admin-logo" src="" alt="Logo">
     <h1>Amministrazione Matrimonio</h1>
     <button id="temaAdmin">⚙️</button>
 </header>
@@ -78,6 +81,8 @@ async function caricaCoppie() {
         tbody.innerHTML = '';
 
         data.coppie.forEach(coppia => {
+            if (!coppia || !coppia.nome) return;
+
             const tr = document.createElement('tr');
 
             const tdNome = document.createElement('td');
