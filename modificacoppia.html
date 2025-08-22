@@ -60,10 +60,11 @@
         inputTesto.addEventListener("input", aggiornaAnteprima);
         selectFont.addEventListener("change", aggiornaAnteprima);
 
+        // Carica dati coppia dal backend
         async function caricaCoppia() {
             try {
                 const res = await fetch(
-                    `https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}`,
+                    `https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}&t=${Date.now()}`,
                     { cache: "no-store" }
                 );
                 if (!res.ok) throw new Error("Coppia non trovata");
@@ -77,13 +78,18 @@
 
                 aggiornaAnteprima();
 
-                console.log("[DEBUG] Caricati colori:", "sfondo=", inputSfondo.value, "testo=", inputTesto.value, "font=", selectFont.value);
+                console.log("[DEBUG] Caricati colori:", 
+                            "sfondo=", inputSfondo.value, 
+                            "testo=", inputTesto.value, 
+                            "font=", selectFont.value);
+
                 document.getElementById("msg").innerText = "";
             } catch(e) {
                 document.getElementById("msg").innerText = "Errore caricamento coppia: " + e.message;
             }
         }
 
+        // Aggiorna dati coppia
         document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async () => {
             const fotoFile = document.getElementById("fotoCoppia").files[0];
 
@@ -95,7 +101,11 @@
             formData.append("style_css_font", selectFont.value);
             if (fotoFile) formData.append("foto_coppia", fotoFile);
 
-            console.log("[DEBUG] Invio aggiornamento:", "sfondo=", inputSfondo.value, "testo=", inputTesto.value, "font=", selectFont.value, "titolo=", document.getElementById("titoloIndex").value);
+            console.log("[DEBUG] Invio aggiornamento:", 
+                        "sfondo=", inputSfondo.value,
+                        "testo=", inputTesto.value,
+                        "font=", selectFont.value,
+                        "titolo=", document.getElementById("titoloIndex").value);
 
             try {
                 const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia', {
@@ -107,16 +117,7 @@
                 if (data.success) {
                     document.getElementById("msg").innerText = "Coppia aggiornata con successo!";
                     console.log("[DEBUG] Aggiornamento completato:", data.config);
-
-                    // Aggiorna subito i campi con i dati appena salvati
-                    document.getElementById("titoloIndex").value = data.config.titolo_index;
-                    inputSfondo.value = data.config.colori.sfondo;
-                    inputTesto.value = data.config.colori.testo;
-                    selectFont.value = data.config.colori.font;
-                    aggiornaAnteprima();
-
-                    // Ricarica dopo 1s per allinearsi allo storage
-                    setTimeout(caricaCoppia, 1000);
+                    caricaCoppia(); // ricarica dati aggiornati senza cache
                 } else {
                     document.getElementById("msg").innerText = "Errore aggiornamento: " + (data.error || "Imprevisto");
                 }
@@ -125,6 +126,7 @@
             }
         });
 
+        // Carica coppia al load
         caricaCoppia();
     </script>
 </body>
