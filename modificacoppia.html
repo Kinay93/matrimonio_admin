@@ -42,8 +42,8 @@
 
                 document.getElementById("nomeCoppia").value = data.nome_coppia;
                 document.getElementById("titoloIndex").value = data.titolo_index || "";
-                document.getElementById("colorSfondo").value = data.colori?.sfondo || "#ffffff";
-                document.getElementById("colorTesto").value = data.colori?.testo || "#000000";
+                document.getElementById("colorSfondo").value = data.colori?.sfondo.trim() || "#ffffff";
+                document.getElementById("colorTesto").value = data.colori?.testo.trim() || "#000000";
 
                 console.log("[DEBUG] Caricati colori:", 
                             "sfondo=", document.getElementById("colorSfondo").value, 
