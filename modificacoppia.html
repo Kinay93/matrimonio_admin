@@ -31,13 +31,18 @@
         const coppia = params.get("coppia");
 
         async function caricaCoppia() {
-            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/config/${coppia}.json`);
-            const data = await res.json();
+            try {
+                const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}`);
+                if (!res.ok) throw new Error("Coppia non trovata");
+                const data = await res.json();
 
-            document.getElementById("nomeCoppia").value = data.nome_coppia;
-            document.getElementById("titoloIndex").value = data.titolo_index || "";
-            document.getElementById("colorSfondo").value = data.colori?.sfondo || "#ffffff";
-            document.getElementById("colorTesto").value = data.colori?.testo || "#000000";
+                document.getElementById("nomeCoppia").value = data.nome_coppia;
+                document.getElementById("titoloIndex").value = data.titolo_index || "";
+                document.getElementById("colorSfondo").value = data.colori?.sfondo || "#ffffff";
+                document.getElementById("colorTesto").value = data.colori?.testo || "#000000";
+            } catch(e) {
+                document.getElementById("msg").innerText = "Errore caricamento coppia: " + e.message;
+            }
         }
 
         document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async () => {
