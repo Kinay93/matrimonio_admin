@@ -3,42 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <title>Aggiorna Coppia</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { display: flex; gap: 20px; }
+        .form-col { flex: 1; }
+        .preview-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        #anteprima { width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; border: 1px solid #ccc; margin-top: 20px; position: relative; }
+        #anteprimaFoto { width: 150px; height: 150px; background-color: #ddd; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #666; }
+        #anteprimaTesto { position: absolute; top: 10px; left: 10px; font-size: 24px; }
+    </style>
 </head>
 <body>
-    <h1>Aggiorna Coppia</h1>
+    <div class="container">
+        <div class="form-col">
+            <h1>Aggiorna Coppia</h1>
 
-    <label for="nomeCoppia">Nome della Coppia:</label>
-    <input type="text" id="nomeCoppia" disabled>
+            <label for="nomeCoppia">Nome della Coppia:</label>
+            <input type="text" id="nomeCoppia" disabled>
 
-    <label for="fotoCoppia">Foto della coppia:</label>
-    <input type="file" id="fotoCoppia">
+            <label for="fotoCoppia">Foto della coppia:</label>
+            <input type="file" id="fotoCoppia">
 
-    <label for="titoloIndex">Titolo della pagina:</label>
-    <input type="text" id="titoloIndex">
+            <label for="titoloIndex">Titolo della pagina:</label>
+            <input type="text" id="titoloIndex">
 
-    <label for="colorSfondo">Colore sfondo:</label>
-    <input type="color" id="colorSfondo">
+            <label for="colorSfondo">Colore sfondo:</label>
+            <input type="color" id="colorSfondo">
 
-    <label for="colorTesto">Colore testo:</label>
-    <input type="color" id="colorTesto">
+            <label for="colorTesto">Colore testo:</label>
+            <input type="color" id="colorTesto">
 
-    <label for="fontScelto">Font del testo:</label>
-    <select id="fontScelto"></select>
+            <label for="fontScelto">Font del testo:</label>
+            <select id="fontScelto"></select>
 
-    <label for="effettoSfondo">Effetto Sfondo:</label>
-    <select id="effettoSfondo"></select>
+            <label for="effettoSfondo">Effetto Sfondo:</label>
+            <select id="effettoSfondo"></select>
 
-    <label for="effettoScritta">Effetto Scritta:</label>
-    <select id="effettoScritta"></select>
+            <label for="effettoScritta">Effetto Scritta:</label>
+            <select id="effettoScritta"></select>
 
-    <h3>Anteprima</h3>
-    <div id="anteprima" style="width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; border: 1px solid #ccc;">
-        <span id="anteprimaTesto">Questo è un esempio</span>
+            <button id="aggiornaCoppiaBtn">Aggiorna configurazione</button>
+            <div id="msg"></div>
+        </div>
+
+        <div class="preview-col">
+            <h3>Anteprima</h3>
+            <div id="anteprima">
+                <div id="anteprimaFoto">Foto</div>
+                <span id="anteprimaTesto">Questo è un esempio</span>
+            </div>
+        </div>
     </div>
-
-    <button id="aggiornaCoppiaBtn">Aggiorna configurazione</button>
-
-    <div id="msg"></div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -61,6 +76,8 @@
         inputSfondo.addEventListener("input", aggiornaAnteprima);
         inputTesto.addEventListener("input", aggiornaAnteprima);
         selectFont.addEventListener("change", aggiornaAnteprima);
+        selectEffettoSfondo.addEventListener("change", aggiornaAnteprima);
+        selectEffettoScritta.addEventListener("change", aggiornaAnteprima);
 
         // Carica dati coppia dal backend
         async function caricaCoppia() {
@@ -133,7 +150,6 @@
             formData.append("style_css_colore_sfondo", inputSfondo.value);
             formData.append("style_css_colore_testo", inputTesto.value);
             formData.append("style_css_font", selectFont.value);
-            // eventualmente inviare anche gli effetti scelti
             formData.append("effetto_sfondo", selectEffettoSfondo.value);
             formData.append("effetto_scritta", selectEffettoScritta.value);
 
@@ -148,7 +164,7 @@
 
                 if (data.success) {
                     document.getElementById("msg").innerText = "Coppia aggiornata con successo!";
-                    caricaCoppia(); // ricarica dati aggiornati senza cache
+                    caricaCoppia();
                 } else {
                     document.getElementById("msg").innerText = "Errore aggiornamento: " + (data.error || "Imprevisto");
                 }
