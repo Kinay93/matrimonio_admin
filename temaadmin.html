@@ -1,135 +1,92 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Tema Admin</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        header { padding: 10px; text-align: center; }
-        .container { display: flex; gap: 20px; padding: 20px; }
-        .form-col { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        .preview-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #ccc; padding: 10px; }
-        .preview-header { width: 100%; padding: 10px; text-align: center; }
-        .preview-logo { max-width: 150px; margin: 10px 0; }
-        label { font-weight: bold; }
-        input, select, button { padding: 5px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestione Tema Admin</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
     <h1>Gestione Tema Admin</h1>
+    <button onclick="window.location.href='index.html'">← Torna</button>
 </header>
 
-<div class="container">
-    <div class="form-col">
-        <label for="bgColor">Colore Sfondo:</label>
-        <input type="color" id="bgColor">
+<main>
+<div class="theme-box">
+    <form id="tema-form">
+        <label>Colore sfondo</label>
+        <input type="color" id="bgColor" name="bgColor"><br><br>
 
-        <label for="textColor">Colore Testo:</label>
-        <input type="color" id="textColor">
+        <label>Colore testo</label>
+        <input type="color" id="textColor" name="textColor"><br><br>
 
-        <label for="headerColor">Colore Header:</label>
-        <input type="color" id="headerColor">
+        <label>Colore intestazione</label>
+        <input type="color" id="headerColor" name="headerColor"><br><br>
 
-        <label for="headerText">Testo Header:</label>
-        <input type="text" id="headerText">
+        <label>Testo intestazione</label>
+        <input type="text" id="headerText" name="headerText" placeholder="Titolo intestazione"><br><br>
 
-        <label for="fontSelect">Font:</label>
-        <select id="fontSelect">
+        <label>Font</label>
+        <select id="fontSelect" name="fontSelect">
             <option value="Arial">Arial</option>
             <option value="Georgia">Georgia</option>
-            <option value="Verdana">Verdana</option>
-            <option value="Courier New">Courier New</option>
             <option value="Times New Roman">Times New Roman</option>
-        </select>
+            <option value="Verdana">Verdana</option>
+        </select><br><br>
 
-        <label for="logoFile">Logo:</label>
-        <input type="file" id="logoFile">
+        <label>Logo</label>
+        <input type="file" id="logoFile" name="logoFile" accept="image/*"><br><br>
 
-        <button id="saveTema">Salva Tema</button>
-        <div id="msg"></div>
-    </div>
-
-    <div class="preview-col">
-        <div class="preview-header" id="previewHeader">Header di esempio</div>
-        <img id="previewLogo" class="preview-logo" src="" alt="Logo Admin">
-        <p>Testo esempio anteprima</p>
-    </div>
+        <button type="button" id="saveTema">Salva Tema</button>
+    </form>
 </div>
+</main>
 
+<script src="script.js"></script>
 <script>
-const adminCorrente = "default"; // puoi cambiare se gestisci più admin
+// Carica il tema esistente se presente
+window.onload = () => {
+    applicaTemaAdmin(); // funzione in script.js
 
-const bgColorInput = document.getElementById('bgColor');
-const textColorInput = document.getElementById('textColor');
-const headerColorInput = document.getElementById('headerColor');
-const headerTextInput = document.getElementById('headerText');
-const fontSelect = document.getElementById('fontSelect');
-const logoFileInput = document.getElementById('logoFile');
+    // eventuale precompilazione dei campi con i valori attuali
+    fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_theme_latest`)
+        .then(r => r.json())
+        .then(data => {
+            if(data.success && data.theme) {
+                document.getElementById('bgColor').value = data.theme.bg_color || '#ffffff';
+                document.getElementById('textColor').value = data.theme.text_color || '#000000';
+                document.getElementById('headerColor').value = data.theme.header_color || '#000000';
+                document.getElementById('headerText').value = data.theme.header_text || '';
+                document.getElementById('fontSelect').value = data.theme.font_family || 'Arial';
+            }
+        });
+};
 
-const previewHeader = document.getElementById('previewHeader');
-const previewLogo = document.getElementById('previewLogo');
-
-function aggiornaAnteprima() {
-    document.body.style.backgroundColor = bgColorInput.value;
-    document.body.style.color = textColorInput.value;
-    previewHeader.style.backgroundColor = headerColorInput.value;
-    previewHeader.textContent = headerTextInput.value;
-    document.body.style.fontFamily = fontSelect.value;
-}
-
-// Carica tema ultimo JSON
-async function caricaTema() {
-    try {
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_theme?admin=${adminCorrente}`);
-        const data = await res.json();
-        if(data.success) {
-            bgColorInput.value = data.bg_color || "#ffffff";
-            textColorInput.value = data.text_color || "#000000";
-            headerColorInput.value = data.header_color || "#007BFF";
-            headerTextInput.value = data.header_text || "Header di esempio";
-            fontSelect.value = data.font_family || "Arial";
-            if(data.logo_url) previewLogo.src = data.logo_url;
-            aggiornaAnteprima();
-        }
-    } catch(e) {
-        console.error("Errore caricamento tema:", e);
-    }
-}
-
-bgColorInput.addEventListener('input', aggiornaAnteprima);
-textColorInput.addEventListener('input', aggiornaAnteprima);
-headerColorInput.addEventListener('input', aggiornaAnteprima);
-headerTextInput.addEventListener('input', aggiornaAnteprima);
-fontSelect.addEventListener('change', aggiornaAnteprima);
-
+// Salvataggio tema con timestamp JSON
 document.getElementById('saveTema').addEventListener('click', async () => {
     const formData = new FormData();
-    formData.append("bg_color", bgColorInput.value);
-    formData.append("text_color", textColorInput.value);
-    formData.append("header_color", headerColorInput.value);
-    formData.append("header_text", headerTextInput.value);
-    formData.append("font_family", fontSelect.value);
-    const logoFile = logoFileInput.files[0];
+    formData.append("bg_color", document.getElementById('bgColor').value);
+    formData.append("text_color", document.getElementById('textColor').value);
+    formData.append("header_color", document.getElementById('headerColor').value);
+    formData.append("header_text", document.getElementById('headerText').value);
+    formData.append("font_family", document.getElementById('fontSelect').value);
+
+    const logoFile = document.getElementById('logoFile').files[0];
     if(logoFile) formData.append("logo", logoFile);
 
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=${adminCorrente}`, {
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/save_theme`, {
         method: "POST",
         body: formData
     });
     const data = await res.json();
     if(data.success) {
-        document.getElementById('msg').innerText = "Tema salvato!";
-        caricaTema(); // ricarica ultimo tema per anteprima
+        alert("Tema salvato!");
+        window.location.reload();
     } else {
-        document.getElementById('msg').innerText = "Errore salvataggio!";
+        alert("Errore nel salvataggio tema");
     }
 });
-
-// Carica tema al load
-caricaTema();
 </script>
 </body>
 </html>
