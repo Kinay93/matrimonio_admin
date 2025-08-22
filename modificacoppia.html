@@ -2,102 +2,105 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Aggiorna Coppia</title>
+<title>Modifica Coppia</title>
 <link rel="stylesheet" href="style.css">
+<style>
+.container { display:flex; gap:20px; }
+.form-col { flex:1; }
+.anteprima-col { flex:1; display:flex; flex-direction:column; align-items:center; }
+#anteprima { width:100%; height:300px; display:flex; align-items:center; justify-content:center; border:1px solid #ccc; margin-top:20px; position:relative; }
+#anteprimaFoto { width:150px; height:150px; background-color:#ddd; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#666; }
+#anteprimaTesto { position:absolute; top:10px; left:10px; font-size:24px; }
+</style>
 </head>
 <body>
+<header><h1>Modifica Coppia</h1></header>
 <div class="container">
-  <div class="form-col">
-    <h1>Aggiorna Coppia</h1>
-    <label for="nomeCoppia">Nome della Coppia:</label>
-    <input type="text" id="nomeCoppia" disabled>
-    <label for="fotoCoppia">Foto della coppia:</label>
-    <input type="file" id="fotoCoppia">
-    <label for="titoloIndex">Titolo della pagina:</label>
-    <input type="text" id="titoloIndex">
-    <label for="colorSfondo">Colore sfondo:</label>
-    <input type="color" id="colorSfondo">
-    <label for="colorTesto">Colore testo:</label>
-    <input type="color" id="colorTesto">
-    <label for="fontScelto">Font del testo:</label>
-    <select id="fontScelto"></select>
-    <label for="effettoSfondo">Effetto Sfondo:</label>
-    <select id="effettoSfondo"></select>
-    <label for="effettoScritta">Effetto Scritta:</label>
-    <select id="effettoScritta"></select>
-    <button id="aggiornaCoppiaBtn">Aggiorna configurazione</button>
-    <div id="msg"></div>
-  </div>
-
-  <div class="preview-col">
-    <h3>Anteprima</h3>
-    <div id="anteprima">
-      <div id="anteprimaFoto">Foto</div>
-      <span id="anteprimaTesto">Questo è un esempio</span>
+    <div class="form-col">
+        <label>Nome coppia:<input type="text" id="nomeCoppia" disabled></label>
+        <label>Foto coppia:<input type="file" id="fotoCoppia"></label>
+        <label>Colore sfondo:<input type="color" id="colorSfondo" value="#ffffff"></label>
+        <label>Colore testo:<input type="color" id="colorTesto" value="#000000"></label>
+        <label>Font:<select id="fontScelto"></select></label>
+        <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
+        <label>Effetto scritta:<select id="effettoScritta"></select></label>
+        <button id="aggiornaCoppiaBtn">Aggiorna coppia</button>
+        <div id="msg"></div>
     </div>
-  </div>
+    <div class="anteprima-col">
+        <h3>Anteprima</h3>
+        <div id="anteprima"><div id="anteprimaFoto">Foto</div><span id="anteprimaTesto">Titolo Coppia</span></div>
+    </div>
 </div>
 
 <script src="script.js"></script>
 <script>
-window.addEventListener("DOMContentLoaded", async () => {
-    if (typeof applicaTemaAdmin === "function") await applicaTemaAdmin();
+const params = new URLSearchParams(window.location.search);
+const nomeCoppiaParam = params.get("coppia");
 
-    const params = new URLSearchParams(window.location.search);
-    const coppia = params.get("coppia");
+const anteprimaDiv = document.getElementById("anteprima");
+const anteprimaTesto = document.getElementById("anteprimaTesto");
+const anteprimaFoto = document.getElementById("anteprimaFoto");
+const inputSfondo = document.getElementById("colorSfondo");
+const inputTesto = document.getElementById("colorTesto");
+const selectFont = document.getElementById("fontScelto");
+const selectEffettoSfondo = document.getElementById("effettoSfondo");
+const selectEffettoScritta = document.getElementById("effettoScritta");
+const inputNome = document.getElementById("nomeCoppia");
 
-    const anteprimaDiv = document.getElementById("anteprima");
-    const anteprimaTesto = document.getElementById("anteprimaTesto");
-    const inputSfondo = document.getElementById("colorSfondo");
-    const inputTesto = document.getElementById("colorTesto");
-    const selectFont = document.getElementById("fontScelto");
-    const selectEffettoSfondo = document.getElementById("effettoSfondo");
-    const selectEffettoScritta = document.getElementById("effettoScritta");
+window.onload = async () => {
+    await applicaTemaAdmin();
+    inputNome.value = nomeCoppiaParam;
+    caricaFontsEdEffetti();
+    caricaDatiCoppia();
+};
 
-    function aggiornaAnteprima() {
-        anteprimaDiv.style.backgroundColor = inputSfondo.value;
-        anteprimaTesto.style.color = inputTesto.value;
-        anteprimaTesto.style.fontFamily = selectFont.value;
-    }
+function aggiornaAnteprima() {
+    anteprimaDiv.style.backgroundColor = inputSfondo.value;
+    anteprimaTesto.style.color = inputTesto.value;
+    anteprimaTesto.style.fontFamily = selectFont.value;
+}
 
-    [inputSfondo, inputTesto].forEach(e => e.addEventListener("input", aggiornaAnteprima));
-    [selectFont, selectEffettoSfondo, selectEffettoScritta].forEach(e => e.addEventListener("change", aggiornaAnteprima));
+[inputSfondo,inputTesto,selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("input", aggiornaAnteprima));
+[selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
-    await caricaFontsEdEffetti(selectFont, selectEffettoSfondo, selectEffettoScritta);
+async function caricaFontsEdEffetti() {
+    try {
+        const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
+        const dataFonts = await resFonts.json();
+        selectFont.innerHTML = "";
+        dataFonts.fonts.forEach(f=>{ const o=document.createElement("option"); o.value=f;o.textContent=f;o.style.fontFamily=f;selectFont.appendChild(o);});
+        const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti");
+        const dataEffetti = await resEffetti.json();
+        selectEffettoSfondo.innerHTML=""; selectEffettoScritta.innerHTML="";
+        dataEffetti.sfondo.forEach(f=>{ const o=document.createElement("option"); o.value=f;o.textContent=f;selectEffettoSfondo.appendChild(o);});
+        dataEffetti.scritta.forEach(f=>{ const o=document.createElement("option"); o.value=f;o.textContent=f;selectEffettoScritta.appendChild(o);});
+    } catch(e){ console.error(e); }
+}
 
-    async function caricaCoppia() {
-        try {
-            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}&t=${Date.now()}`, {cache:"no-store"});
-            const data = await res.json();
-            document.getElementById("nomeCoppia").value = data.nome_coppia;
-            document.getElementById("titoloIndex").value = data.titolo_index || "";
-            inputSfondo.value = data.colori?.sfondo || "#ffffff";
-            inputTesto.value = data.colori?.testo || "#000000";
-            selectFont.value = data.colori?.font || "Arial";
-            aggiornaAnteprima();
-        } catch(e) { document.getElementById("msg").innerText = "Errore caricamento coppia: " + e.message; }
-    }
+async function caricaDatiCoppia() {
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${nomeCoppiaParam}`);
+    const data = await res.json();
+    if(data.error){ alert("Coppia non trovata"); return; }
+    inputSfondo.value = data.colori.sfondo || "#ffffff";
+    inputTesto.value = data.colori.testo || "#000000";
+    selectFont.value = data.colori.font || "Arial";
+    aggiornaAnteprima();
+}
 
-    document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async () => {
-        const fotoFile = document.getElementById("fotoCoppia").files[0];
-        const formData = new FormData();
-        formData.append("nome_coppia", coppia);
-        formData.append("titolo_index", document.getElementById("titoloIndex").value);
-        formData.append("style_css_colore_sfondo", inputSfondo.value);
-        formData.append("style_css_colore_testo", inputTesto.value);
-        formData.append("style_css_font", selectFont.value);
-        formData.append("effetto_sfondo", selectEffettoSfondo.value);
-        formData.append("effetto_scritta", selectEffettoScritta.value);
-        if(fotoFile) formData.append("foto_coppia", fotoFile);
-
-        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia', {method:"POST", body:formData});
-        const data = await res.json();
-        document.getElementById("msg").innerText = data.success ? "Coppia aggiornata con successo!" : "Errore aggiornamento: " + (data.error||"Imprevisto");
-        if(data.success) caricaCoppia();
-    });
-
-    caricaCoppia();
+document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=>{
+    const fotoFile = document.getElementById("fotoCoppia").files[0];
+    const formData = new FormData();
+    formData.append("nome_coppia",nomeCoppiaParam);
+    if(fotoFile) formData.append("foto_coppia",fotoFile);
+    formData.append("style_css_colore_sfondo",inputSfondo.value);
+    formData.append("style_css_colore_testo",inputTesto.value);
+    formData.append("style_css_font",selectFont.value);
+    formData.append("effetto_sfondo",selectEffettoSfondo.value);
+    formData.append("effetto_scritta",selectEffettoScritta.value);
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia",{method:"POST",body:formData});
+    const data = await res.json();
+    document.getElementById("msg").innerText = data.success?"Coppia aggiornata!":"Errore: "+(data.error||"imprevisto");
+    if(data.success) setTimeout(()=>window.location.href="index.html",1000);
 });
 </script>
-</body>
-</html>
