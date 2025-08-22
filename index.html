@@ -129,8 +129,7 @@ async function generaQRCode(coppiaNome, btnGenera) {
 async function vediQRCode(coppiaNome) {
     try {
         const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
-        if (!res.ok) throw new Error('QR code non trovato');
-
+        if (!res.ok) throw new Error('QR non trovato');
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
 
@@ -139,19 +138,24 @@ async function vediQRCode(coppiaNome) {
         const downloadBtn = document.getElementById('download-qrcode');
 
         img.src = url;
-        downloadBtn.href = url;
-
         modal.style.display = 'flex';
 
-        // Chiudi il popup dopo il download
+        // Scarica quando si clicca il pulsante
         downloadBtn.onclick = () => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${coppiaNome}_qrcode.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
             modal.style.display = 'none';
-            URL.revokeObjectURL(url); // libera memoria
         };
     } catch (e) {
         alert(e.message);
     }
 }
+
 
 
 // Chiudi modal
