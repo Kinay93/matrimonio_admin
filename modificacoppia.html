@@ -3,39 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nuova Coppia</title>
+<title>Aggiorna Coppia</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Nuovo Matrimonio</h1>
+<h1>Aggiorna Coppia</h1>
 
 <div class="two-columns">
-    <!-- Colonna dati -->
     <div class="column">
         <label for="nomeCoppia">Nome della Coppia:</label>
-        <input type="text" id="nomeCoppia" placeholder="Inserisci nome coppia">
+        <input type="text" id="nomeCoppia" disabled>
 
         <label for="fotoCoppia">Foto della coppia:</label>
         <input type="file" id="fotoCoppia">
 
+        <label for="titoloIndex">Titolo della pagina:</label>
+        <input type="text" id="titoloIndex">
+
         <label for="colorSfondo">Colore sfondo:</label>
-        <input type="color" id="colorSfondo" value="#ffffff">
+        <input type="color" id="colorSfondo">
 
         <label for="colorTesto">Colore testo:</label>
-        <input type="color" id="colorTesto" value="#000000">
+        <input type="color" id="colorTesto">
 
         <label for="fontScelto">Font del testo:</label>
         <select id="fontScelto"></select>
 
-        <button id="creaCoppiaBtn">Crea coppia</button>
+        <label for="effettoSfondo">Effetto Sfondo:</label>
+        <select id="effettoSfondo"></select>
+
+        <label for="effettoScritta">Effetto Scritta:</label>
+        <select id="effettoScritta"></select>
+
+        <button id="aggiornaCoppiaBtn">Aggiorna configurazione</button>
         <div id="msg"></div>
     </div>
 
-    <!-- Colonna anteprima -->
     <div class="column">
         <h3>Anteprima</h3>
         <div id="anteprima" class="preview">
-            <span id="anteprimaTesto">Nome Coppia</span>
+            <span id="anteprimaTesto">Questo è un esempio</span>
         </div>
     </div>
 </div>
@@ -44,41 +51,8 @@
 <script>
 window.onload = async () => {
     await applyAdminTheme();
-    caricaFonts();
-
-    const anteprimaDiv = document.getElementById("anteprima");
-    const anteprimaTesto = document.getElementById("anteprimaTesto");
-    const inputSfondo = document.getElementById("colorSfondo");
-    const inputTesto = document.getElementById("colorTesto");
-    const selectFont = document.getElementById("fontScelto");
-
-    function aggiornaAnteprima() {
-        anteprimaDiv.style.backgroundColor = inputSfondo.value;
-        anteprimaTesto.style.color = inputTesto.value;
-        anteprimaTesto.style.fontFamily = selectFont.value;
-    }
-
-    inputSfondo.addEventListener("input", aggiornaAnteprima);
-    inputTesto.addEventListener("input", aggiornaAnteprima);
-    selectFont.addEventListener("change", aggiornaAnteprima);
-
-    document.getElementById("creaCoppiaBtn").addEventListener("click", async () => {
-        const nome = inputCoppia.value.trim();
-        const fotoFile = document.getElementById("fotoCoppia").files[0];
-
-        if (!nome || !fotoFile) { alert("Compila tutti i campi"); return; }
-
-        const formData = new FormData();
-        formData.append("nome_coppia", nome);
-        formData.append("foto_coppia", fotoFile);
-        formData.append("style_css_colore_sfondo", inputSfondo.value);
-        formData.append("style_css_colore_testo", inputTesto.value);
-        formData.append("style_css_font", selectFont.value);
-
-        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_coppia', { method: "POST", body: formData });
-        const data = await res.json();
-        document.getElementById("msg").innerText = data.success ? "Coppia creata!" : ("Errore: " + (data.error || "Imprevisto"));
-    });
+    await caricaFontsEdEffetti();
+    caricaCoppia();
 };
 </script>
 </body>
