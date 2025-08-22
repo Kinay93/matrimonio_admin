@@ -1,81 +1,103 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Modifica Coppia</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="script.js" defer></script>
+<meta charset="UTF-8">
+<title>Aggiorna Coppia</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>Modifica Coppia</h1>
-  <button onclick="window.location.href='index.html'" class="top-right">← Torna</button>
-</header>
+<div class="container">
+  <div class="form-col">
+    <h1>Aggiorna Coppia</h1>
+    <label for="nomeCoppia">Nome della Coppia:</label>
+    <input type="text" id="nomeCoppia" disabled>
+    <label for="fotoCoppia">Foto della coppia:</label>
+    <input type="file" id="fotoCoppia">
+    <label for="titoloIndex">Titolo della pagina:</label>
+    <input type="text" id="titoloIndex">
+    <label for="colorSfondo">Colore sfondo:</label>
+    <input type="color" id="colorSfondo">
+    <label for="colorTesto">Colore testo:</label>
+    <input type="color" id="colorTesto">
+    <label for="fontScelto">Font del testo:</label>
+    <select id="fontScelto"></select>
+    <label for="effettoSfondo">Effetto Sfondo:</label>
+    <select id="effettoSfondo"></select>
+    <label for="effettoScritta">Effetto Scritta:</label>
+    <select id="effettoScritta"></select>
+    <button id="aggiornaCoppiaBtn">Aggiorna configurazione</button>
+    <div id="msg"></div>
+  </div>
 
-<main>
-  <form id="formModificaCoppia">
-    <label>Nome Coppia:
-      <input type="text" id="nomeCoppia" name="nomeCoppia" required />
-    </label><br><br>
-    <label>Descrizione:
-      <textarea id="descrizioneCoppia" name="descrizioneCoppia"></textarea>
-    </label><br><br>
-    <button type="submit">Salva Modifiche</button>
-  </form>
-</main>
+  <div class="preview-col">
+    <h3>Anteprima</h3>
+    <div id="anteprima">
+      <div id="anteprimaFoto">Foto</div>
+      <span id="anteprimaTesto">Questo è un esempio</span>
+    </div>
+  </div>
+</div>
 
+<script src="script.js"></script>
 <script>
-window.onload = async () => {
-  await applicaTemaAdmin();
+window.addEventListener("DOMContentLoaded", async () => {
+    if (typeof applicaTemaAdmin === "function") await applicaTemaAdmin();
 
-  const params = new URLSearchParams(window.location.search);
-  const coppia = params.get('coppia');
-  if (!coppia) {
-    alert("Nessuna coppia selezionata");
-    window.location.href = 'index.html';
-    return;
-  }
+    const params = new URLSearchParams(window.location.search);
+    const coppia = params.get("coppia");
 
-  // Carica dati coppia esistente
-  try {
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}`);
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById('nomeCoppia').value = data.coppia.nome || '';
-      document.getElementById('descrizioneCoppia').value = data.coppia.descrizione || '';
-    } else {
-      alert("Coppia non trovata");
-      window.location.href = 'index.html';
+    const anteprimaDiv = document.getElementById("anteprima");
+    const anteprimaTesto = document.getElementById("anteprimaTesto");
+    const inputSfondo = document.getElementById("colorSfondo");
+    const inputTesto = document.getElementById("colorTesto");
+    const selectFont = document.getElementById("fontScelto");
+    const selectEffettoSfondo = document.getElementById("effettoSfondo");
+    const selectEffettoScritta = document.getElementById("effettoScritta");
+
+    function aggiornaAnteprima() {
+        anteprimaDiv.style.backgroundColor = inputSfondo.value;
+        anteprimaTesto.style.color = inputTesto.value;
+        anteprimaTesto.style.fontFamily = selectFont.value;
     }
-  } catch (e) {
-    alert("Errore caricamento dati");
-    window.location.href = 'index.html';
-  }
 
-  // Salva modifiche
-  const form = document.getElementById('formModificaCoppia');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const nome = document.getElementById('nomeCoppia').value.trim();
-      const descrizione = document.getElementById('descrizioneCoppia').value.trim();
+    [inputSfondo, inputTesto].forEach(e => e.addEventListener("input", aggiornaAnteprima));
+    [selectFont, selectEffettoSfondo, selectEffettoScritta].forEach(e => e.addEventListener("change", aggiornaAnteprima));
 
-      const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/modifica_coppia', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vecchio_nome: coppia, nuovo_nome: nome, descrizione })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Modifiche salvate");
-        window.location.href = 'index.html';
-      } else {
-        alert("Errore nel salvataggio: " + (data.message || ''));
-      }
+    await caricaFontsEdEffetti(selectFont, selectEffettoSfondo, selectEffettoScritta);
+
+    async function caricaCoppia() {
+        try {
+            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}&t=${Date.now()}`, {cache:"no-store"});
+            const data = await res.json();
+            document.getElementById("nomeCoppia").value = data.nome_coppia;
+            document.getElementById("titoloIndex").value = data.titolo_index || "";
+            inputSfondo.value = data.colori?.sfondo || "#ffffff";
+            inputTesto.value = data.colori?.testo || "#000000";
+            selectFont.value = data.colori?.font || "Arial";
+            aggiornaAnteprima();
+        } catch(e) { document.getElementById("msg").innerText = "Errore caricamento coppia: " + e.message; }
+    }
+
+    document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async () => {
+        const fotoFile = document.getElementById("fotoCoppia").files[0];
+        const formData = new FormData();
+        formData.append("nome_coppia", coppia);
+        formData.append("titolo_index", document.getElementById("titoloIndex").value);
+        formData.append("style_css_colore_sfondo", inputSfondo.value);
+        formData.append("style_css_colore_testo", inputTesto.value);
+        formData.append("style_css_font", selectFont.value);
+        formData.append("effetto_sfondo", selectEffettoSfondo.value);
+        formData.append("effetto_scritta", selectEffettoScritta.value);
+        if(fotoFile) formData.append("foto_coppia", fotoFile);
+
+        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia', {method:"POST", body:formData});
+        const data = await res.json();
+        document.getElementById("msg").innerText = data.success ? "Coppia aggiornata con successo!" : "Errore aggiornamento: " + (data.error||"Imprevisto");
+        if(data.success) caricaCoppia();
     });
-  }
-};
+
+    caricaCoppia();
+});
 </script>
 </body>
 </html>
