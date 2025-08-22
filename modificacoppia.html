@@ -30,9 +30,13 @@
         const params = new URLSearchParams(window.location.search);
         const coppia = params.get("coppia");
 
+        // Carica dati coppia dal backend
         async function caricaCoppia() {
             try {
-                const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}`);
+                const res = await fetch(
+                    `https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}`,
+                    { cache: "no-store" } // evita cache
+                );
                 if (!res.ok) throw new Error("Coppia non trovata");
                 const data = await res.json();
 
@@ -40,11 +44,13 @@
                 document.getElementById("titoloIndex").value = data.titolo_index || "";
                 document.getElementById("colorSfondo").value = data.colori?.sfondo || "#ffffff";
                 document.getElementById("colorTesto").value = data.colori?.testo || "#000000";
+                document.getElementById("msg").innerText = "";
             } catch(e) {
                 document.getElementById("msg").innerText = "Errore caricamento coppia: " + e.message;
             }
         }
 
+        // Aggiorna dati coppia
         document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async () => {
             const fotoFile = document.getElementById("fotoCoppia").files[0];
 
@@ -55,19 +61,26 @@
             formData.append("style_css_colore_testo", document.getElementById("colorTesto").value);
             if (fotoFile) formData.append("foto_coppia", fotoFile);
 
-            const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia', {
-                method: "POST",
-                body: formData
-            });
+            try {
+                const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia', {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
 
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById("msg").innerText = "Coppia aggiornata con successo!";
-            } else {
-                document.getElementById("msg").innerText = "Errore aggiornamento: " + (data.error || "Imprevisto");
+                if (data.success) {
+                    document.getElementById("msg").innerText = "Coppia aggiornata con successo!";
+                    // ricarica i dati aggiornati
+                    caricaCoppia();
+                } else {
+                    document.getElementById("msg").innerText = "Errore aggiornamento: " + (data.error || "Imprevisto");
+                }
+            } catch(e) {
+                document.getElementById("msg").innerText = "Errore aggiornamento: " + e.message;
             }
         });
 
+        // Carica coppia al load
         caricaCoppia();
     </script>
 </body>
