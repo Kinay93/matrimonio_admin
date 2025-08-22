@@ -9,8 +9,10 @@
 <body>
 <header>
     <h1>Amministrazione Matrimonio</h1>
-    <button id="nuovo-matrimonio" class="top-right">Nuovo Matrimonio</button>
-    <button id="settings" class="top-right" style="right:60px;">⚙️</button>
+    <div>
+        <button id="settings">⚙️</button>
+        <button id="nuovo-matrimonio">Nuovo Matrimonio</button>
+    </div>
 </header>
 
 <main>
@@ -41,16 +43,98 @@
 
 <script src="script.js"></script>
 <script>
-window.onload = () => {
-    applyAdminTheme();
-    caricaCoppie();
+// Navigazioni
+document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
+    window.location.href = 'nuovacoppia.html';
+});
+document.getElementById('settings').addEventListener('click', () => {
+    window.location.href = 'temaadmin.html';
+});
 
-    document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
-        window.location.href = 'nuovacoppia.html';
+// Carica coppie
+async function caricaCoppie() {
+    const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_coppie_admin');
+    const data = await res.json();
+    const tbody = document.querySelector('#coppie-table tbody');
+    tbody.innerHTML = '';
+
+    data.coppie.forEach(coppia => {
+        const tr = document.createElement('tr');
+
+        const tdNome = document.createElement('td');
+        const link = document.createElement('a');
+        link.href = `modificacoppia.html?coppia=${coppia.nome}`;
+        link.textContent = coppia.nome;
+        tdNome.appendChild(link);
+
+        const tdQR = document.createElement('td');
+        const btnGenera = document.createElement('button');
+        btnGenera.textContent = 'Genera QR';
+        btnGenera.disabled = coppia.qr_generato;
+        btnGenera.addEventListener('click', () => generaQRCode(coppia.nome, btnGenera));
+
+        const btnVedi = document.createElement('button');
+        btnVedi.textContent = 'Vedi QR';
+        btnVedi.disabled = !coppia.qr_generato;
+        btnVedi.addEventListener('click', () => vediQRCode(coppia.nome));
+
+        tdQR.appendChild(btnGenera);
+        tdQR.appendChild(btnVedi);
+
+        tr.appendChild(tdNome);
+        tr.appendChild(tdQR);
+        tbody.appendChild(tr);
     });
-    document.getElementById('settings').addEventListener('click', () => {
-        window.location.href = 'temaadmin.html';
-    });
+}
+
+async function generaQRCode(coppiaNome, btnGenera) {
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+    const data = await res.json();
+    if (data.success) {
+        btnGenera.disabled = true;
+        vediQRCode(coppiaNome);
+        caricaCoppie();
+    } else {
+        alert('Errore generazione QR');
+    }
+}
+
+async function vediQRCode(coppiaNome) {
+    try {
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+        if (!res.ok) throw new Error('QR non trovato');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        const modal = document.getElementById('qrcode-modal');
+        const img = document.getElementById('qrcode-fullscreen');
+        const downloadBtn = document.getElementById('download-qrcode');
+
+        img.src = url;
+        modal.style.display = 'flex';
+
+        downloadBtn.onclick = () => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${coppiaNome}_qrcode.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            modal.style.display = 'none';
+        };
+    } catch (e) {
+        alert(e.message);
+    }
+}
+
+document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
+    document.getElementById('qrcode-modal').style.display = 'none';
+});
+
+window.onload = () => {
+    caricaCoppie();
+    applicaTemaAdmin(); // dal file script.js
 };
 </script>
 </body>
