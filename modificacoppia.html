@@ -22,6 +22,20 @@
     <label for="colorTesto">Colore testo:</label>
     <input type="color" id="colorTesto">
 
+    <label for="fontScelto">Font del testo:</label>
+    <select id="fontScelto">
+        <option value="Arial" style="font-family: Arial;">Arial</option>
+        <option value="Georgia" style="font-family: Georgia;">Georgia</option>
+        <option value="Times New Roman" style="font-family: 'Times New Roman';">Times New Roman</option>
+        <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+        <option value="Verdana" style="font-family: Verdana;">Verdana</option>
+    </select>
+
+    <h3>Anteprima</h3>
+    <div id="anteprima" style="width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; border: 1px solid #ccc;">
+        <span id="anteprimaTesto">Questo è un esempio</span>
+    </div>
+
     <button id="aggiornaCoppiaBtn">Aggiorna configurazione</button>
 
     <div id="msg"></div>
@@ -29,6 +43,22 @@
     <script>
         const params = new URLSearchParams(window.location.search);
         const coppia = params.get("coppia");
+
+        const anteprimaDiv = document.getElementById("anteprima");
+        const anteprimaTesto = document.getElementById("anteprimaTesto");
+        const inputSfondo = document.getElementById("colorSfondo");
+        const inputTesto = document.getElementById("colorTesto");
+        const selectFont = document.getElementById("fontScelto");
+
+        function aggiornaAnteprima() {
+            anteprimaDiv.style.backgroundColor = inputSfondo.value;
+            anteprimaTesto.style.color = inputTesto.value;
+            anteprimaTesto.style.fontFamily = selectFont.value;
+        }
+
+        inputSfondo.addEventListener("input", aggiornaAnteprima);
+        inputTesto.addEventListener("input", aggiornaAnteprima);
+        selectFont.addEventListener("change", aggiornaAnteprima);
 
         // Carica dati coppia dal backend
         async function caricaCoppia() {
@@ -42,12 +72,16 @@
 
                 document.getElementById("nomeCoppia").value = data.nome_coppia;
                 document.getElementById("titoloIndex").value = data.titolo_index || "";
-                document.getElementById("colorSfondo").value = data.colori?.sfondo.trim() || "#ffffff";
-                document.getElementById("colorTesto").value = data.colori?.testo.trim() || "#000000";
+                inputSfondo.value = (data.colori?.sfondo || "#ffffff").trim();
+                inputTesto.value = (data.colori?.testo || "#000000").trim();
+                selectFont.value = data.colori?.font || "Arial";
+
+                aggiornaAnteprima();
 
                 console.log("[DEBUG] Caricati colori:", 
-                            "sfondo=", document.getElementById("colorSfondo").value, 
-                            "testo=", document.getElementById("colorTesto").value);
+                            "sfondo=", inputSfondo.value, 
+                            "testo=", inputTesto.value, 
+                            "font=", selectFont.value);
 
                 document.getElementById("msg").innerText = "";
             } catch(e) {
@@ -62,13 +96,15 @@
             const formData = new FormData();
             formData.append("nome_coppia", coppia);
             formData.append("titolo_index", document.getElementById("titoloIndex").value);
-            formData.append("style_css_colore_sfondo", document.getElementById("colorSfondo").value);
-            formData.append("style_css_colore_testo", document.getElementById("colorTesto").value);
+            formData.append("style_css_colore_sfondo", inputSfondo.value);
+            formData.append("style_css_colore_testo", inputTesto.value);
+            formData.append("style_css_font", selectFont.value);
             if (fotoFile) formData.append("foto_coppia", fotoFile);
 
             console.log("[DEBUG] Invio aggiornamento:", 
-                        "sfondo=", document.getElementById("colorSfondo").value,
-                        "testo=", document.getElementById("colorTesto").value,
+                        "sfondo=", inputSfondo.value,
+                        "testo=", inputTesto.value,
+                        "font=", selectFont.value,
                         "titolo=", document.getElementById("titoloIndex").value);
 
             try {
@@ -81,7 +117,6 @@
                 if (data.success) {
                     document.getElementById("msg").innerText = "Coppia aggiornata con successo!";
                     console.log("[DEBUG] Aggiornamento completato:", data.config);
-                    // ricarica i dati aggiornati
                     caricaCoppia();
                 } else {
                     document.getElementById("msg").innerText = "Errore aggiornamento: " + (data.error || "Imprevisto");
