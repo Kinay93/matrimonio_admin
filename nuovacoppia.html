@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nuova Coppia</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+
 </head>
 <body>
 <header>
@@ -61,6 +64,11 @@ document.getElementById('dataMatrimonio').addEventListener('input', e => {
 });
 
 window.onload = () => applicaTemaAdmin();
+
+window.onload = async () => {
+    await applicaTemaAdmin();
+    // qui il codice della pagina
+};
 </script>
 </body>
 </html>
