@@ -7,79 +7,60 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Nuovo Matrimonio</h1>
+<header>
+    <h1>Nuova Coppia</h1>
+    <button onclick="window.location.href='index.html'">← Torna</button>
+</header>
 
+<main>
 <div class="two-columns">
-    <!-- Colonna dati -->
-    <div class="column">
-        <label for="nomeCoppia">Nome della Coppia:</label>
-        <input type="text" id="nomeCoppia" placeholder="Inserisci nome coppia">
+    <div class="form-box">
+        <h2>Inserisci dati</h2>
+        <form id="nuova-coppia-form">
+            <label>Nome coppia</label>
+            <input type="text" id="nomeCoppia" required><br><br>
 
-        <label for="fotoCoppia">Foto della coppia:</label>
-        <input type="file" id="fotoCoppia">
+            <label>Data matrimonio</label>
+            <input type="date" id="dataMatrimonio" required><br><br>
 
-        <label for="colorSfondo">Colore sfondo:</label>
-        <input type="color" id="colorSfondo" value="#ffffff">
-
-        <label for="colorTesto">Colore testo:</label>
-        <input type="color" id="colorTesto" value="#000000">
-
-        <label for="fontScelto">Font del testo:</label>
-        <select id="fontScelto"></select>
-
-        <button id="creaCoppiaBtn">Crea coppia</button>
-        <div id="msg"></div>
+            <button type="submit">Salva</button>
+        </form>
     </div>
 
-    <!-- Colonna anteprima -->
-    <div class="column">
-        <h3>Anteprima</h3>
-        <div id="anteprima" class="preview">
-            <span id="anteprimaTesto">Nome Coppia</span>
-        </div>
+    <div class="preview-box">
+        <h2>Anteprima</h2>
+        <p id="previewNome"></p>
+        <p id="previewData"></p>
     </div>
 </div>
+</main>
 
 <script src="script.js"></script>
 <script>
-window.onload = async () => {
-    await applyAdminTheme();
-    caricaFonts();
+document.getElementById('nuova-coppia-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('nomeCoppia').value;
+    const data = document.getElementById('dataMatrimonio').value;
 
-    const anteprimaDiv = document.getElementById("anteprima");
-    const anteprimaTesto = document.getElementById("anteprimaTesto");
-    const inputSfondo = document.getElementById("colorSfondo");
-    const inputTesto = document.getElementById("colorTesto");
-    const selectFont = document.getElementById("fontScelto");
-
-    function aggiornaAnteprima() {
-        anteprimaDiv.style.backgroundColor = inputSfondo.value;
-        anteprimaTesto.style.color = inputTesto.value;
-        anteprimaTesto.style.fontFamily = selectFont.value;
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/nuova_coppia?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}`);
+    const json = await res.json();
+    if(json.success) {
+        alert("Coppia creata");
+        window.location.href = 'index.html';
+    } else {
+        alert("Errore creazione coppia");
     }
+});
 
-    inputSfondo.addEventListener("input", aggiornaAnteprima);
-    inputTesto.addEventListener("input", aggiornaAnteprima);
-    selectFont.addEventListener("change", aggiornaAnteprima);
+// anteprima veloce
+document.getElementById('nomeCoppia').addEventListener('input', e => {
+    document.getElementById('previewNome').textContent = e.target.value;
+});
+document.getElementById('dataMatrimonio').addEventListener('input', e => {
+    document.getElementById('previewData').textContent = e.target.value;
+});
 
-    document.getElementById("creaCoppiaBtn").addEventListener("click", async () => {
-        const nome = inputCoppia.value.trim();
-        const fotoFile = document.getElementById("fotoCoppia").files[0];
-
-        if (!nome || !fotoFile) { alert("Compila tutti i campi"); return; }
-
-        const formData = new FormData();
-        formData.append("nome_coppia", nome);
-        formData.append("foto_coppia", fotoFile);
-        formData.append("style_css_colore_sfondo", inputSfondo.value);
-        formData.append("style_css_colore_testo", inputTesto.value);
-        formData.append("style_css_font", selectFont.value);
-
-        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_coppia', { method: "POST", body: formData });
-        const data = await res.json();
-        document.getElementById("msg").innerText = data.success ? "Coppia creata!" : ("Errore: " + (data.error || "Imprevisto"));
-    });
-};
+window.onload = () => applicaTemaAdmin();
 </script>
 </body>
 </html>
