@@ -1,73 +1,59 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nuova Coppia</title>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nuova Coppia</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
 </head>
 <body>
 <header>
-    <h1>Nuova Coppia</h1>
-    <button onclick="window.location.href='index.html'">← Torna</button>
+  <h1>Crea Nuova Coppia</h1>
+  <button onclick="window.location.href='index.html'" class="top-right">← Torna</button>
 </header>
 
 <main>
-<div class="two-columns">
-    <div class="form-box">
-        <h2>Inserisci dati</h2>
-        <form id="nuova-coppia-form">
-            <label>Nome coppia</label>
-            <input type="text" id="nomeCoppia" required><br><br>
-
-            <label>Data matrimonio</label>
-            <input type="date" id="dataMatrimonio" required><br><br>
-
-            <button type="submit">Salva</button>
-        </form>
-    </div>
-
-    <div class="preview-box">
-        <h2>Anteprima</h2>
-        <p id="previewNome"></p>
-        <p id="previewData"></p>
-    </div>
-</div>
+  <form id="formNuovaCoppia">
+    <label>Nome Coppia:
+      <input type="text" id="nomeCoppia" name="nomeCoppia" required />
+    </label><br><br>
+    <label>Descrizione:
+      <textarea id="descrizioneCoppia" name="descrizioneCoppia"></textarea>
+    </label><br><br>
+    <button type="submit">Crea Coppia</button>
+  </form>
 </main>
 
-<script src="script.js"></script>
 <script>
-document.getElementById('nuova-coppia-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('nomeCoppia').value;
-    const data = document.getElementById('dataMatrimonio').value;
-
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/nuova_coppia?nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}`);
-    const json = await res.json();
-    if(json.success) {
-        alert("Coppia creata");
-        window.location.href = 'index.html';
-    } else {
-        alert("Errore creazione coppia");
-    }
-});
-
-// anteprima veloce
-document.getElementById('nomeCoppia').addEventListener('input', e => {
-    document.getElementById('previewNome').textContent = e.target.value;
-});
-document.getElementById('dataMatrimonio').addEventListener('input', e => {
-    document.getElementById('previewData').textContent = e.target.value;
-});
-
-window.onload = () => applicaTemaAdmin();
-
 window.onload = async () => {
-    await applicaTemaAdmin();
-    // qui il codice della pagina
+  await applicaTemaAdmin();
+
+  const form = document.getElementById('formNuovaCoppia');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('nomeCoppia').value.trim();
+      const descrizione = document.getElementById('descrizioneCoppia').value.trim();
+      if (!nome) {
+        alert("Inserisci un nome valido");
+        return;
+      }
+
+      const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_coppia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, descrizione })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Coppia creata con successo");
+        window.location.href = 'index.html';
+      } else {
+        alert("Errore nella creazione: " + (data.message || ''));
+      }
+    });
+  }
 };
 </script>
 </body>
