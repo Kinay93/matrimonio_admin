@@ -2,36 +2,75 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tema Admin</title>
 <link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
 </head>
 <body>
-<header>
-    <h1>Impostazioni Tema Admin</h1>
-</header>
+<header><h1>Gestione Tema Admin</h1></header>
+<div style="display:flex; gap:20px;">
+    <div style="flex:1;">
+        <label>Colore sfondo:<input type="color" id="bgColor" value="#ffffff"></label>
+        <label>Colore testo:<input type="color" id="textColor" value="#000000"></label>
+        <label>Colore header:<input type="color" id="headerColor" value="#007BFF"></label>
+        <label>Testo header:<input type="text" id="headerText" value="Amministrazione Matrimonio"></label>
+        <label>Font:<select id="fontSelect"></select></label>
+        <label>Logo:<input type="file" id="logoFile"></label>
+        <button id="saveTema">Salva Tema</button>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center;">
+        <h3>Anteprima Tema</h3>
+        <div id="anteprimaTema" style="width:100%; height:300px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center;">
+            Anteprima colori e font
+        </div>
+    </div>
+</div>
 
-<main>
-    <label>Colore sfondo: <input type="color" id="bgColor"></label><br>
-    <label>Colore testo: <input type="color" id="textColor"></label><br>
-    <label>Colore header: <input type="color" id="headerColor"></label><br>
-    <label>Testo header: <input type="text" id="headerText"></label><br>
-    <label>Font: 
-        <select id="fontSelect">
-            <option value="Arial">Arial</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Verdana">Verdana</option>
-        </select>
-    </label><br>
-    <label>Logo: <input type="file" id="logoFile"></label><br>
-    <button id="saveTema">Salva Tema</button>
-</main>
-
+<script src="script.js"></script>
 <script>
-window.onload = async () => {
+window.onload = async () => { 
     await applicaTemaAdmin();
+    caricaFonts();
 };
+
+const anteprima = document.getElementById("anteprimaTema");
+const bgInput = document.getElementById("bgColor");
+const textInput = document.getElementById("textColor");
+const headerInput = document.getElementById("headerColor");
+const headerTextInput = document.getElementById("headerText");
+const fontSelect = document.getElementById("fontSelect");
+
+async function caricaFonts() {
+    try {
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
+        const data = await res.json();
+        fontSelect.innerHTML="";
+        data.fonts.forEach(f=>{ const o=document.createElement("option"); o.value=f;o.textContent=f;o.style.fontFamily=f;fontSelect.appendChild(o);});
+    } catch(e){ console.error(e); }
+}
+
+function aggiornaAnteprima() {
+    anteprima.style.backgroundColor = bgInput.value;
+    anteprima.style.color = textInput.value;
+    anteprima.style.fontFamily = fontSelect.value;
+    const header = document.querySelector("header h1");
+    if(header) header.textContent = headerTextInput.value;
+}
+
+[bgInput,textInput,fontSelect,headerTextInput].forEach(el=>el.addEventListener("input", aggiornaAnteprima));
+
+document.getElementById("saveTema").addEventListener("click", async ()=>{
+    const formData = new FormData();
+    formData.append("bg_color", bgInput.value);
+    formData.append("text_color", textInput.value);
+    formData.append("header_color", headerInput.value);
+    formData.append("header_text", headerTextInput.value);
+    formData.append("font_family", fontSelect.value);
+    const logoFile = document.getElementById("logoFile").files[0];
+    if(logoFile) formData.append("logo", logoFile);
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/save_theme",{method:"POST",body:formData});
+    const data = await res.json();
+    alert(data.success?"Tema salvato!":"Errore salvataggio tema");
+});
 </script>
 </body>
 </html>
