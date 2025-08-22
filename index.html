@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Amministrazione Matrimonio</title>
+<link rel="stylesheet" href="style.css">
 <style>
 .modal {
     position: fixed;
@@ -35,11 +36,17 @@
     top:10px;
     right:10px;
 }
+header img.admin-logo {
+    max-height: 50px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
 </style>
 </head>
 <body>
 <header>
-    <h1>Amministrazione Matrimonio</h1>
+    <img class="admin-logo" id="adminLogo" src="" alt="Logo Admin" style="display:none;">
+    <h1 id="headerText">Amministrazione Matrimonio</h1>
     <button id="nuovo-matrimonio" class="top-right">Nuovo Matrimonio</button>
     <button id="settings" class="top-right" style="right:60px;">⚙️</button>
 </header>
@@ -71,6 +78,31 @@
 </div>
 
 <script>
+const adminCorrente = "default"; // cambia se necessario
+
+// Applica tema admin
+async function caricaTema() {
+    try {
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_theme?admin=${adminCorrente}`);
+        const data = await res.json();
+        if(data.success) {
+            document.body.style.backgroundColor = data.bg_color || "#ffffff";
+            document.body.style.color = data.text_color || "#000000";
+            document.getElementById('headerText').style.backgroundColor = data.header_color || "#007BFF";
+            document.getElementById('headerText').style.color = data.text_color || "#ffffff";
+            document.body.style.fontFamily = data.font_family || "Arial";
+            if(data.header_text) document.getElementById('headerText').textContent = data.header_text;
+            if(data.logo_url) {
+                const logo = document.getElementById('adminLogo');
+                logo.src = data.logo_url;
+                logo.style.display = "inline-block";
+            }
+        }
+    } catch(e) {
+        console.error("Errore caricamento tema:", e);
+    }
+}
+
 // Reindirizza a nuova coppia
 document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
     window.location.href = 'nuovacoppia.html';
@@ -118,14 +150,14 @@ async function generaQRCode(coppiaNome, btnGenera) {
     const data = await res.json();
     if (data.success) {
         btnGenera.disabled = true;
-        vediQRCode(coppiaNome); // mostra subito popup
+        vediQRCode(coppiaNome);
         caricaCoppie();
     } else {
         alert('Errore generazione QR');
     }
 }
 
-// Mostra QR in popup (fetch + blob)
+// Mostra QR in popup
 async function vediQRCode(coppiaNome) {
     try {
         const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
@@ -140,7 +172,6 @@ async function vediQRCode(coppiaNome) {
         img.src = url;
         modal.style.display = 'flex';
 
-        // Scarica quando si clicca il pulsante
         downloadBtn.onclick = () => {
             const a = document.createElement('a');
             a.href = url;
@@ -156,14 +187,16 @@ async function vediQRCode(coppiaNome) {
     }
 }
 
-
-
 // Chiudi modal
 document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
     document.getElementById('qrcode-modal').style.display = 'none';
 });
 
-window.onload = caricaCoppie;
+// Carica tema e coppie al load
+window.onload = async () => {
+    await caricaTema();
+    caricaCoppie();
+};
 </script>
 </body>
 </html>
