@@ -1,176 +1,61 @@
-// ----------------------------
-// CONFIG ADMIN / TEMA DINAMICO
-// ----------------------------
-let temaCorrente = null; // memorizza il tema admin
-let adminCorrente = "default"; // modifica secondo login/admin corrente
-
-async function caricaTema() {
+// Funzione per applicare il tema admin
+async function applicaTemaAdmin() {
     try {
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_tema?admin=${adminCorrente}&t=${Date.now()}`);
+        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_latest_admin_theme');
         const data = await res.json();
-        if (data.success && data.tema) {
-            temaCorrente = data.tema;
 
-            // Applica dinamicamente al frontend
-            if(temaCorrente.bg_color) document.body.style.backgroundColor = temaCorrente.bg_color;
-            if(temaCorrente.text_color) document.body.style.color = temaCorrente.text_color;
-            if(temaCorrente.header_color) document.querySelector('header').style.backgroundColor = temaCorrente.header_color;
-            if(temaCorrente.header_text) document.querySelector('header h1').textContent = temaCorrente.header_text;
-            if(temaCorrente.font_family) document.body.style.fontFamily = temaCorrente.font_family;
-            if(temaCorrente.logo_url) {
-                let imgLogo = document.querySelector('#logo-img');
-                if(!imgLogo){
-                    imgLogo = document.createElement('img');
-                    imgLogo.id = 'logo-img';
-                    imgLogo.style.height = '50px';
-                    imgLogo.style.marginRight = '10px';
-                    document.querySelector('header').prepend(imgLogo);
-                }
-                imgLogo.src = temaCorrente.logo_url;
+        // Colori e font
+        document.body.style.backgroundColor = data.bg_color || '#fff';
+        document.body.style.color = data.text_color || '#000';
+        const header = document.querySelector('header');
+        if (header) header.style.backgroundColor = data.header_color || '#eee';
+        const h1 = header ? header.querySelector('h1') : null;
+        if (h1) h1.textContent = data.header_text || 'Amministrazione Matrimonio';
+        document.body.style.fontFamily = data.font_family || 'Arial, Helvetica, sans-serif';
+
+        // Logo
+        if (data.logo) {
+            let existingLogo = document.getElementById('admin-logo');
+            if (!existingLogo) {
+                existingLogo = document.createElement('img');
+                existingLogo.id = 'admin-logo';
+                existingLogo.style.height = '40px';
+                existingLogo.style.position = 'absolute';
+                existingLogo.style.top = '10px';
+                existingLogo.style.left = '10px';
+                document.body.appendChild(existingLogo);
             }
+            existingLogo.src = data.logo;
         }
-    } catch(e) {
-        console.error("Errore caricamento tema admin:", e);
+    } catch (err) {
+        console.warn("Tema admin non caricato:", err);
     }
 }
 
-// ----------------------------
-// GESTIONE COPPIE
-// ----------------------------
-document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
-    window.location.href = 'nuovacoppia.html';
-});
+// Gestione salvataggio tema admin
+const saveTemaBtn = document.getElementById('saveTema');
+if (saveTemaBtn) {
+    saveTemaBtn.addEventListener('click', async () => {
+        const timestamp = Date.now();
+        const formData = new FormData();
+        formData.append("filename", `admin_${timestamp}.json`);
+        formData.append("bg_color", document.getElementById('bgColor').value);
+        formData.append("text_color", document.getElementById('textColor').value);
+        formData.append("header_color", document.getElementById('headerColor').value);
+        formData.append("header_text", document.getElementById('headerText').value);
+        formData.append("font_family", document.getElementById('fontSelect').value);
+        const logoFile = document.getElementById('logoFile').files[0];
+        if (logoFile) formData.append("logo", logoFile);
 
-document.getElementById('settings').addEventListener('click', () => {
-    window.location.href = 'temaadmin.html';
-});
-
-async function caricaCoppie() {
-    try {
-        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_coppie_admin');
-        const data = await res.json();
-        const tbody = document.querySelector('#coppie-table tbody');
-        tbody.innerHTML = '';
-
-        data.coppie.forEach(coppia => {
-            const tr = document.createElement('tr');
-
-            const tdNome = document.createElement('td');
-            const link = document.createElement('a');
-            link.href = `modificacoppia.html?coppia=${coppia.nome}`;
-            link.textContent = coppia.nome;
-            tdNome.appendChild(link);
-
-            const tdQR = document.createElement('td');
-            const btnGenera = document.createElement('button');
-            btnGenera.textContent = 'Genera QR';
-            btnGenera.disabled = coppia.qr_generato;
-            btnGenera.addEventListener('click', () => generaQRCode(coppia.nome, btnGenera));
-
-            const btnVedi = document.createElement('button');
-            btnVedi.textContent = 'Vedi QR';
-            btnVedi.disabled = !coppia.qr_generato;
-            btnVedi.addEventListener('click', () => vediQRCode(coppia.nome));
-
-            tdQR.appendChild(btnGenera);
-            tdQR.appendChild(btnVedi);
-
-            tr.appendChild(tdNome);
-            tr.appendChild(tdQR);
-            tbody.appendChild(tr);
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/save_theme`, {
+            method: "POST",
+            body: formData
         });
-    } catch(e) {
-        console.error("Errore caricamento coppie:", e);
-    }
-}
-
-// ----------------------------
-// GENERAZIONE / VISUALIZZAZIONE QR
-// ----------------------------
-async function generaQRCode(coppiaNome, btnGenera) {
-    try {
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
         const data = await res.json();
         if (data.success) {
-            btnGenera.disabled = true;
-            vediQRCode(coppiaNome);
-            caricaCoppie();
-        } else alert('Errore generazione QR');
-    } catch(e) {
-        alert(e.message);
-    }
+            alert("Tema salvato!");
+        } else {
+            alert("Errore nel salvataggio del tema");
+        }
+    });
 }
-
-async function vediQRCode(coppiaNome) {
-    try {
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
-        if(!res.ok) throw new Error("QR non trovato");
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-
-        const modal = document.getElementById('qrcode-modal');
-        const img = document.getElementById('qrcode-fullscreen');
-        const downloadBtn = document.getElementById('download-qrcode');
-
-        img.src = url;
-        modal.style.display = 'flex';
-
-        downloadBtn.onclick = () => {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${coppiaNome}_qrcode.jpg`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            modal.style.display = 'none';
-        };
-    } catch(e) {
-        alert(e.message);
-    }
-}
-
-document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
-    document.getElementById('qrcode-modal').style.display = 'none';
-});
-
-// ----------------------------
-// TEMA ADMIN SAVE (per temaadmin.html)
-// ----------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    const saveBtn = document.getElementById('saveTema');
-    if(saveBtn){
-        saveBtn.addEventListener('click', async () => {
-            try{
-                const formData = new FormData();
-                formData.append("bg_color", document.getElementById('bgColor').value);
-                formData.append("text_color", document.getElementById('textColor').value);
-                formData.append("header_color", document.getElementById('headerColor').value);
-                formData.append("header_text", document.getElementById('headerText').value);
-                formData.append("font_family", document.getElementById('fontSelect').value);
-                const logoFile = document.getElementById('logoFile').files[0];
-                if(logoFile) formData.append("logo", logoFile);
-
-                const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=${adminCorrente}`, {
-                    method: "POST",
-                    body: formData
-                });
-                const data = await res.json();
-                if(data.success) {
-                    alert("Tema salvato!");
-                    caricaTema(); // aggiorna subito frontend
-                } else alert("Errore salvataggio tema");
-            } catch(e) {
-                console.error("Errore save tema:", e);
-            }
-        });
-    }
-});
-
-// ----------------------------
-// ONLOAD
-// ----------------------------
-window.onload = async () => {
-    await caricaTema();
-    caricaCoppie();
-};
