@@ -60,11 +60,12 @@
         inputTesto.addEventListener("input", aggiornaAnteprima);
         selectFont.addEventListener("change", aggiornaAnteprima);
 
-        // Carica dati coppia dal backend
+        // Carica dati coppia dal backend (con timestamp per evitare cache)
         async function caricaCoppia() {
             try {
+                const timestamp = Date.now();
                 const res = await fetch(
-                    `https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}`,
+                    `https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppia)}&t=${timestamp}`,
                     { cache: "no-store" }
                 );
                 if (!res.ok) throw new Error("Coppia non trovata");
@@ -117,7 +118,8 @@
                 if (data.success) {
                     document.getElementById("msg").innerText = "Coppia aggiornata con successo!";
                     console.log("[DEBUG] Aggiornamento completato:", data.config);
-                    caricaCoppia();
+                    // Aspetta mezzo secondo prima di ricaricare
+                    setTimeout(caricaCoppia, 500);
                 } else {
                     document.getElementById("msg").innerText = "Errore aggiornamento: " + (data.error || "Imprevisto");
                 }
