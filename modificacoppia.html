@@ -3,56 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aggiorna Coppia</title>
+<title>Modifica Coppia</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Aggiorna Coppia</h1>
+<header>
+    <h1>Modifica Coppia</h1>
+    <button onclick="window.location.href='index.html'">← Torna</button>
+</header>
 
+<main>
 <div class="two-columns">
-    <div class="column">
-        <label for="nomeCoppia">Nome della Coppia:</label>
-        <input type="text" id="nomeCoppia" disabled>
+    <div class="form-box">
+        <h2>Dati Coppia</h2>
+        <form id="modifica-coppia-form">
+            <label>Nome coppia</label>
+            <input type="text" id="nomeCoppia" required><br><br>
 
-        <label for="fotoCoppia">Foto della coppia:</label>
-        <input type="file" id="fotoCoppia">
+            <label>Data matrimonio</label>
+            <input type="date" id="dataMatrimonio" required><br><br>
 
-        <label for="titoloIndex">Titolo della pagina:</label>
-        <input type="text" id="titoloIndex">
-
-        <label for="colorSfondo">Colore sfondo:</label>
-        <input type="color" id="colorSfondo">
-
-        <label for="colorTesto">Colore testo:</label>
-        <input type="color" id="colorTesto">
-
-        <label for="fontScelto">Font del testo:</label>
-        <select id="fontScelto"></select>
-
-        <label for="effettoSfondo">Effetto Sfondo:</label>
-        <select id="effettoSfondo"></select>
-
-        <label for="effettoScritta">Effetto Scritta:</label>
-        <select id="effettoScritta"></select>
-
-        <button id="aggiornaCoppiaBtn">Aggiorna configurazione</button>
-        <div id="msg"></div>
+            <button type="submit">Salva</button>
+        </form>
     </div>
 
-    <div class="column">
-        <h3>Anteprima</h3>
-        <div id="anteprima" class="preview">
-            <span id="anteprimaTesto">Questo è un esempio</span>
-        </div>
+    <div class="preview-box">
+        <h2>Anteprima</h2>
+        <p id="previewNome"></p>
+        <p id="previewData"></p>
     </div>
 </div>
+</main>
 
 <script src="script.js"></script>
 <script>
-window.onload = async () => {
-    await applyAdminTheme();
-    await caricaFontsEdEffetti();
-    caricaCoppia();
+const params = new URLSearchParams(window.location.search);
+const coppiaNome = params.get('coppia');
+
+async function caricaDati() {
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${encodeURIComponent(coppiaNome)}`);
+    const data = await res.json();
+    document.getElementById('nomeCoppia').value = data.nome;
+    document.getElementById('dataMatrimonio').value = data.data;
+    document.getElementById('previewNome').textContent = data.nome;
+    document.getElementById('previewData').textContent = data.data;
+}
+
+document.getElementById('modifica-coppia-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('nomeCoppia').value;
+    const data = document.getElementById('dataMatrimonio').value;
+
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/modifica_coppia?vecchio=${encodeURIComponent(coppiaNome)}&nome=${encodeURIComponent(nome)}&data=${encodeURIComponent(data)}`);
+    const json = await res.json();
+    if(json.success) {
+        alert("Coppia aggiornata");
+        window.location.href = 'index.html';
+    } else {
+        alert("Errore modifica coppia");
+    }
+});
+
+document.getElementById('nomeCoppia').addEventListener('input', e => {
+    document.getElementById('previewNome').textContent = e.target.value;
+});
+document.getElementById('dataMatrimonio').addEventListener('input', e => {
+    document.getElementById('previewData').textContent = e.target.value;
+});
+
+window.onload = () => {
+    caricaDati();
+    applicaTemaAdmin();
 };
 </script>
 </body>
