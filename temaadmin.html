@@ -1,21 +1,135 @@
-<link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
-<h1>Personalizza Tema Admin</h1>
-<label>Colore sfondo: <input type="color" id="bgColor"></label>
-<label>Colore testo: <input type="color" id="textColor"></label>
-<label>Colore header: <input type="color" id="headerColor"></label>
-<label>Colore testo header: <input type="color" id="headerText"></label>
-<label>Font: 
-  <select id="fontSelect">
-    <option>Arial</option>
-    <option>Georgia</option>
-    <option>Verdana</option>
-  </select>
-</label>
-<label>Logo: <input type="file" id="logoFile"></label>
-<div id="anteprimaTema" style="padding:1rem; border:1px solid #ccc;">
-    <header id="previewHeader">Header</header>
-    <p>Testo esempio</p>
-    <img id="previewLogo" src="" style="max-width:100px">
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Tema Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        header { padding: 10px; text-align: center; }
+        .container { display: flex; gap: 20px; padding: 20px; }
+        .form-col { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .preview-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #ccc; padding: 10px; }
+        .preview-header { width: 100%; padding: 10px; text-align: center; }
+        .preview-logo { max-width: 150px; margin: 10px 0; }
+        label { font-weight: bold; }
+        input, select, button { padding: 5px; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Gestione Tema Admin</h1>
+</header>
+
+<div class="container">
+    <div class="form-col">
+        <label for="bgColor">Colore Sfondo:</label>
+        <input type="color" id="bgColor">
+
+        <label for="textColor">Colore Testo:</label>
+        <input type="color" id="textColor">
+
+        <label for="headerColor">Colore Header:</label>
+        <input type="color" id="headerColor">
+
+        <label for="headerText">Testo Header:</label>
+        <input type="text" id="headerText">
+
+        <label for="fontSelect">Font:</label>
+        <select id="fontSelect">
+            <option value="Arial">Arial</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Times New Roman">Times New Roman</option>
+        </select>
+
+        <label for="logoFile">Logo:</label>
+        <input type="file" id="logoFile">
+
+        <button id="saveTema">Salva Tema</button>
+        <div id="msg"></div>
+    </div>
+
+    <div class="preview-col">
+        <div class="preview-header" id="previewHeader">Header di esempio</div>
+        <img id="previewLogo" class="preview-logo" src="" alt="Logo Admin">
+        <p>Testo esempio anteprima</p>
+    </div>
 </div>
-<button id="saveTema">Salva Tema</button>
+
+<script>
+const adminCorrente = "default"; // puoi cambiare se gestisci più admin
+
+const bgColorInput = document.getElementById('bgColor');
+const textColorInput = document.getElementById('textColor');
+const headerColorInput = document.getElementById('headerColor');
+const headerTextInput = document.getElementById('headerText');
+const fontSelect = document.getElementById('fontSelect');
+const logoFileInput = document.getElementById('logoFile');
+
+const previewHeader = document.getElementById('previewHeader');
+const previewLogo = document.getElementById('previewLogo');
+
+function aggiornaAnteprima() {
+    document.body.style.backgroundColor = bgColorInput.value;
+    document.body.style.color = textColorInput.value;
+    previewHeader.style.backgroundColor = headerColorInput.value;
+    previewHeader.textContent = headerTextInput.value;
+    document.body.style.fontFamily = fontSelect.value;
+}
+
+// Carica tema ultimo JSON
+async function caricaTema() {
+    try {
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_theme?admin=${adminCorrente}`);
+        const data = await res.json();
+        if(data.success) {
+            bgColorInput.value = data.bg_color || "#ffffff";
+            textColorInput.value = data.text_color || "#000000";
+            headerColorInput.value = data.header_color || "#007BFF";
+            headerTextInput.value = data.header_text || "Header di esempio";
+            fontSelect.value = data.font_family || "Arial";
+            if(data.logo_url) previewLogo.src = data.logo_url;
+            aggiornaAnteprima();
+        }
+    } catch(e) {
+        console.error("Errore caricamento tema:", e);
+    }
+}
+
+bgColorInput.addEventListener('input', aggiornaAnteprima);
+textColorInput.addEventListener('input', aggiornaAnteprima);
+headerColorInput.addEventListener('input', aggiornaAnteprima);
+headerTextInput.addEventListener('input', aggiornaAnteprima);
+fontSelect.addEventListener('change', aggiornaAnteprima);
+
+document.getElementById('saveTema').addEventListener('click', async () => {
+    const formData = new FormData();
+    formData.append("bg_color", bgColorInput.value);
+    formData.append("text_color", textColorInput.value);
+    formData.append("header_color", headerColorInput.value);
+    formData.append("header_text", headerTextInput.value);
+    formData.append("font_family", fontSelect.value);
+    const logoFile = logoFileInput.files[0];
+    if(logoFile) formData.append("logo", logoFile);
+
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=${adminCorrente}`, {
+        method: "POST",
+        body: formData
+    });
+    const data = await res.json();
+    if(data.success) {
+        document.getElementById('msg').innerText = "Tema salvato!";
+        caricaTema(); // ricarica ultimo tema per anteprima
+    } else {
+        document.getElementById('msg').innerText = "Errore salvataggio!";
+    }
+});
+
+// Carica tema al load
+caricaTema();
+</script>
+</body>
+</html>
