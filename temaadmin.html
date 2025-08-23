@@ -48,8 +48,7 @@ input[type="color"], input[type="text"], select { padding:5px; border-radius:4px
 window.onload = async () => { 
     await applicaTemaAdmin();
     await caricaFonts();
-    await caricaEffettiScritta();
-    await caricaEffettiSfondo();
+    await caricaEffetti();
 };
 
 const anteprima = document.getElementById("anteprimaTema");
@@ -64,41 +63,104 @@ const effettiSfondoSelect = document.getElementById("effettiSfondoSelect");
 // --- Caricamento Font ---
 async function caricaFonts() {
     try {
-        const res = await fetch("https://storage.googleapis.com/matrimonio_app_bucket/config/fonts/fonts.json", { mode: "cors" });
-        if(!res.ok) throw new Error("Errore fetch fonts");
-        const fonts = await res.json();
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { mode: "cors" });
+        const data = await res.json();
+        console.log("Fonts ricevuti:", data);
 
         fontSelect.innerHTML = "";
-        fonts.forEach(f => {
+        data.fonts.forEach(f => {
             const option = document.createElement("option");
             option.value = f.css_family;
             option.textContent = f.name;
             option.style.fontFamily = f.css_family;
             fontSelect.appendChild(option);
         });
-        if(fontSelect.options.length > 0) fontSelect.value = fonts[0].css_family;
+        if(fontSelect.options.length > 0) fontSelect.value = data.fonts[0].css_family;
         aggiornaAnteprima();
     } catch(e) { console.error("Errore caricamento fonts:", e); }
 }
 
-// --- Caricamento Effetti Scritta ---
-async function caricaEffettiScritta() {
+// --- Caricamento Effetti Scritta e Sfondo ---
+async function caricaEffetti() {
     try {
-        const res = await fetch("https://storage.googleapis.com/matrimonio_app_bucket/config/effetti_scritta/effetti_scritta.json", { mode: "cors" });
-        if(!res.ok) throw new Error("Errore fetch effetti scritta");
-        const effetti = await res.json();
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { mode: "cors" });
+        const data = await res.json();
+        console.log("Effetti ricevuti:", data);
 
+        // Effetti scritta
+        const scritta = data.scritta || [];
         effettiScrittaSelect.innerHTML = "";
-        effetti.forEach(eff => {
+        scritta.forEach(eff => {
             const option = document.createElement("option");
             option.value = eff.id;
             option.textContent = eff.name;
             effettiScrittaSelect.appendChild(option);
         });
-        if(effettiScrittaSelect.options.length > 0) effettiScrittaSelect.value = effetti[0].id;
+        if(effettiScrittaSelect.options.length > 0) effettiScrittaSelect.value = scritta[0].id;
+
+        // Effetti sfondo
+        const sfondo = data.sfondo || [];
+        effettiSfondoSelect.innerHTML = "";
+        sfondo.forEach(eff => {
+            const option = document.createElement("option");
+            option.value = eff.id;
+            option.textContent = eff.name;
+            effettiSfondoSelect.appendChild(option);
+        });
+        if(effettiSfondoSelect.options.length > 0) effettiSfondoSelect.value = sfondo[0].id;
+
         aggiornaAnteprima();
-    } catch(e) { console.error("Errore caricamento effetti scritta:", e); }
+    } catch(e) { console.error("Errore caricamento effetti:", e); }
 }
 
-// --- Caricamento Effetti Sfondo ---
-async function caricaEf
+// --- Aggiorna Anteprima ---
+function aggiornaAnteprima() {
+    anteprima.style.backgroundColor = bgInput.value;
+    anteprima.style.color = textInput.value;
+    anteprima.style.fontFamily = fontSelect.value;
+
+    anteprima.className = ""; // reset classi effetti
+    if(effettiScrittaSelect.value) anteprima.classList.add(effettiScrittaSelect.value);
+    if(effettiSfondoSelect.value) anteprima.classList.add(effettiSfondoSelect.value);
+
+    const header = document.querySelector("header h1");
+    if(header){
+        header.textContent = headerTextInput.value;
+        header.style.backgroundColor = headerInput.value;
+        header.style.color = textInput.value;
+    }
+}
+
+// Event listener input per aggiornamento live
+[bgInput, textInput, fontSelect, headerTextInput, headerInput, effettiScrittaSelect, effettiSfondoSelect].forEach(el => el.addEventListener("input", aggiornaAnteprima));
+
+// Salvataggio tema
+document.getElementById("saveTema").addEventListener("click", async () => {
+    const formData = new FormData();
+    formData.append("bg_color", bgInput.value);
+    formData.append("text_color", textInput.value);
+    formData.append("header_color", headerInput.value);
+    formData.append("header_text", headerTextInput.value);
+    formData.append("font_family", fontSelect.value);
+    formData.append("effetto_scritta", effettiScrittaSelect.value);
+    formData.append("effetto_sfondo", effettiSfondoSelect.value);
+
+    const logoFile = document.getElementById("logoFile").files[0];
+    if(logoFile) formData.append("logo", logoFile);
+
+    try {
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=default", { method: "POST", body: formData });
+        const data = await res.json();
+        alert(data.success ? "Tema salvato!" : "Errore salvataggio tema");
+    } catch(err) {
+        console.error(err);
+        alert("Errore salvataggio tema");
+    }
+});
+</script>
+
+<footer>
+    <a href="index.html" class="pulsante">Menu</a>
+</footer>
+</body>
+</html>
