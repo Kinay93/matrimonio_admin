@@ -6,7 +6,9 @@
 <style>
   :root {
     --bg-color: #ffffff;
+    --bg-color-rgb: 255,255,255;
     --bg-color-secondario: #eeeeee;
+    --bg-color-secondario-rgb: 238,238,238;
     --text-color: #000000;
     --header-color: #007BFF;
     --header-text: #ffffff;
@@ -33,10 +35,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
   }
 
   h2 {
     margin-bottom: 0.5rem;
+  }
+
+  .overlay {
+    position: absolute;
+    top:0; left:0; right:0; bottom:0;
+    pointer-events: none;
   }
 </style>
 </head>
@@ -82,6 +91,17 @@ const saveBtn = document.getElementById('saveBtn');
 let effettiScritta = [];
 let effettiSfondo = [];
 let fonts = [];
+
+// --- Helper: HEX to RGB
+function hexToRgb(hex) {
+  hex = hex.replace('#','');
+  if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+  const bigint = parseInt(hex,16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `${r}, ${g}, ${b}`;
+}
 
 // --- Carica font dal backend
 async function caricaFonts() {
@@ -136,36 +156,73 @@ async function caricaEffettiSfondo() {
 
 // --- Aggiorna anteprima
 function aggiornaAnteprima() {
-  // Font
+  // Reset completo degli stili inline
+  previewBox.style.cssText = '';
+  
+  // Font e colore testo
   previewBox.style.fontFamily = fontsSelect.value;
-
-  // Colore testo
   previewBox.style.color = textColorInput.value;
+
+  // Variabili CSS
+  const bgRgb = hexToRgb(bgColorInput.value);
+  const bgSecondarioRgb = hexToRgb(bgColorSecondarioInput.value);
+  previewBox.style.setProperty('--bg-color', bgColorInput.value);
+  previewBox.style.setProperty('--bg-color-rgb', bgRgb);
+  previewBox.style.setProperty('--bg-color-secondario', bgColorSecondarioInput.value);
+  previewBox.style.setProperty('--bg-color-secondario-rgb', bgSecondarioRgb);
 
   // Effetto scritta
   const effScritta = effettiScritta.find(e => e.id === effettiScrittaSelect.value);
-  previewBox.style.cssText = previewBox.style.cssText; // reset inline
   if(effScritta && effScritta.css) {
-    previewBox.style.cssText += effScritta.css.replace(/var\(--text-color\)/g, textColorInput.value);
+    let scrittaCss = effScritta.css.replace(/var\(--text-color\)/g, textColorInput.value);
+    scrittaCss.split(';').forEach(rule => {
+      if(rule.trim()){
+        let [prop, val] = rule.split(':');
+        if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
+      }
+    });
   }
-
-  // Colore sfondo
-  previewBox.style.setProperty('--bg-color', bgColorInput.value);
-  previewBox.style.setProperty('--bg-color-secondario', bgColorSecondarioInput.value);
 
   // Effetto sfondo
   const effSfondo = effettiSfondo.find(e => e.id === effettiSfondoSelect.value);
+  let overlayColor = `rgba(${bgRgb}, 0.3)`;
   if(effSfondo && effSfondo.css) {
-    previewBox.style.cssText += effSfondo.css
+    let sfondoCss = effSfondo.css
       .replace(/var\(--bg-color\)/g, bgColorInput.value)
-      .replace(/var\(--bg-color-secondario\)/g, bgColorSecondarioInput.value);
+      .replace(/var\(--bg-color-rgb\)/g, bgRgb)
+      .replace(/var\(--bg-color-secondario\)/g, bgColorSecondarioInput.value)
+      .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
+
+    sfondoCss.split(';').forEach(rule => {
+      if(rule.trim()){
+        let [prop, val] = rule.split(':');
+        if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
+      }
+    });
+
+    // Overlay automatico se c'è immagine
+    const bgImageMatch = sfondoCss.match(/url\(([^)]+)\)/);
+    if(bgImageMatch) {
+      previewBox.style.position = 'relative';
+      if(!previewBox.querySelector('.overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'overlay';
+        overlay.style.backgroundColor = overlayColor;
+        previewBox.appendChild(overlay);
+      } else {
+        previewBox.querySelector('.overlay').style.backgroundColor = overlayColor;
+      }
+    } else {
+      const existingOverlay = previewBox.querySelector('.overlay');
+      if(existingOverlay) existingOverlay.remove();
+    }
   }
 }
 
 // --- Event listeners
 [bgColorInput, bgColorSecondarioInput, textColorInput, fontsSelect, effettiScrittaSelect, effettiSfondoSelect]
   .forEach(el => el.addEventListener('input', aggiornaAnteprima));
-  
+
 saveBtn.addEventListener('click', async () => {
   const formData = new FormData();
   formData.append('bg_color', bgColorInput.value);
