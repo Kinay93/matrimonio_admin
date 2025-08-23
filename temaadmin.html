@@ -76,7 +76,7 @@ const previewBox = document.getElementById("previewBox");
 
 async function caricaFonts() {
     try {
-        const res = await fetch("/admin/get_fonts");
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
         const data = await res.json();
         fontSelect.innerHTML = "";
         data.fonts.forEach(f => {
@@ -90,7 +90,7 @@ async function caricaFonts() {
 
 async function caricaEffetti() {
     try {
-        const res = await fetch("/admin/get_effetti");
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti");
         const data = await res.json();
 
         effettiScrittaSelect.innerHTML = "";
@@ -136,7 +136,7 @@ effettiSfondoSelect.addEventListener("change", aggiornaAnteprima);
 document.getElementById("themeForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const res = await fetch("/admin/save_theme", {
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/save_theme", {
         method: "POST",
         body: formData
     });
@@ -146,7 +146,7 @@ document.getElementById("themeForm").addEventListener("submit", async (e) => {
 });
 
 async function caricaTema() {
-    const res = await fetch("/admin/get_theme");
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_theme");
     const data = await res.json();
     if(!data.success) return;
     const conf = data.config;
