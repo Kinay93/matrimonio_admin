@@ -5,178 +5,236 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Tema Matrimonio</title>
 <style>
-/* ---------- RESET BASE ---------- */
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: Arial, sans-serif; background-color:#f9f9f9; color:#333; min-height:100vh; display:flex; flex-direction:column; }
-header { background-color:#4a90e2; color:white; padding:1rem; display:flex; justify-content:space-between; align-items:center; }
-header h1 { font-size:1.5rem; }
-header button { background-color:white; color:#4a90e2; border:none; padding:0.4rem 0.8rem; margin-left:0.5rem; border-radius:5px; cursor:pointer; font-weight:bold; }
-header button:hover { opacity:0.9; }
-main { flex:1; padding:1rem; }
-.preview-area { width:100%; height:200px; border:1px solid #ccc; border-radius:8px; display:flex; justify-content:center; align-items:center; text-align:center; }
-select, input[type=color] { margin-bottom:0.5rem; display:block; padding:0.3rem; }
+    :root {
+        --bg-color: #ffffff;
+        --bg-color-secondario: #eeeeee;
+        --text-color: #000000;
+        --header-color: #007bff;
+        --header-text: #ffffff;
+    }
+
+    body {
+        font-family: var(--font-family, Arial, sans-serif);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    header {
+        background-color: var(--header-color);
+        color: var(--header-text);
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    main {
+        flex: 1;
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .form-box, .preview-box {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        flex: 1;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .preview-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+    }
+
+    select, input[type=color], input[type=text] {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        padding: 0.3rem;
+    }
+
+    button {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        margin-top: 0.5rem;
+    }
 </style>
 </head>
 <body>
-
 <header>
-  <h1>Admin Tema Matrimonio</h1>
+    <h1>Amministrazione Tema Matrimonio</h1>
 </header>
 
 <main>
-  <div>
-    <label>Colore Sfondo Primario:</label>
-    <input type="color" id="bgColor1" value="#ffffff">
+    <div class="form-box">
+        <h2>Impostazioni Tema</h2>
+        <label>Colore Sfondo Primario: <input type="color" id="bgColor"></label>
+        <label>Colore Sfondo Secondario: <input type="color" id="bgColorSecondario"></label>
+        <label>Colore Testo: <input type="color" id="textColor"></label>
+        <label>Colore Header: <input type="color" id="headerColor"></label>
+        <label>Testo Header: <input type="text" id="headerText"></label>
+        <label>Font: <select id="fontsSelect"></select></label>
+        <label>Effetto Scritta: <select id="effettiScrittaSelect"></select></label>
+        <label>Effetto Sfondo: <select id="effettiSfondoSelect"></select></label>
+        <label>Logo: <input type="file" id="logoInput"></label>
+        <button id="saveThemeBtn">Salva Tema</button>
+    </div>
 
-    <label>Colore Sfondo Secondario:</label>
-    <input type="color" id="bgColor2" value="#eeeeee">
-
-    <label>Colore Testo:</label>
-    <input type="color" id="textColor" value="#000000">
-
-    <label>Font:</label>
-    <select id="fontSelect"></select>
-
-    <label>Effetto Scritta:</label>
-    <select id="effettoScrittaSelect"></select>
-
-    <label>Effetto Sfondo:</label>
-    <select id="effettoSfondoSelect"></select>
-  </div>
-
-  <div class="preview-area" id="previewArea">
-    <span id="previewText">Anteprima Testo</span>
-  </div>
-
-  <button id="saveBtn">Salva Tema</button>
+    <div class="preview-box" id="previewBox">
+        <h2>Anteprima</h2>
+        <p id="previewText">Testo Anteprima</p>
+    </div>
 </main>
 
 <script>
-const fontSelect = document.getElementById("fontSelect");
-const effettoScrittaSelect = document.getElementById("effettoScrittaSelect");
-const effettoSfondoSelect = document.getElementById("effettoSfondoSelect");
-const bgColor1Input = document.getElementById("bgColor1");
-const bgColor2Input = document.getElementById("bgColor2");
+const backendBase = "https://matrimonioapp.ew.r.appspot.com";
+
+const bgColorInput = document.getElementById("bgColor");
+const bgColorSecondarioInput = document.getElementById("bgColorSecondario");
 const textColorInput = document.getElementById("textColor");
-const previewArea = document.getElementById("previewArea");
+const headerColorInput = document.getElementById("headerColor");
+const headerTextInput = document.getElementById("headerText");
+const fontsSelect = document.getElementById("fontsSelect");
+const effettiScrittaSelect = document.getElementById("effettiScrittaSelect");
+const effettiSfondoSelect = document.getElementById("effettiSfondoSelect");
+const logoInput = document.getElementById("logoInput");
+const saveThemeBtn = document.getElementById("saveThemeBtn");
+const previewBox = document.getElementById("previewBox");
 const previewText = document.getElementById("previewText");
 
-let fonts = [];
-let effettiScritta = [];
-let effettiSfondo = [];
+let fonts = [], effettiScritta = [], effettiSfondo = [];
 
-const backendURL = "https://matrimonioapp.ew.r.appspot.com"; // punta al backend su Google Cloud
-
-// ---------- CARICAMENTO FONT ----------
+// --- Carica fonts ---
 async function caricaFonts() {
-    try {
-        const res = await fetch(`${backendURL}/admin/get_fonts`);
-        const data = await res.json();
-        fonts = data.fonts || [];
-        fontSelect.innerHTML = "";
-        fonts.forEach(f => {
-            const option = document.createElement("option");
-            option.value = f.css_family;
-            option.textContent = f.name;
-            fontSelect.appendChild(option);
-        });
-    } catch(e) { console.error("Errore caricamento fonts:", e); }
+    const res = await fetch(`${backendBase}/admin/get_fonts`);
+    const data = await res.json();
+    fonts = data.fonts || [];
+    fontsSelect.innerHTML = "";
+    fonts.forEach(f => {
+        const option = document.createElement("option");
+        option.value = f.css_family;
+        option.textContent = f.name;
+        fontsSelect.appendChild(option);
+    });
 }
 
-// ---------- CARICAMENTO EFFETTI ----------
+// --- Carica effetti ---
 async function caricaEffetti() {
-    try {
-        const res = await fetch(`${backendURL}/admin/get_effetti`);
-        const data = await res.json();
-        effettiScritta = data.scritta || [];
-        effettiSfondo = data.sfondo || [];
+    const res = await fetch(`${backendBase}/admin/get_effetti`);
+    const data = await res.json();
+    effettiScritta = data.scritta || [];
+    effettiSfondo = data.sfondo || [];
 
-        effettoScrittaSelect.innerHTML = "";
-        effettiScritta.forEach(e => {
-            const option = document.createElement("option");
-            option.value = e.id;
-            option.textContent = e.name;
-            effettoScrittaSelect.appendChild(option);
-        });
+    effettiScrittaSelect.innerHTML = "";
+    effettiScritta.forEach(eff => {
+        const option = document.createElement("option");
+        option.value = eff.id;
+        option.textContent = eff.name;
+        effettiScrittaSelect.appendChild(option);
+    });
 
-        effettoSfondoSelect.innerHTML = "";
-        effettiSfondo.forEach(e => {
-            const option = document.createElement("option");
-            option.value = e.id;
-            option.textContent = e.name;
-            effettoSfondoSelect.appendChild(option);
-        });
-    } catch(e) { console.error("Errore caricamento effetti:", e); }
+    effettiSfondoSelect.innerHTML = "";
+    effettiSfondo.forEach(eff => {
+        const option = document.createElement("option");
+        option.value = eff.id;
+        option.textContent = eff.name;
+        effettiSfondoSelect.appendChild(option);
+    });
 }
 
-// ---------- APPLICA ANTEPRIMA ----------
+// --- Aggiorna anteprima ---
 function aggiornaAnteprima() {
-    // Font
-    previewText.style.fontFamily = fontSelect.value || "Arial";
+    document.documentElement.style.setProperty("--bg-color", bgColorInput.value);
+    document.documentElement.style.setProperty("--bg-color-secondario", bgColorSecondarioInput.value);
+    document.documentElement.style.setProperty("--text-color", textColorInput.value);
+    document.documentElement.style.setProperty("--header-color", headerColorInput.value);
+    document.documentElement.style.setProperty("--header-text", headerTextInput.value);
+    document.documentElement.style.setProperty("--font-family", fontsSelect.value);
 
-    // Colore testo
-    previewText.style.color = textColorInput.value;
-
-    // Effetto scritta
-    const effScr = effettiScritta.find(e => e.id === effettoScrittaSelect.value);
-    previewText.className = "";
-    if(effScr) previewText.classList.add(effScr.id);
-
-    // Effetto sfondo
-    const effSf = effettiSfondo.find(e => e.id === effettoSfondoSelect.value);
-    previewArea.style = "";
-    if(effSf) {
-        // sostituisci placeholder colori
-        let css = effSf.css.replace(/#ffffff/g, bgColor1Input.value)
-                           .replace(/#eeeeee/g, bgColor2Input.value);
-        previewArea.style.cssText = css;
+    // Applica effetto scritta
+    const effScritta = effettiScritta.find(e => e.id === effettiScrittaSelect.value);
+    if(effScritta) {
+        previewText.style.cssText = effScritta.css;
+        previewText.style.fontFamily = fontsSelect.value;
     } else {
-        previewArea.style.backgroundColor = bgColor1Input.value;
+        previewText.style.cssText = `color: ${textColorInput.value}; font-family: ${fontsSelect.value};`;
+    }
+
+    // Applica effetto sfondo
+    const effSfondo = effettiSfondo.find(e => e.id === effettiSfondoSelect.value);
+    if(effSfondo) {
+        previewBox.style.cssText = effSfondo.css;
+    } else {
+        previewBox.style.cssText = `background-color: ${bgColorInput.value};`;
     }
 }
 
-// ---------- SALVATAGGIO TEMA ----------
+// --- Carica tema esistente ---
+async function caricaTema() {
+    const res = await fetch(`${backendBase}/admin/get_theme?admin=default`);
+    const data = await res.json();
+    if(!data.success) return;
+
+    const config = data.config;
+
+    bgColorInput.value = config.bg_color || "#ffffff";
+    bgColorSecondarioInput.value = config.bg_color_secondario || "#eeeeee";
+    textColorInput.value = config.text_color || "#000000";
+    headerColorInput.value = config.header_color || "#007bff";
+    headerTextInput.value = config.header_text || "Header di esempio";
+    fontsSelect.value = config.font_family || "Arial, sans-serif";
+    effettiScrittaSelect.value = config.effetto_scritta || "";
+    effettiSfondoSelect.value = config.effetto_sfondo || "";
+
+    aggiornaAnteprima();
+}
+
+// --- Salva tema ---
 async function salvaTema() {
     const formData = new FormData();
-    formData.append("bg_color", bgColor1Input.value);
-    formData.append("bg_color_secondario", bgColor2Input.value);
+    formData.append("bg_color", bgColorInput.value);
+    formData.append("bg_color_secondario", bgColorSecondarioInput.value);
     formData.append("text_color", textColorInput.value);
-    formData.append("font_family", fontSelect.value);
-    formData.append("effetto_scritta", effettoScrittaSelect.value);
-    formData.append("effetto_sfondo", effettoSfondoSelect.value);
+    formData.append("header_color", headerColorInput.value);
+    formData.append("header_text", headerTextInput.value);
+    formData.append("font_family", fontsSelect.value);
+    formData.append("effetto_scritta", effettiScrittaSelect.value);
+    formData.append("effetto_sfondo", effettiSfondoSelect.value);
+    if(logoInput.files[0]) formData.append("logo", logoInput.files[0]);
 
-    const res = await fetch(`${backendURL}/admin/save_theme?admin=default`, {
+    const res = await fetch(`${backendBase}/admin/save_theme?admin=default`, {
         method: "POST",
         body: formData
     });
+
     const data = await res.json();
-    if(data.success) alert("Tema salvato!");
+    if(data.success) alert("Tema salvato correttamente!");
     else alert("Errore salvataggio tema");
 }
 
-// ---------- EVENT LISTENERS ----------
-[fontSelect, effettoScrittaSelect, effettoSfondoSelect, bgColor1Input, bgColor2Input, textColorInput]
-    .forEach(el => el.addEventListener("input", aggiornaAnteprima));
+// --- Event listeners ---
+[bgColorInput, bgColorSecondarioInput, textColorInput, headerColorInput, headerTextInput, fontsSelect, effettiScrittaSelect, effettiSfondoSelect].forEach(el => {
+    el.addEventListener("input", aggiornaAnteprima);
+});
 
-document.getElementById("saveBtn").addEventListener("click", salvaTema);
+saveThemeBtn.addEventListener("click", salvaTema);
 
-// ---------- INIT ----------
+// --- Init ---
 async function init() {
     await caricaFonts();
     await caricaEffetti();
-    aggiornaAnteprima();
+    await caricaTema();
 }
 
 init();
 </script>
-
-<style>
-/* Effetti scritta CSS */
-.corsivo-ombra { font-style: italic; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
-.grassetto { font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
-.ombra-leggera { text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
-/* Aggiungi qui gli altri effetti scritta */
-</style>
-
 </body>
 </html>
