@@ -2,158 +2,174 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Tema Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Tema Matrimonio</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  #anteprimaTema {
-    width: 100%;
-    height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-  }
+    .preview-box {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        text-align: center;
+        min-height: 150px;
+    }
 </style>
 </head>
 <body>
-<header><h1>Gestione Tema Admin</h1></header>
+<header>
+    <h1>Admin Tema Matrimonio</h1>
+</header>
 
-<div class="container">
-  <div class="form-col">
-    <label>Colore sfondo:<input type="color" id="bgColor" value="#ffffff"></label>
-    <label>Colore testo:<input type="color" id="textColor" value="#000000"></label>
-    <label>Colore header:<input type="color" id="headerColor" value="#007BFF"></label>
-    <label>Testo header:<input type="text" id="headerText" value="Amministrazione Matrimonio"></label>
-    <label>Font:<select id="fontSelect"></select></label>
-    <label>Effetto scritta:<select id="effettiScrittaSelect"></select></label>
-    <label>Effetto sfondo:<select id="effettiSfondoSelect"></select></label>
-    <label>Logo:<input type="file" id="logoFile"></label>
-    <button id="saveTema">Salva Tema</button>
-  </div>
+<main>
+    <div class="two-columns">
+        <div class="form-box">
+            <h2>Configurazione Tema</h2>
+            <form id="themeForm">
+                <label>Colore Sfondo Primario:</label>
+                <input type="color" id="bgColor" name="bg_color"><br><br>
 
-  <div class="anteprima-col">
-    <h3>Anteprima Tema</h3>
-    <div id="anteprimaTema">Anteprima colori, font e effetti</div>
-  </div>
-</div>
+                <label>Colore Sfondo Secondario:</label>
+                <input type="color" id="bgColorSecondario" name="bg_color_secondario"><br><br>
 
-<script src="script.js"></script>
+                <label>Colore Testo:</label>
+                <input type="color" id="textColor" name="text_color"><br><br>
+
+                <label>Colore Header:</label>
+                <input type="color" id="headerColor" name="header_color"><br><br>
+
+                <label>Testo Header:</label>
+                <input type="text" id="headerText" name="header_text"><br><br>
+
+                <label>Font:</label>
+                <select id="fontSelect" name="font_family"></select><br><br>
+
+                <label>Effetto Scritta:</label>
+                <select id="effettiScrittaSelect" name="effetto_scritta"></select><br><br>
+
+                <label>Effetto Sfondo:</label>
+                <select id="effettiSfondoSelect" name="effetto_sfondo"></select><br><br>
+
+                <label>Logo:</label>
+                <input type="file" id="logoFile" name="logo"><br><br>
+
+                <button type="submit">Salva Tema</button>
+            </form>
+        </div>
+
+        <div class="preview-box" id="previewBox">
+            Anteprima Tema
+        </div>
+    </div>
+</main>
+
 <script>
-const anteprima = document.getElementById("anteprimaTema");
-const bgInput = document.getElementById("bgColor");
-const textInput = document.getElementById("textColor");
-const headerInput = document.getElementById("headerColor");
-const headerTextInput = document.getElementById("headerText");
 const fontSelect = document.getElementById("fontSelect");
 const effettiScrittaSelect = document.getElementById("effettiScrittaSelect");
 const effettiSfondoSelect = document.getElementById("effettiSfondoSelect");
 
-let fonts = [];
-let effettiScritta = [];
-let effettiSfondo = [];
+const bgColorInput = document.getElementById("bgColor");
+const bgColorSecondarioInput = document.getElementById("bgColorSecondario");
+const textColorInput = document.getElementById("textColor");
+const headerColorInput = document.getElementById("headerColor");
+const headerTextInput = document.getElementById("headerText");
+const previewBox = document.getElementById("previewBox");
 
-// ----------- CARICA DATI DAL BACKEND -----------
 async function caricaFonts() {
-  try {
-    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
-    fonts = await res.json();
-    fontSelect.innerHTML = "";
-    fonts.fonts.forEach(f => {
-      const o = document.createElement("option");
-      o.value = f.id;
-      o.textContent = f.name;
-      fontSelect.appendChild(o);
-    });
-  } catch(e){ console.error("Errore caricamento fonts:", e); }
+    try {
+        const res = await fetch("/admin/get_fonts");
+        const data = await res.json();
+        fontSelect.innerHTML = "";
+        data.fonts.forEach(f => {
+            const opt = document.createElement("option");
+            opt.value = f.css_family;
+            opt.textContent = f.name;
+            fontSelect.appendChild(opt);
+        });
+    } catch(e) { console.error(e); }
 }
 
 async function caricaEffetti() {
-  try {
-    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti");
-    const data = await res.json();
-    effettiScritta = data.scritta;
-    effettiSfondo = data.sfondo;
+    try {
+        const res = await fetch("/admin/get_effetti");
+        const data = await res.json();
 
-    effettiScrittaSelect.innerHTML = "";
-    effettiScritta.forEach(eff => {
-      const o = document.createElement("option");
-      o.value = eff.id;
-      o.textContent = eff.name;
-      effettiScrittaSelect.appendChild(o);
-    });
+        effettiScrittaSelect.innerHTML = "";
+        data.scritta.forEach(e => {
+            const opt = document.createElement("option");
+            opt.value = e.id;
+            opt.textContent = e.name;
+            effettiScrittaSelect.appendChild(opt);
+        });
 
-    effettiSfondoSelect.innerHTML = "";
-    effettiSfondo.forEach(eff => {
-      const o = document.createElement("option");
-      o.value = eff.id;
-      o.textContent = eff.name;
-      effettiSfondoSelect.appendChild(o);
-    });
-  } catch(e){ console.error("Errore caricamento effetti:", e); }
+        effettiSfondoSelect.innerHTML = "";
+        data.sfondo.forEach(e => {
+            const opt = document.createElement("option");
+            opt.value = e.id;
+            opt.textContent = e.name;
+            effettiSfondoSelect.appendChild(opt);
+        });
+    } catch(e) { console.error(e); }
 }
 
-// ----------- AGGIORNA ANTEPRIMA -----------
 function aggiornaAnteprima() {
-  anteprima.style.backgroundColor = bgInput.value;
-  anteprima.style.color = textInput.value;
+    const bg = bgColorInput.value;
+    const bg2 = bgColorSecondarioInput.value;
+    const txt = textColorInput.value;
+    const font = fontSelect.value;
+    const effettoScritta = effettiScrittaSelect.value;
+    const effettoSfondo = effettiSfondoSelect.value;
 
-  const font = fonts.fonts.find(f => f.id === fontSelect.value);
-  if(font) anteprima.style.fontFamily = font.css_family;
-
-  const effScritta = effettiScritta.find(e => e.id === effettiScrittaSelect.value);
-  if(effScritta) anteprima.style.cssText += effScritta.css;
-
-  const effSfondo = effettiSfondo.find(e => e.id === effettiSfondoSelect.value);
-  if(effSfondo) anteprima.style.cssText += effSfondo.css;
-
-  const header = document.querySelector("header h1");
-  if(header){
-    header.textContent = headerTextInput.value;
-    header.style.backgroundColor = headerInput.value;
-    header.style.color = textInput.value;
-  }
+    previewBox.style.background = bg;
+    previewBox.style.color = txt;
+    previewBox.style.fontFamily = font;
+    previewBox.style.boxShadow = effettoSfondo ? "0 0 20px " + bg2 : "none";
+    previewBox.textContent = effettoScritta ? "Testo con effetto: " + effettoScritta : "Anteprima Tema";
 }
 
-// ----------- LISTENER INPUT -----------
-[bgInput,textInput,fontSelect,headerTextInput,headerInput,effettiScrittaSelect,effettiSfondoSelect]
-.forEach(el => el.addEventListener("input", aggiornaAnteprima));
+bgColorInput.addEventListener("input", aggiornaAnteprima);
+bgColorSecondarioInput.addEventListener("input", aggiornaAnteprima);
+textColorInput.addEventListener("input", aggiornaAnteprima);
+fontSelect.addEventListener("change", aggiornaAnteprima);
+effettiScrittaSelect.addEventListener("change", aggiornaAnteprima);
+effettiSfondoSelect.addEventListener("change", aggiornaAnteprima);
 
-// ----------- SAVE TEMA -----------
-document.getElementById("saveTema").addEventListener("click", async ()=>{
-  const formData = new FormData();
-  formData.append("bg_color", bgInput.value);
-  formData.append("text_color", textInput.value);
-  formData.append("header_color", headerInput.value);
-  formData.append("header_text", headerTextInput.value);
-
-  const font = fonts.fonts.find(f => f.id === fontSelect.value);
-  formData.append("font_family", font ? font.css_family : "Arial, sans-serif");
-  
-  formData.append("effetto_scritta", effettiScrittaSelect.value);
-  formData.append("effetto_sfondo", effettiSfondoSelect.value);
-
-  const logoFile = document.getElementById("logoFile").files[0];
-  if(logoFile) formData.append("logo", logoFile);
-
-  try {
-    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=default", {method:"POST", body:formData});
+document.getElementById("themeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const res = await fetch("/admin/save_theme", {
+        method: "POST",
+        body: formData
+    });
     const data = await res.json();
-    alert(data.success ? "Tema salvato!" : "Errore salvataggio tema");
-  } catch(e){ console.error(e); }
+    if(data.success) alert("Tema salvato!");
+    else alert("Errore salvataggio");
 });
 
-// ----------- INIT -----------
-window.onload = async () => { 
-  await caricaFonts();
-  await caricaEffetti();
-  aggiornaAnteprima();
-};
-</script>
+async function caricaTema() {
+    const res = await fetch("/admin/get_theme");
+    const data = await res.json();
+    if(!data.success) return;
+    const conf = data.config;
 
-<footer>
-  <a href="index.html" class="pulsante">Menu</a>
-</footer>
+    bgColorInput.value = conf.bg_color || "#ffffff";
+    bgColorSecondarioInput.value = conf.bg_color_secondario || "#ffffff";
+    textColorInput.value = conf.text_color || "#000000";
+    headerColorInput.value = conf.header_color || "#007BFF";
+    headerTextInput.value = conf.header_text || "Header di esempio";
+    fontSelect.value = conf.font_family || "Arial";
+    effettiScrittaSelect.value = conf.effetto_scritta || "";
+    effettiSfondoSelect.value = conf.effetto_sfondo || "";
+
+    aggiornaAnteprima();
+}
+
+async function init() {
+    await caricaFonts();
+    await caricaEffetti();
+    await caricaTema();
+}
+
+init();
+</script>
 </body>
 </html>
