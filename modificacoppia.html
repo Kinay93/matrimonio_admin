@@ -24,8 +24,8 @@ body { display:flex; flex-direction:column; align-items:center; justify-content:
     <div class="form-col">
         <label>Nome coppia:<input type="text" id="nomeCoppia" disabled></label>
         <label>Foto coppia:<input type="file" id="fotoCoppia"></label>
-        <label>Colore sfondo:<input type="color" id="colorSfondo" value="#ffffff"></label>
-        <label>Colore testo:<input type="color" id="colorTesto" value="#000000"></label>
+        <label>Colore sfondo:<input type="color" id="colorSfondo"></label>
+        <label>Colore testo:<input type="color" id="colorTesto"></label>
         <label>Font:<select id="fontScelto"></select></label>
         <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
         <label>Effetto scritta:<select id="effettoScritta"></select></label>
@@ -57,16 +57,16 @@ const selectEffettoScritta = document.getElementById("effettoScritta");
 const inputNome = document.getElementById("nomeCoppia");
 
 window.onload = async () => {
-    await applicaTemaAdmin();
+    const theme = await applicaTemaAdmin();
     inputNome.value = nomeCoppiaParam;
     caricaFontsEdEffetti();
-    caricaDatiCoppia();
+    caricaDatiCoppia(theme);
 };
 
 function aggiornaAnteprima() {
-    anteprimaDiv.style.backgroundColor = inputSfondo.value;
-    anteprimaTesto.style.color = inputTesto.value;
-    anteprimaTesto.style.fontFamily = selectFont.value;
+    anteprimaDiv.style.backgroundColor = inputSfondo.value || "#ffffff";
+    anteprimaTesto.style.color = inputTesto.value || "#000000";
+    anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
 }
 
 [inputSfondo,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
@@ -86,18 +86,21 @@ async function caricaFontsEdEffetti() {
         const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti");
         const dataEffetti = await resEffetti.json();
         selectEffettoSfondo.innerHTML=""; selectEffettoScritta.innerHTML="";
-        dataEffetti.sfondo.forEach(f=>{ const o=document.createElement("option"); o.value=f;o.textContent=f; selectEffettoSfondo.appendChild(o); });
-        dataEffetti.scritta.forEach(f=>{ const o=document.createElement("option"); o.value=f;o.textContent=f; selectEffettoScritta.appendChild(o); });
+        (dataEffetti.sfondo||[]).forEach(f=>{ const o=document.createElement("option"); o.value=f||""; o.textContent=f||"Nessuno"; selectEffettoSfondo.appendChild(o); });
+        (dataEffetti.scritta||[]).forEach(f=>{ const o=document.createElement("option"); o.value=f||""; o.textContent=f||"Nessuno"; selectEffettoScritta.appendChild(o); });
     } catch(e){ console.error(e); }
 }
 
-async function caricaDatiCoppia() {
+async function caricaDatiCoppia(theme) {
     const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${nomeCoppiaParam}`);
     const data = await res.json();
     if(data.error){ alert("Coppia non trovata"); return; }
-    inputSfondo.value = data.colori.sfondo || "#ffffff";
-    inputTesto.value = data.colori.testo || "#000000";
-    selectFont.value = data.colori.font || "Arial";
+
+    inputSfondo.value = data.colori?.sfondo || theme.bg_color || "#ffffff";
+    inputTesto.value = data.colori?.testo || theme.text_color || "#000000";
+    selectFont.value = data.colori?.font || theme.font_family || "Arial";
+    selectEffettoSfondo.value = data.effetto_sfondo || "";
+    selectEffettoScritta.value = data.effetto_scritta || "";
     aggiornaAnteprima();
 }
 
@@ -109,8 +112,8 @@ document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=
     formData.append("style_css_colore_sfondo",inputSfondo.value);
     formData.append("style_css_colore_testo",inputTesto.value);
     formData.append("style_css_font",selectFont.value);
-    formData.append("effetto_sfondo",selectEffettoSfondo.value);
-    formData.append("effetto_scritta",selectEffettoScritta.value);
+    formData.append("effetto_sfondo",selectEffettoSfondo.value||"");
+    formData.append("effetto_scritta",selectEffettoScritta.value||"");
     const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia",{method:"POST",body:formData});
     const data = await res.json();
     document.getElementById("msg").innerText = data.success?"Coppia aggiornata!":"Errore: "+(data.error||"imprevisto");
