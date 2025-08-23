@@ -17,6 +17,20 @@ button:hover { background:#0056b3; }
 #anteprimaTema { width:100%; height:300px; display:flex; align-items:center; justify-content:center; border:1px solid #ccc; border-radius:8px; background:#f9f9f9; transition: all 0.3s ease; }
 footer { text-align:center; padding:10px; background:#f5f5f5; }
 input[type="color"], input[type="text"], select { padding:5px; border-radius:4px; border:1px solid #ccc; }
+
+/* ---------- EFFETTI SCRITTA ---------- */
+.ombra-leggera { text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+.grassetto { font-weight: bold; }
+.cursiva { font-style: italic; }
+.sfumato { background: linear-gradient(to right, #f00, #00f); -webkit-background-clip: text; color: transparent; }
+.sottolineato { text-decoration: underline; }
+
+/* ---------- EFFETTI SFONDO ---------- */
+.sfondo-lucido { background: linear-gradient(135deg, #ffffff, #e0e0e0); }
+.sfondo-scuro { background: linear-gradient(135deg, #333, #555); }
+.sfondo-radiale { background: radial-gradient(circle, #fff, #ccc); }
+.sfondo-stripes { background: repeating-linear-gradient(45deg, #f5f5f5, #f5f5f5 10px, #ddd 10px, #ddd 20px); }
+.sfondo-blur { backdrop-filter: blur(3px); }
 </style>
 </head>
 <body>
@@ -43,7 +57,6 @@ input[type="color"], input[type="text"], select { padding:5px; border-radius:4px
     </div>
 </div>
 
-<script src="script.js"></script>
 <script>
 window.onload = async () => { 
     await applicaTemaAdmin();
@@ -65,8 +78,6 @@ async function caricaFonts() {
     try {
         const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { mode: "cors" });
         const data = await res.json();
-        console.log("Fonts ricevuti:", data);
-
         fontSelect.innerHTML = "";
         data.fonts.forEach(f => {
             const option = document.createElement("option");
@@ -80,12 +91,11 @@ async function caricaFonts() {
     } catch(e) { console.error("Errore caricamento fonts:", e); }
 }
 
-// --- Caricamento Effetti Scritta e Sfondo ---
+// --- Caricamento Effetti ---
 async function caricaEffetti() {
     try {
         const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { mode: "cors" });
         const data = await res.json();
-        console.log("Effetti ricevuti:", data);
 
         // Effetti scritta
         const scritta = data.scritta || [];
