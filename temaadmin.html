@@ -154,7 +154,7 @@ async function caricaEffettiSfondo() {
   } catch(e) { console.error("Errore caricamento effetti sfondo:", e); }
 }
 
-// --- Aggiorna anteprima
+// --- Aggiorna anteprima con overlay e fix parsing CSS
 function aggiornaAnteprima() {
   // Reset completo degli stili inline
   previewBox.style.cssText = '';
@@ -177,7 +177,8 @@ function aggiornaAnteprima() {
     let scrittaCss = effScritta.css.replace(/var\(--text-color\)/g, textColorInput.value);
     scrittaCss.split(';').forEach(rule => {
       if(rule.trim()){
-        let [prop, val] = rule.split(':');
+        let [prop, ...rest] = rule.split(':');
+        let val = rest.join(':');
         if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
       }
     });
@@ -195,7 +196,8 @@ function aggiornaAnteprima() {
 
     sfondoCss.split(';').forEach(rule => {
       if(rule.trim()){
-        let [prop, val] = rule.split(':');
+        let [prop, ...rest] = rule.split(':'); // fix parsing CSS con ":" negli URL
+        let val = rest.join(':');
         if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
       }
     });
