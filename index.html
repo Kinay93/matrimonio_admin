@@ -82,6 +82,7 @@
             transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.5s ease;
             opacity: 0;
             transform: translateY(20px);
+            cursor: pointer;
         }
         .coppia-card.visible {
             opacity: 1;
@@ -92,8 +93,9 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
         .coppia-card h3 {
-            margin: 0 0 10px;
+            margin: 10px 0;
             font-size: 1rem;
+            pointer-events: none; /* evita click sul titolo */
         }
         .coppia-img {
             width: 80px;
@@ -153,7 +155,6 @@
         </a>
     </div>
 
-    <script src="script.js"></script>
     <script>
         window.onload = async () => {
             await applicaTemaAdmin();
@@ -180,39 +181,94 @@
                     const card = document.createElement('div');
                     card.className = 'coppia-card';
 
+                    // Foto cliccabile
+                    const img = document.createElement('div');
+                    img.className = 'coppia-img';
+                    img.addEventListener('click', () => {
+                        window.location.href = `modificacoppia.html?coppia=${encodeURIComponent(coppia.nome)}`;
+                    });
+                    card.appendChild(img);
+
+                    // Nome
                     const title = document.createElement('h3');
                     title.textContent = coppia.nome;
                     card.appendChild(title);
 
-                    const img = document.createElement('div');
-                    img.className = 'coppia-img';
-                    card.appendChild(img);
-
+                    // Bottone genera QR
                     const btnGenera = document.createElement('button');
                     btnGenera.textContent = 'Genera QR';
                     btnGenera.className = 'btn-genera';
                     btnGenera.disabled = coppia.qr_generato;
-                    btnGenera.addEventListener('click', () => generaQRCode(coppia.nome, btnGenera));
+                    btnGenera.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        generaQRCode(coppia.nome, btnGenera);
+                    });
                     card.appendChild(btnGenera);
 
+                    // Bottone vedi QR
                     const btnVedi = document.createElement('button');
                     btnVedi.textContent = 'Vedi QR';
                     btnVedi.className = 'btn-vedi';
                     btnVedi.disabled = !coppia.qr_generato;
-                    btnVedi.addEventListener('click', () => vediQRCode(coppia.nome));
+                    btnVedi.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        vediQRCode(coppia.nome);
+                    });
                     card.appendChild(btnVedi);
 
                     grid.appendChild(card);
 
-                    // Delay to stagger animations
-                    setTimeout(() => {
-                        card.classList.add('visible');
-                    }, index * 100);
+                    // Animazione comparsa
+                    setTimeout(() => card.classList.add('visible'), index * 100);
                 });
             } catch (e) {
                 alert('Errore caricamento coppie: ' + e.message);
             }
         }
+
+        async function generaQRCode(coppiaNome, btnGenera) {
+            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+            const data = await res.json();
+
+            if (data.success) {
+                btnGenera.disabled = true;
+                vediQRCode(coppiaNome);
+                caricaCoppie();
+            } else alert('Errore generazione QR');
+        }
+
+        async function vediQRCode(coppiaNome) {
+            try {
+                const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+                if (!res.ok) throw new Error('QR non trovato');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const modal = document.getElementById('qrcode-modal');
+                const img = document.getElementById('qrcode-fullscreen');
+                const downloadBtn = document.getElementById('download-qrcode');
+
+                img.src = url;
+                modal.style.display = 'flex';
+
+                downloadBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${coppiaNome}_qrcode.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    modal.style.display = 'none';
+                };
+            } catch(e) {
+                alert(e.message);
+            }
+        }
+
+        document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
+            document.getElementById('qrcode-modal').style.display = 'none';
+        });
     </script>
 </body>
 </html>
