@@ -73,7 +73,8 @@
     <div class="form-col">
         <label>Nome coppia:<input type="text" id="nomeCoppia" placeholder="Nome coppia"></label>
         <label>Foto coppia:<input type="file" id="fotoCoppia"></label>
-        <label>Colore sfondo:<input type="color" id="colorSfondo"></label>
+        <label>Colore sfondo primario:<input type="color" id="colorSfondo"></label>
+        <label>Colore sfondo secondario:<input type="color" id="colorSfondoSecondario"></label>
         <label>Colore testo:<input type="color" id="colorTesto"></label>
         <label>Font:<select id="fontScelto"></select></label>
         <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
@@ -91,13 +92,13 @@
     </div>
 </div>
 
-<script src="script.js"></script>
 <script>
 const anteprimaDiv = document.getElementById("anteprima");
 const anteprimaTesto = document.getElementById("anteprimaTesto");
 const anteprimaFoto = document.getElementById("anteprimaFoto");
 
 const inputSfondo = document.getElementById("colorSfondo");
+const inputSfondoSecondario = document.getElementById("colorSfondoSecondario");
 const inputTesto = document.getElementById("colorTesto");
 const selectFont = document.getElementById("fontScelto");
 const selectEffettoSfondo = document.getElementById("effettoSfondo");
@@ -107,7 +108,6 @@ let effettiScritta = [];
 let effettiSfondo = [];
 let fonts = [];
 
-// --- HEX to RGB
 function hexToRgb(hex) {
     hex = hex.replace('#','');
     if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
@@ -118,7 +118,6 @@ function hexToRgb(hex) {
     return `${r}, ${g}, ${b}`;
 }
 
-// --- Carica font ed effetti
 async function caricaFontsEdEffetti() {
     try {
         const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
@@ -157,41 +156,44 @@ async function caricaFontsEdEffetti() {
     } catch(e){ console.error(e); }
 }
 
-// --- Aggiorna anteprima
 function aggiornaAnteprima() {
-    // Reset
     anteprimaDiv.style.cssText = '';
     anteprimaTesto.style.cssText = '';
 
-    // Colore e font
     anteprimaDiv.style.backgroundColor = inputSfondo.value || "#ffffff";
     anteprimaTesto.style.color = inputTesto.value || "#000000";
     anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
 
     const bgRgb = hexToRgb(inputSfondo.value);
+    const bgSecondarioRgb = hexToRgb(inputSfondoSecondario.value);
 
-    // Effetto sfondo
     const effSfondo = effettiSfondo.find(e => e.id === selectEffettoSfondo.value);
+    let overlayColor = `rgba(${bgRgb}, 0.3)`;
     if(effSfondo && effSfondo.css){
-        let sfondoCss = effSfondo.css.replace(/var\(--bg-color\)/g, inputSfondo.value)
-                                     .replace(/var\(--bg-color-rgb\)/g, bgRgb);
+        let sfondoCss = effSfondo.css
+            .replace(/var\(--bg-color\)/g, inputSfondo.value)
+            .replace(/var\(--bg-color-rgb\)/g, bgRgb)
+            .replace(/var\(--bg-color-secondario\)/g, inputSfondoSecondario.value)
+            .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
+
         sfondoCss.split(';').forEach(rule=>{
             if(rule.trim()){
-                let [prop, ...rest] = rule.split(':');
+                let [prop,...rest] = rule.split(':');
                 let val = rest.join(':');
                 if(prop && val) anteprimaDiv.style.setProperty(prop.trim(), val.trim());
             }
         });
 
-        // Overlay se c'è immagine
-        if(sfondoCss.includes("url(")){
+        const bgImageMatch = sfondoCss.match(/url\(([^)]+)\)/);
+        if(bgImageMatch){
+            anteprimaDiv.style.position='relative';
             if(!anteprimaDiv.querySelector('.overlay')){
                 const overlay = document.createElement('div');
                 overlay.className='overlay';
-                overlay.style.backgroundColor=`rgba(${bgRgb},0.3)`;
+                overlay.style.backgroundColor=overlayColor;
                 anteprimaDiv.appendChild(overlay);
             } else {
-                anteprimaDiv.querySelector('.overlay').style.backgroundColor=`rgba(${bgRgb},0.3)`;
+                anteprimaDiv.querySelector('.overlay').style.backgroundColor=overlayColor;
             }
         } else {
             const existingOverlay = anteprimaDiv.querySelector('.overlay');
@@ -199,13 +201,12 @@ function aggiornaAnteprima() {
         }
     }
 
-    // Effetto scritta
     const effScritta = effettiScritta.find(e => e.id === selectEffettoScritta.value);
     if(effScritta && effScritta.css){
         let scrittaCss = effScritta.css.replace(/var\(--text-color\)/g, inputTesto.value);
         scrittaCss.split(';').forEach(rule=>{
             if(rule.trim()){
-                let [prop, ...rest] = rule.split(':');
+                let [prop,...rest] = rule.split(':');
                 let val = rest.join(':');
                 if(prop && val) anteprimaTesto.style.setProperty(prop.trim(), val.trim());
             }
@@ -213,11 +214,9 @@ function aggiornaAnteprima() {
     }
 }
 
-// --- Event listener
-[inputSfondo,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
+[inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
-// --- Crea coppia
 document.getElementById("creaCoppiaBtn").addEventListener("click", async ()=>{
     const nome = document.getElementById("nomeCoppia").value.trim();
     const fotoFile = document.getElementById("fotoCoppia").files[0];
@@ -231,6 +230,7 @@ document.getElementById("creaCoppiaBtn").addEventListener("click", async ()=>{
     formData.append("nome_coppia",nome);
     formData.append("foto_coppia",fotoFile);
     formData.append("style_css_colore_sfondo",inputSfondo.value);
+    formData.append("style_css_colore_sfondo_secondario",inputSfondoSecondario.value);
     formData.append("style_css_colore_testo",inputTesto.value);
     formData.append("style_css_font",selectFont.value);
     formData.append("effetto_sfondo",selectEffettoSfondo.value||"");
@@ -246,9 +246,8 @@ document.getElementById("creaCoppiaBtn").addEventListener("click", async ()=>{
     if(data.success) setTimeout(()=>window.location.href="index.html",1000);
 });
 
-// --- Init
 window.onload = async ()=>{
-    caricaFontsEdEffetti();
+    await caricaFontsEdEffetti();
     aggiornaAnteprima();
 };
 </script>
