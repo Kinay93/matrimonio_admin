@@ -261,16 +261,11 @@ document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=
     if(data.success) setTimeout(()=>window.location.href="index.html",1000);
 });
 
-window.onload = async ()=>{
-    await caricaFontsEdEffetti();
-    await caricaDatiCoppia();
+window.onload = async () => {
+    await applicaTemaAdmin();       // mantiene sfondo, header, overlay globale admin
+    await caricaFontsEdEffetti();   // popola select font/effetti
+    await caricaDatiCoppia();      // riempie form e anteprima con dati coppia
 };
-async function initTemaAdmin() {
-    await applicaTemaAdmin(); // Applica il tema admin
-    if (typeof aggiornaAnteprima === 'function') aggiornaAnteprima();
-}
-
-initTemaAdmin(); // Richiamo esplicito quando serve
 </script>
 </body>
 </html>
