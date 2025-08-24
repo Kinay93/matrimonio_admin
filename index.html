@@ -54,29 +54,15 @@
         .top-bar button {
             padding:6px 12px;
         }
-        /* Modal QR */
-        .modal {
+        /* Overlay generato dinamicamente */
+        .overlay {
+            pointer-events:none;
             position:fixed;
-            top:0; left:0;
-            width:100%; height:100%;
-            background:rgba(0,0,0,0.8);
-            display:none;
-            justify-content:center;
-            align-items:center;
-            z-index:1000;
-        }
-        .modal .close {
-            position:absolute;
-            top:10px; right:20px;
-            font-size:30px; color:white; cursor:pointer;
-        }
-        .modal img {
-            max-width:80%; max-height:80%;
-            border:5px solid #fff;
-        }
-        .modal button {
-            margin-top:10px;
-            padding:6px 12px;
+            top:0;
+            left:0;
+            right:0;
+            bottom:0;
+            z-index:0;
         }
     </style>
 </head>
@@ -106,9 +92,10 @@
         </table>
     </div>
 
-    <div id="qrcode-modal" class="modal">
-        <span class="close">&times;</span>
-        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia">
+    <!-- Modal QR fullscreen -->
+    <div id="qrcode-modal" class="modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:1000;">
+        <span class="close" style="position:absolute; top:10px; right:20px; font-size:30px; color:white; cursor:pointer;">&times;</span>
+        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia" style="max-width:80%; max-height:80%; border:5px solid #fff;">
         <a id="download-qrcode" href="" download="qrcode.jpg">
             <button>Scarica QR</button>
         </a>
@@ -117,7 +104,10 @@
     <script src="script.js"></script>
     <script>
         window.onload = async () => {
-            await applicaTemaAdmin(); // Applica tema admin
+            // Applica tema admin appena carica la pagina
+            await applicaTemaAdmin();
+
+            // Carica la lista coppie
             caricaCoppie();
         };
 
@@ -141,13 +131,16 @@
 
                     const tr = document.createElement('tr');
 
+                    // Colonna Nome
                     const tdNome = document.createElement('td');
                     const link = document.createElement('a');
                     link.href = `modificacoppia.html?coppia=${encodeURIComponent(coppia.nome)}`;
                     link.textContent = coppia.nome;
                     tdNome.appendChild(link);
 
+                    // Colonna QR
                     const tdQR = document.createElement('td');
+
                     const btnGenera = document.createElement('button');
                     btnGenera.textContent = 'Genera QR';
                     btnGenera.disabled = coppia.qr_generato;
@@ -163,6 +156,7 @@
 
                     tr.appendChild(tdNome);
                     tr.appendChild(tdQR);
+
                     tbody.appendChild(tr);
                 });
             } catch(e) {
@@ -173,6 +167,7 @@
         async function generaQRCode(coppiaNome, btnGenera) {
             const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
             const data = await res.json();
+
             if (data.success) {
                 btnGenera.disabled = true;
                 vediQRCode(coppiaNome);
