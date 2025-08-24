@@ -10,123 +10,115 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: #fafafa;
         }
         header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             padding: 10px 20px;
             background: #f5f5f5;
             flex-wrap: wrap;
         }
         header h1 {
-            font-size: 1.3rem;
-            margin: 5px 0;
-            flex: 1 1 100%;
-            transition: color 0.3s ease;
+            flex: 1;
+            font-size: 1.5rem;
         }
-        header h1:hover {
-            color: #007bff;
-        }
-        @media(min-width: 600px) {
-            header h1 {
-                flex: 0 0 auto;
-                font-size: 1.5rem;
-            }
-        }
-        .center-btn {
-            flex: 1 1 100%;
+        header .center-btn {
+            flex: 1;
             text-align: center;
-            margin: 5px 0;
         }
-        @media(min-width: 600px) {
-            .center-btn {
-                flex: 1;
-                margin: 0;
-            }
+        header .right-btn {
+            flex: 1;
+            text-align: right;
         }
         header button {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 6px;
+            padding: 6px 12px;
             cursor: pointer;
-            background: #007bff;
-            color: white;
-            margin: 5px 0;
-            transition: background 0.3s ease, transform 0.2s ease;
+            transition: background 0.3s ease;
         }
         header button:hover {
-            background: #0056b3;
-            transform: scale(1.05);
+            background: #ddd;
         }
         .container {
             padding: 20px;
         }
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 20px;
         }
-        @media(min-width: 1024px) {
-            .grid {
-                grid-template-columns: repeat(5, 1fr);
-            }
-        }
-        .coppia-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             padding: 15px;
             text-align: center;
-            transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.5s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             transform: translateY(20px);
         }
-        .coppia-card.visible {
+        .card.show {
             opacity: 1;
             transform: translateY(0);
         }
-        .coppia-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        .coppia-card h3 {
-            margin: 0 0 10px;
-            font-size: 1rem;
+        .card h3 {
+            margin: 10px 0;
+            font-size: 1.1rem;
         }
-        .coppia-img {
-            width: 80px;
-            height: 80px;
+        .card a img {
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
-            background: #ddd;
-            margin: 0 auto 10px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .card a img:hover {
+            transform: scale(1.1);
+        }
+        .card button {
+            margin: 5px;
+            padding: 6px 10px;
+            cursor: pointer;
             transition: background 0.3s ease;
         }
-        .coppia-card:hover .coppia-img {
-            background: #ccc;
+        .card button:hover {
+            background: #eee;
         }
-        @media(min-width: 600px) {
-            .coppia-img {
-                width: 100px;
-                height: 100px;
+        @media (max-width: 600px) {
+            header h1, header .center-btn, header .right-btn {
+                flex: 100%;
+                text-align: center;
+                margin-bottom: 10px;
             }
         }
-        .coppia-card button {
-            display: block;
-            width: 100%;
-            margin: 5px 0;
-            padding: 6px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.3s ease, transform 0.2s ease;
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
-        .btn-genera { background: #28a745; color: white; }
-        .btn-genera:hover { background: #218838; transform: scale(1.03); }
-        .btn-vedi { background: #6c757d; color: white; }
-        .btn-vedi:hover { background: #5a6268; transform: scale(1.03); }
+        .modal img {
+            max-width: 80%;
+            max-height: 80%;
+            border: 5px solid #fff;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -135,25 +127,23 @@
         <div class="center-btn">
             <button id="nuovo-matrimonio">Nuova Coppia</button>
         </div>
-        <button id="temaAdmin">⚙️</button>
+        <div class="right-btn">
+            <button id="temaAdmin">⚙️</button>
+        </div>
     </header>
 
     <div class="container">
-        <div class="grid" id="coppie-grid">
-            <!-- Coppie generate dinamicamente -->
-        </div>
+        <div class="grid" id="coppie-grid"></div>
     </div>
 
-    <!-- Modal QR -->
-    <div id="qrcode-modal" class="modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:1000;">
-        <span class="close" style="position:absolute; top:10px; right:20px; font-size:30px; color:white; cursor:pointer;">&times;</span>
-        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia" style="max-width:80%; max-height:80%; border:5px solid #fff;">
+    <div id="qrcode-modal" class="modal">
+        <span class="close">&times;</span>
+        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia">
         <a id="download-qrcode" href="" download="qrcode.jpg">
             <button>Scarica QR</button>
         </a>
     </div>
 
-    <script src="script.js"></script>
     <script>
         window.onload = async () => {
             await applicaTemaAdmin();
@@ -163,6 +153,7 @@
         document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
             window.location.href = 'nuovacoppia.html';
         });
+
         document.getElementById('temaAdmin').addEventListener('click', () => {
             window.location.href = 'temaadmin.html';
         });
@@ -174,45 +165,92 @@
                 const grid = document.getElementById('coppie-grid');
                 grid.innerHTML = '';
 
-                data.coppie.forEach((coppia, index) => {
+                data.coppie.forEach((coppia, i) => {
                     if (!coppia || !coppia.nome) return;
-
                     const card = document.createElement('div');
-                    card.className = 'coppia-card';
+                    card.className = 'card';
 
                     const title = document.createElement('h3');
                     title.textContent = coppia.nome;
-                    card.appendChild(title);
 
-                    const img = document.createElement('div');
-                    img.className = 'coppia-img';
-                    card.appendChild(img);
+                    const link = document.createElement('a');
+                    link.href = `modificacoppia.html?coppia=${encodeURIComponent(coppia.nome)}`;
+                    const img = document.createElement('img');
+                    img.src = ''; // Placeholder immagine
+                    img.alt = coppia.nome;
+                    link.appendChild(img);
 
                     const btnGenera = document.createElement('button');
                     btnGenera.textContent = 'Genera QR';
-                    btnGenera.className = 'btn-genera';
                     btnGenera.disabled = coppia.qr_generato;
-                    btnGenera.addEventListener('click', () => generaQRCode(coppia.nome, btnGenera));
-                    card.appendChild(btnGenera);
+                    btnGenera.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        generaQRCode(coppia.nome, btnGenera);
+                    });
 
                     const btnVedi = document.createElement('button');
                     btnVedi.textContent = 'Vedi QR';
-                    btnVedi.className = 'btn-vedi';
                     btnVedi.disabled = !coppia.qr_generato;
-                    btnVedi.addEventListener('click', () => vediQRCode(coppia.nome));
+                    btnVedi.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        vediQRCode(coppia.nome);
+                    });
+
+                    card.appendChild(title);
+                    card.appendChild(link);
+                    card.appendChild(btnGenera);
                     card.appendChild(btnVedi);
 
                     grid.appendChild(card);
 
-                    // Delay to stagger animations
-                    setTimeout(() => {
-                        card.classList.add('visible');
-                    }, index * 100);
+                    setTimeout(() => card.classList.add('show'), 100 * i);
                 });
-            } catch (e) {
-                alert('Errore caricamento coppie: ' + e.message);
+            } catch(e) {
+                alert("Errore caricamento coppie: " + e.message);
             }
         }
+
+        async function generaQRCode(coppiaNome, btnGenera) {
+            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+            const data = await res.json();
+            if (data.success) {
+                btnGenera.disabled = true;
+                vediQRCode(coppiaNome);
+                caricaCoppie();
+            } else alert('Errore generazione QR');
+        }
+
+        async function vediQRCode(coppiaNome) {
+            try {
+                const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+                if (!res.ok) throw new Error('QR non trovato');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const modal = document.getElementById('qrcode-modal');
+                const img = document.getElementById('qrcode-fullscreen');
+                const downloadBtn = document.getElementById('download-qrcode');
+
+                img.src = url;
+                modal.style.display = 'flex';
+
+                downloadBtn.onclick = () => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${coppiaNome}_qrcode.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    modal.style.display = 'none';
+                };
+            } catch(e) {
+                alert(e.message);
+            }
+        }
+
+        document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
+            document.getElementById('qrcode-modal').style.display = 'none';
+        });
     </script>
 </body>
 </html>
