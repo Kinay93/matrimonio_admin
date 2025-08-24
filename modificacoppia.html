@@ -92,7 +92,12 @@
     </div>
 </div>
 
+<script src="script.js"></script>
 <script>
+window.onload = async () => {
+    await applicaTemaAdmin(); // Applica il tema admin
+    aggiornaAnteprima();      // La funzione già esistente per l'anteprima
+};    
 const params = new URLSearchParams(window.location.search);
 const nomeCoppiaParam = params.get("coppia");
 
