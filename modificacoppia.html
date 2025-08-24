@@ -228,7 +228,7 @@ async function caricaDatiCoppia() {
     if(data.error){ alert("Coppia non trovata"); return; }
 
     inputNome.value = nomeCoppiaParam;
-    inputSfondo.value = data.colori.sfondo) || "#ffffff";
+    inputSfondo.value = data.colori.sfondo || "#ffffff";
     inputSfondoSecondario.value = data.colori.sfondo_secondario || "#eeeeee";
     inputTesto.value = data.colori.testo || "#000000";
     selectFont.value = data.colori.font || "Arial";
