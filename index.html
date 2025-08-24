@@ -6,27 +6,119 @@
     <title>Amministrazione Matrimonio</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #f5f5f5; flex-wrap: wrap; }
-        header h1 { flex: 1; font-size: 1.5rem; }
-        header .center-btn { flex: 1; text-align: center; }
-        header .right-btn { flex: 1; text-align: right; }
-        header button { padding: 6px 12px; cursor: pointer; transition: background 0.3s ease; }
-        header button:hover { background: #ddd; }
-        .container { padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-        .card { background: #fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 15px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; opacity: 0; transform: translateY(20px); }
-        .card.show { opacity: 1; transform: translateY(0); }
-        .card:hover { transform: scale(1.03); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .card h3 { margin: 10px 0; font-size: 1.1rem; }
-        .card a img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; cursor: pointer; transition: transform 0.3s ease; }
-        .card a img:hover { transform: scale(1.1); }
-        .card button { margin: 5px; padding: 6px 10px; cursor: pointer; transition: background 0.3s ease; }
-        .card button:hover { background: #eee; }
-        @media (max-width: 600px) { header h1, header .center-btn, header .right-btn { flex: 100%; text-align: center; margin-bottom: 10px; } }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal img { max-width: 80%; max-height: 80%; border: 5px solid #fff; }
-        .close { position: absolute; top: 10px; right: 20px; font-size: 30px; color: white; cursor: pointer; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: #f5f5f5;
+            flex-wrap: wrap;
+        }
+        header h1 {
+            flex: 1;
+            font-size: 1.5rem;
+        }
+        header .center-btn {
+            flex: 1;
+            text-align: center;
+        }
+        header .right-btn {
+            flex: 1;
+            text-align: right;
+        }
+        header button {
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        header button:hover {
+            background: #ddd;
+        }
+        .container {
+            padding: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .card.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .card h3 {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+        .card a img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .card a img:hover {
+            transform: scale(1.1);
+        }
+        .card button {
+            margin: 5px;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .card button:hover {
+            background: #eee;
+        }
+        @media (max-width: 600px) {
+            header h1, header .center-btn, header .right-btn {
+                flex: 100%;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+        }
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal img {
+            max-width: 80%;
+            max-height: 80%;
+            border: 5px solid #fff;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -81,11 +173,10 @@
                     const title = document.createElement('h3');
                     title.textContent = coppia.nome;
 
-                    // link sulla foto, non sul nome
                     const link = document.createElement('a');
                     link.href = `modificacoppia.html?coppia=${encodeURIComponent(coppia.nome)}`;
                     const img = document.createElement('img');
-                    img.src = coppia.immagine || 'default-profile.png';
+                    img.src = ''; // Placeholder immagine
                     img.alt = coppia.nome;
                     link.appendChild(img);
 
@@ -94,7 +185,6 @@
                     btnGenera.disabled = coppia.qr_generato;
                     btnGenera.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        e.preventDefault();
                         generaQRCode(coppia.nome, btnGenera);
                     });
 
@@ -103,7 +193,6 @@
                     btnVedi.disabled = !coppia.qr_generato;
                     btnVedi.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        e.preventDefault();
                         vediQRCode(coppia.nome);
                     });
 
@@ -113,6 +202,7 @@
                     card.appendChild(btnVedi);
 
                     grid.appendChild(card);
+
                     setTimeout(() => card.classList.add('show'), 100 * i);
                 });
             } catch(e) {
