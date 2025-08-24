@@ -255,6 +255,13 @@ window.onload = async ()=>{
     await caricaFontsEdEffetti();
     aggiornaAnteprima();
 };
+async function initTemaAdmin() {
+    await applicaTemaAdmin(); // Applica il tema admin
+    if (typeof aggiornaAnteprima === 'function') aggiornaAnteprima(); // Solo se presente
+}
+
+initTemaAdmin();
+
 </script>
 
 <footer>
