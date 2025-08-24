@@ -92,7 +92,12 @@
     </div>
 </div>
 
+<script src="script.js"></script>
 <script>
+window.onload = async () => {
+    await applicaTemaAdmin(); // Applica il tema admin
+    aggiornaAnteprima();      // La funzione già esistente per l'anteprima
+};
 const anteprimaDiv = document.getElementById("anteprima");
 const anteprimaTesto = document.getElementById("anteprimaTesto");
 const anteprimaFoto = document.getElementById("anteprimaFoto");
