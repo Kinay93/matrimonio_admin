@@ -1,256 +1,199 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amministrazione Matrimonio</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background: #f5f5f5;
-            flex-wrap: wrap;
-        }
-        header h1 {
-            flex: 1;
-            font-size: 1.5rem;
-        }
-        header .center-btn {
-            flex: 1;
-            text-align: center;
-        }
-        header .right-btn {
-            flex: 1;
-            text-align: right;
-        }
-        header button {
-            padding: 6px 12px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        header button:hover {
-            background: #ddd;
-        }
-        .container {
-            padding: 20px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-        }
-        .card {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        .card.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .card:hover {
-            transform: scale(1.03);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .card h3 {
-            margin: 10px 0;
-            font-size: 1.1rem;
-        }
-        .card a img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        .card a img:hover {
-            transform: scale(1.1);
-        }
-        .card button {
-            margin: 5px;
-            padding: 6px 10px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .card button:hover {
-            background: #eee;
-        }
-        @media (max-width: 600px) {
-            header h1, header .center-btn, header .right-btn {
-                flex: 100%;
-                text-align: center;
-                margin-bottom: 10px;
-            }
-        }
-        .modal {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal img {
-            max-width: 80%;
-            max-height: 80%;
-            border: 5px solid #fff;
-        }
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 30px;
-            color: white;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amministrazione Matrimonio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    header button {
+      padding: 6px 12px;
+      margin-left: 10px;
+    }
+    .container {
+      padding: 20px;
+    }
+    #coppie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .coppia-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .coppia-nome {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .coppia-foto {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #ccc;
+      margin: 0 auto 8px auto;
+    }
+    .coppia-btn {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .modal {
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Amministrazione Matrimonio</h1>
-        <div class="center-btn">
-            <button id="nuovo-matrimonio">Nuova Coppia</button>
-        </div>
-        <div class="right-btn">
-            <button id="temaAdmin">⚙️</button>
-        </div>
-    </header>
-
-    <div class="container">
-        <div class="grid" id="coppie-grid"></div>
+  <header>
+    <h1>Amministrazione Matrimonio</h1>
+    <div>
+      <button id="nuovo-matrimonio">Nuova Coppia</button>
+      <button id="temaAdmin">⚙️</button>
     </div>
+  </header>
 
-    <div id="qrcode-modal" class="modal">
-        <span class="close">&times;</span>
-        <img id="qrcode-fullscreen" src="" alt="QR Code Coppia">
-        <a id="download-qrcode" href="" download="qrcode.jpg">
-            <button>Scarica QR</button>
-        </a>
-    </div>
+  <div class="container">
+    <div id="coppie-grid"></div>
+  </div>
 
-    <script>
-        window.onload = async () => {
-            await applicaTemaAdmin();
-            caricaCoppie();
+  <div id="qrcode-modal" class="modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:1000;">
+    <span class="close" style="position:absolute; top:10px; right:20px; font-size:30px; color:white; cursor:pointer;">&times;</span>
+    <img id="qrcode-fullscreen" src="" alt="QR Code Coppia" style="max-width:80%; max-height:80%; border:5px solid #fff;">
+    <a id="download-qrcode" href="" download="qrcode.jpg">
+      <button>Scarica QR</button>
+    </a>
+  </div>
+
+  <script>
+    window.onload = async () => {
+      await applicaTemaAdmin();
+      caricaCoppie();
+    };
+
+    document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
+      window.location.href = 'nuovacoppia.html';
+    });
+
+    document.getElementById('temaAdmin').addEventListener('click', () => {
+      window.location.href = 'temaadmin.html';
+    });
+
+    async function caricaCoppie() {
+      try {
+        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_coppie_admin');
+        const data = await res.json();
+        const grid = document.getElementById('coppie-grid');
+        grid.innerHTML = '';
+
+        data.coppie.forEach(coppia => {
+          if (!coppia || !coppia.nome) return;
+
+          const card = document.createElement('div');
+          card.classList.add('coppia-card');
+
+          const nome = document.createElement('div');
+          nome.classList.add('coppia-nome');
+          nome.textContent = coppia.nome;
+          card.appendChild(nome);
+
+          const link = document.createElement('a');
+          link.href = `modificacoppia.html?coppia=${encodeURIComponent(coppia.nome)}`;
+
+          const img = document.createElement('div');
+          img.classList.add('coppia-foto');
+          link.appendChild(img);
+
+          card.appendChild(link);
+
+          const btnContainer = document.createElement('div');
+          btnContainer.classList.add('coppia-btn');
+
+          const btnGenera = document.createElement('button');
+          btnGenera.textContent = 'Genera QR';
+          btnGenera.disabled = coppia.qr_generato;
+          btnGenera.addEventListener('click', () => generaQRCode(coppia.nome, btnGenera));
+
+          const btnVedi = document.createElement('button');
+          btnVedi.textContent = 'Vedi QR';
+          btnVedi.disabled = !coppia.qr_generato;
+          btnVedi.addEventListener('click', () => vediQRCode(coppia.nome));
+
+          btnContainer.appendChild(btnGenera);
+          btnContainer.appendChild(btnVedi);
+
+          card.appendChild(btnContainer);
+
+          grid.appendChild(card);
+        });
+      } catch (e) {
+        alert("Errore caricamento coppie: " + e.message);
+      }
+    }
+
+    async function generaQRCode(coppiaNome, btnGenera) {
+      const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+      const data = await res.json();
+      if (data.success) {
+        btnGenera.disabled = true;
+        vediQRCode(coppiaNome);
+        caricaCoppie();
+      } else alert('Errore generazione QR');
+    }
+
+    async function vediQRCode(coppiaNome) {
+      try {
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
+        if (!res.ok) throw new Error('QR non trovato');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const modal = document.getElementById('qrcode-modal');
+        const img = document.getElementById('qrcode-fullscreen');
+        const downloadBtn = document.getElementById('download-qrcode');
+
+        img.src = url;
+        modal.style.display = 'flex';
+
+        downloadBtn.onclick = () => {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${coppiaNome}_qrcode.jpg`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          modal.style.display = 'none';
         };
+      } catch(e) {
+        alert(e.message);
+      }
+    }
 
-        document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
-            window.location.href = 'nuovacoppia.html';
-        });
-
-        document.getElementById('temaAdmin').addEventListener('click', () => {
-            window.location.href = 'temaadmin.html';
-        });
-
-        async function caricaCoppie() {
-            try {
-                const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_coppie_admin');
-                const data = await res.json();
-                const grid = document.getElementById('coppie-grid');
-                grid.innerHTML = '';
-
-                data.coppie.forEach((coppia, i) => {
-                    if (!coppia || !coppia.nome) return;
-                    const card = document.createElement('div');
-                    card.className = 'card';
-
-                    const title = document.createElement('h3');
-                    title.textContent = coppia.nome;
-
-                    const link = document.createElement('a');
-                    link.href = `modificacoppia.html?coppia=${encodeURIComponent(coppia.nome)}`;
-                    const img = document.createElement('img');
-                    img.src = ''; // Placeholder immagine
-                    img.alt = coppia.nome;
-                    link.appendChild(img);
-
-                    const btnGenera = document.createElement('button');
-                    btnGenera.textContent = 'Genera QR';
-                    btnGenera.disabled = coppia.qr_generato;
-                    btnGenera.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        generaQRCode(coppia.nome, btnGenera);
-                    });
-
-                    const btnVedi = document.createElement('button');
-                    btnVedi.textContent = 'Vedi QR';
-                    btnVedi.disabled = !coppia.qr_generato;
-                    btnVedi.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        vediQRCode(coppia.nome);
-                    });
-
-                    card.appendChild(title);
-                    card.appendChild(link);
-                    card.appendChild(btnGenera);
-                    card.appendChild(btnVedi);
-
-                    grid.appendChild(card);
-
-                    setTimeout(() => card.classList.add('show'), 100 * i);
-                });
-            } catch(e) {
-                alert("Errore caricamento coppie: " + e.message);
-            }
-        }
-
-        async function generaQRCode(coppiaNome, btnGenera) {
-            const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
-            const data = await res.json();
-            if (data.success) {
-                btnGenera.disabled = true;
-                vediQRCode(coppiaNome);
-                caricaCoppie();
-            } else alert('Errore generazione QR');
-        }
-
-        async function vediQRCode(coppiaNome) {
-            try {
-                const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?coppia=${encodeURIComponent(coppiaNome)}`);
-                if (!res.ok) throw new Error('QR non trovato');
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const modal = document.getElementById('qrcode-modal');
-                const img = document.getElementById('qrcode-fullscreen');
-                const downloadBtn = document.getElementById('download-qrcode');
-
-                img.src = url;
-                modal.style.display = 'flex';
-
-                downloadBtn.onclick = () => {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${coppiaNome}_qrcode.jpg`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    modal.style.display = 'none';
-                };
-            } catch(e) {
-                alert(e.message);
-            }
-        }
-
-        document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
-            document.getElementById('qrcode-modal').style.display = 'none';
-        });
-    </script>
+    document.querySelector('#qrcode-modal .close').addEventListener('click', () => {
+      document.getElementById('qrcode-modal').style.display = 'none';
+    });
+  </script>
 </body>
 </html>
