@@ -82,7 +82,6 @@
             transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.5s ease;
             opacity: 0;
             transform: translateY(20px);
-            cursor: pointer;
         }
         .coppia-card.visible {
             opacity: 1;
@@ -93,9 +92,8 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
         .coppia-card h3 {
-            margin: 10px 0;
+            margin: 0 0 10px;
             font-size: 1rem;
-            pointer-events: none; /* evita click sul titolo */
         }
         .coppia-img {
             width: 80px;
@@ -155,11 +153,17 @@
         </a>
     </div>
 
+    <script src="script.js"></script>
     <script>
+        
         window.onload = async () => {
+            // Applica tema admin appena carica la pagina
             await applicaTemaAdmin();
+
+            // Carica la lista coppie
             caricaCoppie();
         };
+
 
         document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
             window.location.href = 'nuovacoppia.html';
@@ -181,6 +185,11 @@
                     const card = document.createElement('div');
                     card.className = 'coppia-card';
 
+                    // Nome
+                    const title = document.createElement('h3');
+                    title.textContent = coppia.nome;
+                    card.appendChild(title);
+
                     // Foto cliccabile
                     const img = document.createElement('div');
                     img.className = 'coppia-img';
@@ -188,11 +197,6 @@
                         window.location.href = `modificacoppia.html?coppia=${encodeURIComponent(coppia.nome)}`;
                     });
                     card.appendChild(img);
-
-                    // Nome
-                    const title = document.createElement('h3');
-                    title.textContent = coppia.nome;
-                    card.appendChild(title);
 
                     // Bottone genera QR
                     const btnGenera = document.createElement('button');
