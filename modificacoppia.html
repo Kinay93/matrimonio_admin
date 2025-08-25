@@ -244,10 +244,10 @@ document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=
     formData.append("nome_coppia",nomeCoppiaParam);
     if(fotoFile) formData.append("foto_coppia",fotoFile);
 
-    formData.append("style_css_colore_sfondo",inputSfondo.value);
-    formData.append("style_css_colore_sfondo_secondario",inputSfondoSecondario.value);
-    formData.append("style_css_colore_testo",inputTesto.value);
-    formData.append("style_css_font",selectFont.value);
+    formData.append("sfondo",inputSfondo.value);
+    formData.append("sfondo_secondario",inputSfondoSecondario.value);
+    formData.append("testo",inputTesto.value);
+    formData.append("font",selectFont.value);
     formData.append("effetto_sfondo",selectEffettoSfondo.value||"");
     formData.append("effetto_scritta",selectEffettoScritta.value||"");
 
