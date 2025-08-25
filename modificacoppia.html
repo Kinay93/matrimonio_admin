@@ -198,10 +198,10 @@ function aggiornaAnteprima() {
     let overlayColor = `rgba(${bgRgb}, 0.3)`;
     if(effSfondo && effSfondo.css){
         let sfondoCss = effSfondo.css
-            .replace(/var\(--sfondo\)/g, inputSfondo.value)
-            .replace(/var\(--sfondo-rgb\)/g, bgRgb)
-            .replace(/var\(--sfondo-secondario\)/g, inputSfondoSecondario.value)
-            .replace(/var\(--sfondo-secondario-rgb\)/g, bgSecondarioRgb);
+            .replace(/var\(--bg-color\)/g, inputSfondo.value)
+            .replace(/var\(--bg-color-rgb\)/g, bgRgb)
+            .replace(/var\(--bg-color-secondario\)/g, inputSfondoSecondario.value)
+            .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
 
         sfondoCss.split(';').forEach(rule=>{
             if(rule.trim()){
@@ -240,6 +240,7 @@ function aggiornaAnteprima() {
         });
     }
 }
+
 
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
