@@ -160,6 +160,28 @@ async function caricaFontsEdEffetti() {
 
     } catch(e){ console.error(e); }
 }
+async function caricaDatiCoppia() {
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${nomeCoppiaParam}`);
+    const data = await res.json();
+    if(data.error){ alert("Coppia non trovata"); return; }
+    console.log("Tema coppia:", data);
+    console.log("Effetto scritta scelto:", data.effetto_scritta);
+    console.log("Lista effetti scritta:", data.effetti_scritta_lista);
+    console.log("Effetto sfondo scelto:", data.effetto_sfondo);
+    console.log("Lista effetti sfondo:", data.effetti_sfondo_lista);
+    console.log("sfondo:", data.sfondo);
+    console.log("sfondo_secondario:", data.sfondo_secondario);
+
+    inputNome.value = nomeCoppiaParam;
+    inputSfondo.value = data.sfondo || "#ffffff";
+    inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
+    inputTesto.value = data.testo || "#000000";
+    selectFont.value = data.font || "Arial";
+    selectEffettoSfondo.value = data.effetto_sfondo || "";
+    selectEffettoScritta.value = data.effetto_scritta || "";
+
+    aggiornaAnteprima();
+}
 
 function aggiornaAnteprima() {
     anteprimaDiv.style.cssText = '';
@@ -221,29 +243,6 @@ function aggiornaAnteprima() {
 
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
-
-async function caricaDatiCoppia() {
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${nomeCoppiaParam}`);
-    const data = await res.json();
-    if(data.error){ alert("Coppia non trovata"); return; }
-    console.log("Tema coppia:", data);
-    console.log("Effetto scritta scelto:", data.effetto_scritta);
-    console.log("Lista effetti scritta:", data.effetti_scritta_lista);
-    console.log("Effetto sfondo scelto:", data.effetto_sfondo);
-    console.log("Lista effetti sfondo:", data.effetti_sfondo_lista);
-    console.log("sfondo:", data.sfondo);
-    console.log("sfondo_secondario:", data.sfondo_secondario);
-
-    inputNome.value = nomeCoppiaParam;
-    inputSfondo.value = data.sfondo || "#ffffff";
-    inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
-    inputTesto.value = data.testo || "#000000";
-    selectFont.value = data.font || "Arial";
-    selectEffettoSfondo.value = data.effetto_sfondo || "";
-    selectEffettoScritta.value = data.effetto_scritta || "";
-
-    aggiornaAnteprima();
-}
 
 document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=>{
     const fotoFile = document.getElementById("fotoCoppia").files[0];
