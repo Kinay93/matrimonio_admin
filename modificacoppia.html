@@ -73,10 +73,10 @@
     <div class="form-col">
         <label>Nome coppia:<input type="text" id="nomeCoppia" disabled></label>
         <label>Foto coppia:<input type="file" id="fotoCoppia"></label>
-        <label>Colore sfondo primario:<input type="color" id="colorSfondo"></label>
-        <label>Colore sfondo secondario:<input type="color" id="colorSfondoSecondario"></label>
-        <label>Colore testo:<input type="color" id="colorTesto"></label>
-        <label>Font:<select id="fontScelto"></select></label>
+        <label>Colore sfondo primario:<input type="color" id="sfondo"></label>
+        <label>Colore sfondo secondario:<input type="color" id="sfondoSecondario"></label>
+        <label>Colore testo:<input type="color" id="testo"></label>
+        <label>Font:<select id="font"></select></label>
         <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
         <label>Effetto scritta:<select id="effettoScritta"></select></label>
         <button id="aggiornaCoppiaBtn">Aggiorna coppia</button>
@@ -101,10 +101,10 @@ const anteprimaDiv = document.getElementById("anteprima");
 const anteprimaTesto = document.getElementById("anteprimaTesto");
 const anteprimaFoto = document.getElementById("anteprimaFoto");
 
-const inputSfondo = document.getElementById("colorSfondo");
-const inputSfondoSecondario = document.getElementById("colorSfondoSecondario");
-const inputTesto = document.getElementById("colorTesto");
-const selectFont = document.getElementById("fontScelto");
+const inputSfondo = document.getElementById("sfondo");
+const inputSfondoSecondario = document.getElementById("sfondoSecondario");
+const inputTesto = document.getElementById("testo");
+const selectFont = document.getElementById("font");
 const selectEffettoSfondo = document.getElementById("effettoSfondo");
 const selectEffettoScritta = document.getElementById("effettoScritta");
 const inputNome = document.getElementById("nomeCoppia");
@@ -176,10 +176,10 @@ function aggiornaAnteprima() {
     let overlayColor = `rgba(${bgRgb}, 0.3)`;
     if(effSfondo && effSfondo.css){
         let sfondoCss = effSfondo.css
-            .replace(/var\(--bg-color\)/g, inputSfondo.value)
-            .replace(/var\(--bg-color-rgb\)/g, bgRgb)
-            .replace(/var\(--bg-color-secondario\)/g, inputSfondoSecondario.value)
-            .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
+            .replace(/var\(--sfondo\)/g, inputSfondo.value)
+            .replace(/var\(--sfondo-rgb\)/g, bgRgb)
+            .replace(/var\(--bg-sfondo-secondario\)/g, inputSfondoSecondario.value)
+            .replace(/var\(--bg-sfondo-secondario-rgb\)/g, bgSecondarioRgb);
 
         sfondoCss.split(';').forEach(rule=>{
             if(rule.trim()){
