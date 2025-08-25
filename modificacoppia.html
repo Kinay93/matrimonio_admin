@@ -200,8 +200,8 @@ function aggiornaAnteprima() {
         let sfondoCss = effSfondo.css
             .replace(/var\(--sfondo\)/g, inputSfondo.value)
             .replace(/var\(--sfondo-rgb\)/g, bgRgb)
-            .replace(/var\(--bg-sfondo-secondario\)/g, inputSfondoSecondario.value)
-            .replace(/var\(--bg-sfondo-secondario-rgb\)/g, bgSecondarioRgb);
+            .replace(/var\(--sfondo-secondario\)/g, inputSfondoSecondario.value)
+            .replace(/var\(--sfondo-secondario-rgb\)/g, bgSecondarioRgb);
 
         sfondoCss.split(';').forEach(rule=>{
             if(rule.trim()){
