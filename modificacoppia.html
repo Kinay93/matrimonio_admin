@@ -228,10 +228,10 @@ async function caricaDatiCoppia() {
     if(data.error){ alert("Coppia non trovata"); return; }
 
     inputNome.value = nomeCoppiaParam;
-    inputSfondo.value = data.colori.sfondo || "#ffffff";
-    inputSfondoSecondario.value = data.colori.sfondo_secondario || "#eeeeee";
-    inputTesto.value = data.colori.testo || "#000000";
-    selectFont.value = data.colori.font || "Arial";
+    inputSfondo.value = data.sfondo || "#ffffff";
+    inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
+    inputTesto.value = data.testo || "#000000";
+    selectFont.value = data.font || "Arial";
     selectEffettoSfondo.value = data.effetto_sfondo || "";
     selectEffettoScritta.value = data.effetto_scritta || "";
 
