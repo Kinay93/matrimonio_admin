@@ -2,84 +2,89 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Modifica  Coppia</title>
+    <title>Modifica Coppia</title>
     <link rel="stylesheet" href="style.css">
     <style>
         body {
-            display:flex;
-            flex-direction:column;
-            min-height:100vh;
-            margin:0;
+            margin: 0;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         header {
-            display:flex;
-            align-items:center;
-            padding:10px;
-            background:#f7f7f7;
-            border-bottom:1px solid #ccc;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f7f7f7;
+            border-bottom: 1px solid #ccc;
         }
         .container {
-            flex:1;
-            display:flex;
-            overflow:hidden;
+            flex: 1;
+            display: flex;
+            overflow: hidden;
         }
         .form-col {
-            flex:1;
-            display:flex;
-            flex-direction:column;
-            gap:10px;
-            padding:20px;
-            overflow-y:auto;
-            border-right:1px solid #ccc;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #ccc;
         }
         .anteprima-col {
-            width:50%;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:flex-start;
-            padding:20px;
-            position:sticky;
-            top:0;
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
         }
         #anteprima {
-            width:100%;
-            height:300px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            border:1px solid #ccc;
-            margin-top:20px;
-            position:relative;
+            width: 100%;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            position: relative;
         }
         #anteprimaFoto {
-            width:150px;
-            height:150px;
-            background-color:#ddd;
-            border-radius:10px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:bold;
-            color:#666;
+            width: 150px;
+            height: 150px;
+            background-color: #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
         }
         #anteprimaTesto {
-            position:absolute;
-            top:10px;
-            left:10px;
-            font-size:24px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
         }
         .overlay {
-            position:absolute;
-            top:0; left:0; right:0; bottom:0;
-            pointer-events:none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 <header>
     <img src="logo.png" alt="Logo" style="height:40px; margin-right:10px;">
-    <h1 style="margin:0;">Amministrazione Matrimonio</h1>
+    <h1>Amministrazione Matrimonio</h1>
 </header>
 
 <div class="container">
@@ -284,8 +289,7 @@ document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=
 window.onload = async () => {
     await applicaTemaAdmin();       // mantiene sfondo, header, overlay globale admin
     await caricaFontsEdEffetti();   // popola select font/effetti
-    await caricaDatiCoppia();       // riempie form e anteprima con dati coppia
-};      
-</script>
+    await caricaDatiCoppia();      // riempie form e anteprima con dati coppia
+};</script>
 </body>
 </html>
