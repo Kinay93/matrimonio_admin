@@ -241,6 +241,7 @@ document.getElementById("creaCoppiaBtn").addEventListener("click", async ()=>{
         method:"POST",
         body:formData
     });
+    console.log("res: ", res);
     const data = await res.json();
     document.getElementById("msg").innerText = data.success ? "Coppia creata!" : "Errore: "+(data.error||"imprevisto");
 
