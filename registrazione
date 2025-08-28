@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Registrazione</title>
+<style>
+    body {
+        margin: 0;
+        font-family: sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: #f0f2f5;
+    }
+    .container {
+        background: white;
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    input[type="email"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+    }
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 10px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button#registerBtn {
+        background: #4CAF50;
+        color: white;
+    }
+    button#registerBtn:hover {
+        background: #45a049;
+    }
+    .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .social-btn button {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        font-size: 14px;
+    }
+    .social-btn button.google {
+        background: #db4437;
+        color: white;
+    }
+    .social-btn button.facebook {
+        background: #3b5998;
+        color: white;
+    }
+    .social-btn button:hover {
+        opacity: 0.9;
+    }
+    #msg {
+        text-align: center;
+        margin-top: 10px;
+        font-weight: bold;
+        color: red;
+    }
+    @media (max-width: 480px) {
+        .container {
+            padding: 20px;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Registrati</h2>
+    <div id="msg"></div>
+    <form id="registerForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+
+        <label for="confirmPassword">Conferma Password</label>
+        <input type="password" id="confirmPassword" required>
+
+        <button type="submit" id="registerBtn">Registrati</button>
+    </form>
+
+    <div class="social-btn">
+        <button class="google" id="googleBtn">
+            <img src="https://img.icons8.com/color/20/000000/google-logo.png"/> Google
+        </button>
+        <button class="facebook" id="facebookBtn">
+            <img src="https://img.icons8.com/color/20/000000/facebook-new.png"/> Facebook
+        </button>
+    </div>
+</div>
+
+<script>
+    const registerForm = document.getElementById('registerForm');
+    const msg = document.getElementById('msg');
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.style.color = 'red';
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if(password !== confirmPassword){
+            msg.textContent = "Le password non coincidono!";
+            return;
+        }
+
+        // Simulazione registrazione via API
+        try {
+            // Sostituire con fetch reale al backend
+            const response = await fakeRegisterApi(email, password);
+            if(response.success){
+                msg.style.color = 'green';
+                msg.textContent = "Registrazione avvenuta con successo!";
+                setTimeout(()=>window.location.href='login.html', 1500);
+            } else {
+                msg.textContent = response.error || "Errore imprevisto";
+            }
+        } catch(err){
+            msg.textContent = "Errore di connessione";
+        }
+    });
+
+    // Simulazione API finta
+    function fakeRegisterApi(email, password){
+        return new Promise(resolve => {
+            setTimeout(()=>{
+                if(email === "test@test.com") resolve({success:false, error:"Email già registrata"});
+                else resolve({success:true});
+            }, 1000);
+        });
+    }
+
+    // Pulsanti social
+    document.getElementById('googleBtn').addEventListener('click', ()=>{
+        alert("Implementare OAuth Google qui");
+    });
+    document.getElementById('facebookBtn').addEventListener('click', ()=>{
+        alert("Implementare OAuth Facebook qui");
+    });
+</script>
+</body>
+</html>
