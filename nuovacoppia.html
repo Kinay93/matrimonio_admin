@@ -212,6 +212,31 @@ footer a:hover {
 
 <script src="script.js"></script>
 <script>
+async function checkAuth() {
+    const token = localStorage.getItem("auth_token");
+    if(!token){
+        window.location.href = "/login_page";
+        return;
+    }
+
+    try {
+        const res = await fetch("/me", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        if(!data.success){
+            localStorage.removeItem("auth_token");
+            window.location.href = "/login_page";
+        }
+        // Se è valido, puoi mostrare dati dell’admin
+        console.log("Utente autenticato:", data.email);
+    } catch(err){
+        localStorage.removeItem("auth_token");
+        window.location.href = "/login_page";
+    }
+}
+
+checkAuth();
 const anteprimaDiv = document.getElementById("anteprima");
 const anteprimaTesto = document.getElementById("anteprimaTesto");
 const anteprimaFoto = document.getElementById("anteprimaFoto");
