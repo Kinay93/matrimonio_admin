@@ -33,20 +33,34 @@ function applicaTemaAdminExtra(bgColor, bgColorSecondario, font) {
 
     document.querySelectorAll('button, a, th, td, p, span, h1, h2, h3, h4, h5, h6, label, input, select, textarea')
         .forEach(el => {
-            // Bottoni, link, celle tabella -> colore terzo di sfondo
             if(el.tagName === 'BUTTON' || el.tagName === 'A' || el.tagName === 'TH' || el.tagName === 'TD'){
                 el.style.backgroundColor = coloreTerzo;
                 el.style.color = contrastText;
             }
-            // Tutti gli elementi -> font admin
             el.style.fontFamily = font;
         });
+}
+
+// --- Controllo login admin
+async function checkLoginAdmin() {
+    const token = localStorage.getItem("auth_token");
+    if(!token){
+        window.location.href = "/login_page";
+        return null;
+    }
+    return token;
 }
 
 // --- Applica tema admin principale
 async function applicaTemaAdmin() {
     try {
-        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_theme?admin=default');
+        const token = await checkLoginAdmin();
+        if(!token) return; // reindirizzato al login
+
+        // --- Prendi tema admin
+        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_theme?admin=default', {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
         const config = await res.json() || {};
 
         const bgColor = config.bg_color || '#ffffff';
@@ -54,12 +68,11 @@ async function applicaTemaAdmin() {
         const textColor = config.text_color || '#000000';
         const font = config.font_family || 'Arial, Helvetica, sans-serif';
 
-        // --- Applica colori e font al body
         document.body.style.backgroundColor = bgColor;
         document.body.style.color = textColor;
         document.body.style.fontFamily = font;
 
-        // --- Applica header
+        // --- Header
         const header = document.querySelector('header');
         if(header){
             header.style.backgroundColor = config.header_color || '#eee';
@@ -85,8 +98,10 @@ async function applicaTemaAdmin() {
             logo.src = config.logo_url;
         }
 
-        // --- Carica effetti scritta e sfondo
-        const effettiRes = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_effetti');
+        // --- Prendi effetti scritta e sfondo
+        const effettiRes = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_effetti', {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
         const effettiData = await effettiRes.json();
         const effettiScritta = effettiData.scritta || [];
         const effettiSfondo = effettiData.sfondo || [];
@@ -124,7 +139,6 @@ async function applicaTemaAdmin() {
                     }
                 });
 
-                // --- Overlay automatico se c'è immagine
                 const urlMatch = css.match(/url\(([^)]+)\)/);
                 if(urlMatch){
                     let overlay = document.getElementById('admin-theme-overlay');
@@ -158,3 +172,8 @@ async function applicaTemaAdmin() {
         console.warn("Tema admin non caricato:", err);
     }
 }
+
+// --- Chiamare la funzione
+document.addEventListener('DOMContentLoaded', () => {
+    applicaTemaAdmin();
+});
