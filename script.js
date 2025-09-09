@@ -12,6 +12,13 @@ function parseJwt(token) {
     }
 }
 
+// Funzione logout globale
+function logout() {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("admin_username");
+    window.location.href = "login.html";
+}
+
 // --- Helper: HEX to RGB
 function hexToRgb(hex) {
     if (!hex) return "255,255,255";
