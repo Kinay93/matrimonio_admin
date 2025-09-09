@@ -56,15 +56,16 @@ registerForm.addEventListener('submit', async (e) => {
         msg.textContent = "Le password non coincidono!";
         return;
     }
-
+    console.log("sono qui");
     try {
+        console.log("provo il fetch");
         const response = await fetch("https://matrimonioapp.ew.r.appspot.com/register", {
             method: "POST",
             credentials: "include",   // <--- fondamentale per cookie/session
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({email, password})
         }).then(res => res.json());
-
+        console.log("json che passo   ": res.json());
         if(response.success){
             localStorage.setItem("auth_token", response.token);
             msg.style.color = 'green';
