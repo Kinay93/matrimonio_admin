@@ -4,28 +4,145 @@
 <meta charset="UTF-8">
 <title>Registrazione</title>
 <style>
-body {margin:0;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f0f2f5;}
-.container {background:white;padding:30px 40px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,0.1);width:100%;max-width:400px;}
-h2{text-align:center;margin-bottom:20px;}
-label{display:block;margin-bottom:5px;font-weight:bold;}
-input[type="email"], input[type="password"]{width:100%;padding:10px;margin-bottom:15px;border-radius:8px;border:1px solid #ccc;box-sizing:border-box;}
-button{width:100%;padding:12px;margin-bottom:10px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;transition:background 0.2s;}
-button#registerBtn{background:#4CAF50;color:white;}
-button#registerBtn:hover{background:#45a049;}
-.social-btn{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;}
-.social-btn button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;font-size:14px;}
-.social-btn button.google{background:#db4437;color:white;}
-.social-btn button.facebook{background:#3b5998;color:white;}
-.social-btn button:hover{opacity:0.9;}
-#msg{text-align:center;margin-top:10px;font-weight:bold;color:red;}
-@media (max-width:480px){.container{padding:20px;}}
+/* ---------- BODY & CONTAINER ---------- */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #E0FBFC;
+    color: #023E3B;
+}
+
+.container {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- HEADER ---------- */
+header {
+    background-color: #2EC4B6;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    border-radius: 15px 15px 0 0;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+/* ---------- FORM ---------- */
+h2 { text-align: center; margin: 20px 0 15px; }
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="email"], input[type="password"], input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    transition: 0.2s;
+}
+
+input:focus {
+    border-color: #2EC4B6;
+    outline: none;
+    box-shadow: 0 0 5px #2EC4B6;
+}
+
+/* ---------- BUTTON ---------- */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#registerBtn {
+    background-color: #2EC4B6;
+    color: white;
+}
+
+#registerBtn:hover {
+    background-color: #27a19a;
+}
+
+/* ---------- MESSAGGI ---------- */
+#msg {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #FF6B6B;
+}
+
+/* ---------- SOCIAL BUTTONS ---------- */
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.social-btn button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    color: white;
+}
+
+.social-btn button.google { background: #DB4437; }
+.social-btn button.facebook { background: #3B5998; }
+.social-btn button:hover { opacity: 0.9; }
+
+/* ---------- FOOTER ---------- */
+footer {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+footer a {
+    color: #2EC4B6;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+footer a:hover { text-decoration: underline; }
+
+@media (max-width:480px){ .container{padding:20px;} }
 </style>
 </head>
 <body>
 <div class="container">
-<h2>Registrati</h2>
+<header>Registrazione</header>
 <div id="msg"></div>
 <form id="registerForm">
+    <label for="username">Username</label>
+    <input type="text" id="username" required>
     <label for="email">Email</label>
     <input type="email" id="email" required>
     <label for="password">Password</label>
@@ -38,6 +155,7 @@ button#registerBtn:hover{background:#45a049;}
     <button class="google" id="googleBtn"><img src="https://img.icons8.com/color/20/000000/google-logo.png"/> Google</button>
     <button class="facebook" id="facebookBtn"><img src="https://img.icons8.com/color/20/000000/facebook-new.png"/> Facebook</button>
 </div>
+<footer>Hai già un account? <a href="login.html">Accedi qui</a></footer>
 </div>
 
 <script>
@@ -46,8 +164,9 @@ const msg = document.getElementById('msg');
 
 registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    msg.style.color = 'red';
+    msg.style.color = '#FF6B6B';
 
+    const username = document.getElementById('username').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
@@ -56,21 +175,20 @@ registerForm.addEventListener('submit', async (e) => {
         msg.textContent = "Le password non coincidono!";
         return;
     }
-    console.log("sono qui");
+
     try {
-        console.log("provo il fetch");
         const response = await fetch("https://matrimonioapp.ew.r.appspot.com/register", {
             method: "POST",
-            credentials: "include",   // <--- fondamentale per cookie/session
+            credentials: "include",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({email, password})
+            body: JSON.stringify({username, email, password})
         }).then(res => res.json());
-        
+
         if(response.success){
             localStorage.setItem("auth_token", response.token);
             msg.style.color = 'green';
             msg.textContent = "Registrazione avvenuta con successo!";
-            setTimeout(()=>window.location.href='/admin', 1500);
+            setTimeout(()=>window.location.href='login.html', 1500);
         } else {
             msg.textContent = response.error || "Errore imprevisto";
         }
@@ -79,7 +197,7 @@ registerForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Pulsanti OAuth
+// Social buttons
 document.getElementById('googleBtn').addEventListener('click', ()=>{ window.location.href = "/login/google"; });
 document.getElementById('facebookBtn').addEventListener('click', ()=>{ window.location.href = "/login/facebook"; });
 </script>
