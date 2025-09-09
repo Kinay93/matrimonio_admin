@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>Modifica Coppia</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
+<meta charset="UTF-8">
+<title>Modifica Coppia</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body {
     margin: 0;
     font-family: sans-serif;
     display: flex;
@@ -13,14 +13,71 @@
     min-height: 100vh;
 }
 
+/* Header con menu utente */
 header {
     display: flex;
     align-items: center;
-    padding: 10px;
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #ccc;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #2EC4B6;
+    color: white;
+    flex-wrap: wrap;
 }
 
+header h1 {
+    font-size: 1.3rem;
+    margin: 5px 0;
+}
+
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #2EC4B6;
+}
+
+.user-btn img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    min-width: 150px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 1000;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+}
+
+.dropdown-menu a:hover {
+    background: #f0f0f0;
+}
+
+/* Container principale */
 .container {
     display: flex;
     flex: 1;
@@ -124,13 +181,8 @@ footer a:hover {
 
 /* Responsive tablet e mobile */
 @media (max-width: 1024px) {
-    body {
-        overflow: hidden; /* impedisce scroll globale */
-    }
-    .container {
-        flex-direction: column;
-        height: 100vh;
-    }
+    body { overflow: hidden; }
+    .container { flex-direction: column; height: 100vh; }
     .anteprima-col {
         width: 80%;
         height: 40vh;
@@ -142,49 +194,36 @@ footer a:hover {
         z-index: 1000;
         border-bottom: 1px solid #ccc;
     }
-    .form-col {
-        margin-top: 40vh;
-        flex: 1;
-        overflow-y: auto;
-        border-right: none;
-        border-bottom: 1px solid #ccc;
-    }
-    #anteprima {
-        width: 80%;
-        height: 80%;
-        max-width: none;
-        max-height: none;
-    }
+    .form-col { margin-top: 40vh; flex: 1; overflow-y: auto; border-right: none; border-bottom: 1px solid #ccc; }
+    #anteprima { width: 80%; height: 80%; max-width: none; max-height: none; }
 }
 
-/* Extra per smartphone molto piccoli */
 @media (max-width: 480px) {
-    .anteprima-col {
-        height: 35vh;
-    }
-    .form-col {
-        margin-top: 35vh;
-    }
+    .anteprima-col { height: 35vh; }
+    .form-col { margin-top: 35vh; }
 }
 
-/* Mobile footer */
 @media (max-width: 768px) {
-    footer {
-        flex-direction: column;
-        gap: 10px;
-    }
-    footer a {
-        width: 80%;
-        text-align: center;
-    }
+    footer { flex-direction: column; gap: 10px; }
+    footer a { width: 80%; text-align: center; }
 }
-
-    </style>
+</style>
 </head>
 <body>
+
 <header>
-    <img src="logo.png" alt="Logo" style="height:40px; margin-right:10px;">
-    <h1>Amministrazione Matrimonio</h1>
+    <h1>Modifica Coppia</h1>
+    <div class="user-menu">
+        <button id="userBtn" class="user-btn">
+            <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+            <span>Admin</span>
+        </button>
+        <div id="dropdownMenu" class="dropdown-menu">
+            <a href="profilo.html">Profilo</a>
+            <a href="temaadmin.html">Temi</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
 </header>
 
 <div class="container">
@@ -210,25 +249,24 @@ footer a:hover {
     </div>
 </div>
 
+<footer>
+    <a href="index.html" id="home-btn">Home</a>
+</footer>
+
 <script src="script.js"></script>
 <script>
+// --- Autenticazione ---
 async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token){
-        window.location.href = "/login_page";
-        return;
-    }
+    if(!token) window.location.href = "/login_page";
 
     try {
-        const res = await fetch("/me", {
-            headers: { "Authorization": "Bearer " + token }
-        });
+        const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token }});
         const data = await res.json();
         if(!data.success){
             localStorage.removeItem("auth_token");
             window.location.href = "/login_page";
         }
-        // Se è valido, puoi mostrare dati dell’admin
         console.log("Utente autenticato:", data.email);
     } catch(err){
         localStorage.removeItem("auth_token");
@@ -237,9 +275,31 @@ async function checkAuth() {
 }
 
 checkAuth();
+
+// --- Logout ---
+function logout() {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("admin_username");
+    window.location.href = "login.html";
+}
+
+// --- Dropdown menu utente ---
+const userBtn = document.getElementById('userBtn');
+const dropdownMenu = document.getElementById('dropdownMenu');
+userBtn.addEventListener('click', () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+});
+window.addEventListener('click', (e) => {
+    if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
+        dropdownMenu.style.display = 'none';
+    }
+});
+
+// --- Parametri coppia ---
 const params = new URLSearchParams(window.location.search);
 const nomeCoppiaParam = params.get("coppia");
 
+// --- Elementi DOM ---
 const anteprimaDiv = document.getElementById("anteprima");
 const anteprimaTesto = document.getElementById("anteprimaTesto");
 const anteprimaFoto = document.getElementById("anteprimaFoto");
@@ -256,6 +316,7 @@ let effettiScritta = [];
 let effettiSfondo = [];
 let fonts = [];
 
+// --- Utils ---
 function hexToRgb(hex) {
     hex = hex.replace('#','');
     if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
@@ -266,6 +327,7 @@ function hexToRgb(hex) {
     return `${r}, ${g}, ${b}`;
 }
 
+// --- Carica fonts ed effetti ---
 async function caricaFontsEdEffetti() {
     try {
         const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
@@ -303,17 +365,12 @@ async function caricaFontsEdEffetti() {
 
     } catch(e){ console.error(e); }
 }
+
+// --- Carica dati coppia ---
 async function caricaDatiCoppia() {
     const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${nomeCoppiaParam}`);
     const data = await res.json();
     if(data.error){ alert("Coppia non trovata"); return; }
-    console.log("Tema coppia:", data);
-    console.log("Effetto scritta scelto:", data.effetto_scritta);
-    console.log("Lista effetti scritta:", data.effetti_scritta_lista);
-    console.log("Effetto sfondo scelto:", data.effetto_sfondo);
-    console.log("Lista effetti sfondo:", data.effetti_sfondo_lista);
-    console.log("sfondo:", data.sfondo);
-    console.log("sfondo_secondario:", data.sfondo_secondario);
 
     inputNome.value = nomeCoppiaParam;
     inputSfondo.value = data.sfondo || "#ffffff";
@@ -326,6 +383,7 @@ async function caricaDatiCoppia() {
     aggiornaAnteprima();
 }
 
+// --- Anteprima ---
 function aggiornaAnteprima() {
     anteprimaDiv.style.cssText = '';
     anteprimaTesto.style.cssText = '';
@@ -384,16 +442,16 @@ function aggiornaAnteprima() {
     }
 }
 
-
+// --- Event listeners ---
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
+// --- Aggiorna coppia ---
 document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=>{
     const fotoFile = document.getElementById("fotoCoppia").files[0];
     const formData = new FormData();
     formData.append("nome_coppia",nomeCoppiaParam);
     if(fotoFile) formData.append("foto_coppia",fotoFile);
-
     formData.append("sfondo",inputSfondo.value);
     formData.append("sfondo_secondario",inputSfondoSecondario.value);
     formData.append("testo",inputTesto.value);
@@ -407,18 +465,16 @@ document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=
     });
     const data = await res.json();
     document.getElementById("msg").innerText = data.success ? "Coppia aggiornata!" : "Errore: "+(data.error||"imprevisto");
-
     if(data.success) setTimeout(()=>window.location.href="index.html",1000);
 });
 
+// --- Onload ---
 window.onload = async () => {
-    await applicaTemaAdmin();       // mantiene sfondo, header, overlay globale admin
-    await caricaFontsEdEffetti();   // popola select font/effetti
-    await caricaDatiCoppia();      // riempie form e anteprima con dati coppia
-    document.getElementById("home-btn").href = `index.html}`;
-};</script>
+    await applicaTemaAdmin();
+    await caricaFontsEdEffetti();
+    await caricaDatiCoppia();
+};
+</script>
+
 </body>
-    <footer>
-    <a href="index.html" id="home-btn">Home</a>
-  </footer>
 </html>
