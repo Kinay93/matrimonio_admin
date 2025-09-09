@@ -141,6 +141,10 @@ footer a:hover { text-decoration: underline; }
 <header>Registrazione</header>
 <div id="msg"></div>
 <form id="registerForm">
+    <label for="nome">Nome</label>
+    <input type="text" id="nome" required>
+    <label for="cognome">Cognome</label>
+    <input type="text" id="cognome" required>
     <label for="username">Username</label>
     <input type="text" id="username" required>
     <label for="email">Email</label>
@@ -166,6 +170,8 @@ registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     msg.style.color = '#FF6B6B';
 
+    const nome = document.getElementById('nome').value.trim();
+    const cognome = document.getElementById('cognome').value.trim();
     const username = document.getElementById('username').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -181,7 +187,7 @@ registerForm.addEventListener('submit', async (e) => {
             method: "POST",
             credentials: "include",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({username, email, password})
+            body: JSON.stringify({nome, cognome, username, email, password})
         }).then(res => res.json());
 
         if(response.success){
