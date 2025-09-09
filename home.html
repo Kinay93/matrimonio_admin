@@ -20,11 +20,62 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: relative;
     }
 
     header h1 {
       margin: 0;
       font-size: 1.4em;
+    }
+
+    /* -------- USER MENU -------- */
+    .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    .user-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #2EC4B6;
+    }
+
+    .user-btn img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 45px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      min-width: 150px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+
+    .dropdown-menu a {
+      display: block;
+      padding: 10px;
+      text-decoration: none;
+      color: #333;
+      transition: background 0.2s;
+    }
+
+    .dropdown-menu a:hover {
+      background: #f0f0f0;
     }
 
     /* -------- SIDEBAR -------- */
@@ -38,7 +89,7 @@
       overflow-x: hidden;
       transition: 0.3s;
       padding-top: 60px;
-      z-index: 1000;
+      z-index: 900;
     }
 
     .sidebar a {
@@ -90,7 +141,22 @@
   <!-- HEADER -->
   <header>
     <h1>Home Amministratore</h1>
-    <button class="toggle-btn" onclick="openSidebar()">☰</button>
+    <div style="display:flex; align-items:center; gap:15px;">
+      <button class="toggle-btn" onclick="openSidebar()">☰</button>
+
+      <!-- MENU UTENTE -->
+      <div class="user-menu">
+        <button id="userBtn" class="user-btn">
+          <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+          <span>Admin</span>
+        </button>
+        <div id="dropdownMenu" class="dropdown-menu">
+          <a href="profilo.html">Profilo</a>
+          <a href="temaadmin.html">Temi</a>
+          <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- SIDEBAR -->
