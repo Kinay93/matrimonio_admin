@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>Nuova Coppia</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-       body {
+<meta charset="UTF-8">
+<title>Nuova Coppia</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body {
     margin: 0;
     font-family: sans-serif;
     display: flex;
@@ -13,14 +13,71 @@
     min-height: 100vh;
 }
 
+/* Header con menu utente */
 header {
     display: flex;
     align-items: center;
-    padding: 10px;
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #ccc;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #2EC4B6;
+    color: white;
+    flex-wrap: wrap;
 }
 
+header h1 {
+    font-size: 1.3rem;
+    margin: 5px 0;
+}
+
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #2EC4B6;
+}
+
+.user-btn img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    min-width: 150px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 1000;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+}
+
+.dropdown-menu a:hover {
+    background: #f0f0f0;
+}
+
+/* Container principale */
 .container {
     display: flex;
     flex: 1;
@@ -49,7 +106,7 @@ header {
     padding: 20px;
     position: sticky;
     top: 0;
-    height: 90%;
+    height: 100vh;
     box-sizing: border-box;
 }
 
@@ -124,13 +181,8 @@ footer a:hover {
 
 /* Responsive tablet e mobile */
 @media (max-width: 1024px) {
-    body {
-        overflow: hidden; /* impedisce scroll globale */
-    }
-    .container {
-        flex-direction: column;
-        height: 100vh;
-    }
+    body { overflow: hidden; }
+    .container { flex-direction: column; height: 100vh; }
     .anteprima-col {
         width: 80%;
         height: 40vh;
@@ -142,49 +194,36 @@ footer a:hover {
         z-index: 1000;
         border-bottom: 1px solid #ccc;
     }
-    .form-col {
-        margin-top: 40vh;
-        flex: 1;
-        overflow-y: auto;
-        border-right: none;
-        border-bottom: 1px solid #ccc;
-    }
-    #anteprima {
-        width: 80%;
-        height: 80%;
-        max-width: none;
-        max-height: none;
-    }
+    .form-col { margin-top: 40vh; flex: 1; overflow-y: auto; border-right: none; border-bottom: 1px solid #ccc; }
+    #anteprima { width: 80%; height: 80%; max-width: none; max-height: none; }
 }
 
-/* Extra per smartphone molto piccoli */
 @media (max-width: 480px) {
-    .anteprima-col {
-        height: 35vh;
-    }
-    .form-col {
-        margin-top: 35vh;
-    }
+    .anteprima-col { height: 35vh; }
+    .form-col { margin-top: 35vh; }
 }
 
-/* Mobile footer */
 @media (max-width: 768px) {
-    footer {
-        flex-direction: column;
-        gap: 10px;
-    }
-    footer a {
-        width: 80%;
-        text-align: center;
-    }
+    footer { flex-direction: column; gap: 10px; }
+    footer a { width: 80%; text-align: center; }
 }
-
-    </style>
+</style>
 </head>
 <body>
-<header style="display:flex; align-items:center;">
-    <img src="logo.png" alt="Logo" style="height:40px; margin-right:10px;">
-    <h1 style="margin:0;">Amministrazione Matrimonio</h1>
+
+<header>
+    <h1>Nuova Coppia</h1>
+    <div class="user-menu">
+        <button id="userBtn" class="user-btn">
+            <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+            <span>Admin</span>
+        </button>
+        <div id="dropdownMenu" class="dropdown-menu">
+            <a href="profilo.html">Profilo</a>
+            <a href="temaadmin.html">Temi</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
 </header>
 
 <div class="container">
@@ -210,33 +249,45 @@ footer a:hover {
     </div>
 </div>
 
-<script src="script.js"></script>
+<footer>
+    <a href="index.html" id="home-btn">Menu</a>
+</footer>
+
 <script>
 async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token){
-        window.location.href = "/login_page";
-        return;
-    }
-
+    if(!token){ window.location.href = "/login_page"; return; }
     try {
-        const res = await fetch("/me", {
-            headers: { "Authorization": "Bearer " + token }
-        });
+        const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token }});
         const data = await res.json();
-        if(!data.success){
-            localStorage.removeItem("auth_token");
-            window.location.href = "/login_page";
-        }
-        // Se è valido, puoi mostrare dati dell’admin
+        if(!data.success){ localStorage.removeItem("auth_token"); window.location.href = "/login_page"; }
         console.log("Utente autenticato:", data.email);
     } catch(err){
-        localStorage.removeItem("auth_token");
-        window.location.href = "/login_page";
+        localStorage.removeItem("auth_token"); window.location.href = "/login_page";
     }
 }
 
+function logout() {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("admin_username");
+    window.location.href = "login.html";
+}
+
+// Dropdown menu
+const userBtn = document.getElementById('userBtn');
+const dropdownMenu = document.getElementById('dropdownMenu');
+userBtn.addEventListener('click', () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+});
+window.addEventListener('click', (e) => {
+    if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
+        dropdownMenu.style.display = 'none';
+    }
+});
+
 checkAuth();
+
+// --- Elementi DOM ---
 const anteprimaDiv = document.getElementById("anteprima");
 const anteprimaTesto = document.getElementById("anteprimaTesto");
 const anteprimaFoto = document.getElementById("anteprimaFoto");
@@ -262,6 +313,7 @@ function hexToRgb(hex) {
     return `${r}, ${g}, ${b}`;
 }
 
+// Carica fonts ed effetti
 async function caricaFontsEdEffetti() {
     try {
         const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
@@ -300,6 +352,7 @@ async function caricaFontsEdEffetti() {
     } catch(e){ console.error(e); }
 }
 
+// Anteprima
 function aggiornaAnteprima() {
     anteprimaDiv.style.cssText = '';
     anteprimaTesto.style.cssText = '';
@@ -358,17 +411,15 @@ function aggiornaAnteprima() {
     }
 }
 
+// Event listeners
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
+// Crea coppia
 document.getElementById("creaCoppiaBtn").addEventListener("click", async ()=>{
     const nome = document.getElementById("nomeCoppia").value.trim();
     const fotoFile = document.getElementById("fotoCoppia").files[0];
-
-    if(!nome || !fotoFile){
-        alert("Inserisci nome e foto");
-        return;
-    }
+    if(!nome || !fotoFile){ alert("Inserisci nome e foto"); return; }
 
     const formData = new FormData();
     formData.append("nome_coppia",nome);
@@ -384,28 +435,17 @@ document.getElementById("creaCoppiaBtn").addEventListener("click", async ()=>{
         method:"POST",
         body:formData
     });
-    console.log("res: ", res);
     const data = await res.json();
     document.getElementById("msg").innerText = data.success ? "Coppia creata!" : "Errore: "+(data.error||"imprevisto");
 
     if(data.success) setTimeout(()=>window.location.href="index.html",1000);
 });
 
+// Onload
 window.onload = async ()=>{
     await caricaFontsEdEffetti();
-    document.getElementById("home-btn").href = `index.html}`;
     aggiornaAnteprima();
 };
-async function initTemaAdmin() {
-    await applicaTemaAdmin(); // Applica il tema admin
-    if (typeof aggiornaAnteprima === 'function') aggiornaAnteprima(); // Solo se presente
-}
-
-initTemaAdmin();
-
 </script>
 </body>
-<footer>
-    <a href="index.html" class="pulsante" id="home-btn" >Menu</a>
-</footer>
 </html>
