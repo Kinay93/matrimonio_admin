@@ -20,6 +20,74 @@
     padding: 0;
   }
 
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: #2EC4B6;
+    color: white;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-size: 1.3rem;
+    margin: 5px 0;
+    flex: 1 1 100%;
+  }
+
+  header h1:hover {
+    color: #e0fbfc;
+  }
+
+  .user-menu {
+    position: relative;
+    display: inline-block;
+  }
+
+  .user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #2EC4B6;
+  }
+
+  .user-btn img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    min-width: 150px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 1000;
+  }
+
+  .dropdown-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .dropdown-menu a:hover {
+    background: #f0f0f0;
+  }
+
   .form-box, .preview-box {
     padding: 1rem;
     margin: 1rem;
@@ -38,10 +106,7 @@
     position: relative;
   }
 
-  h2 {
-    margin-bottom: 0.5rem;
-  }
-
+  h2 { margin-bottom: 0.5rem; }
   .overlay {
     position: absolute;
     top:0; left:0; right:0; bottom:0;
@@ -50,6 +115,24 @@
 </style>
 </head>
 <body>
+
+<header>
+  <h1>Admin Matrimonio</h1>
+
+  <!-- MENU UTENTE -->
+  <div class="user-menu">
+    <button id="userBtn" class="user-btn">
+      <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+      <span>Admin</span>
+    </button>
+    <div id="dropdownMenu" class="dropdown-menu">
+      <a href="profilo.html">Profilo</a>
+      <a href="temaadmin.html">Temi</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
+  </div>
+</header>
+
 <div class="form-box">
   <h2>Impostazioni Tema</h2>
   
@@ -78,32 +161,35 @@
   Anteprima Testo
 </div>
 
+<script src="script.js"></script>
 <script>
-  async function checkAuth() {
+async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token){
-        window.location.href = "/login_page";
-        return;
-    }
-
-    try {
-        const res = await fetch("/me", {
-            headers: { "Authorization": "Bearer " + token }
-        });
-        const data = await res.json();
-        if(!data.success){
-            localStorage.removeItem("auth_token");
-            window.location.href = "/login_page";
-        }
-        // Se è valido, puoi mostrare dati dell’admin
-        console.log("Utente autenticato:", data.email);
-    } catch(err){
-        localStorage.removeItem("auth_token");
-        window.location.href = "/login_page";
-    }
+    if(!token) window.location.href = "/login_page";
 }
 
 checkAuth();
+
+// Dropdown utente
+const userBtn = document.getElementById('userBtn');
+const dropdownMenu = document.getElementById('dropdownMenu');
+userBtn.addEventListener('click', () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+});
+window.addEventListener('click', (e) => {
+    if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
+        dropdownMenu.style.display = 'none';
+    }
+});
+
+// Funzione logout
+function logout() {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("admin_username");
+    window.location.href = "login.html";
+}
+
+// Restante codice temaadmin
 const previewBox = document.getElementById('previewBox');
 const bgColorInput = document.getElementById('bgColorInput');
 const bgColorSecondarioInput = document.getElementById('bgColorSecondarioInput');
@@ -117,7 +203,6 @@ let effettiScritta = [];
 let effettiSfondo = [];
 let fonts = [];
 
-// --- Helper: HEX to RGB
 function hexToRgb(hex) {
   hex = hex.replace('#','');
   if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
@@ -128,7 +213,6 @@ function hexToRgb(hex) {
   return `${r}, ${g}, ${b}`;
 }
 
-// --- Carica font dal backend
 async function caricaFonts() {
   try {
     const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_fonts', {mode: 'cors'});
@@ -145,7 +229,6 @@ async function caricaFonts() {
   } catch(e) { console.error("Errore caricamento fonts:", e); }
 }
 
-// --- Carica effetti scritta
 async function caricaEffettiScritta() {
   try {
     const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_effetti', {mode: 'cors'});
@@ -162,7 +245,6 @@ async function caricaEffettiScritta() {
   } catch(e) { console.error("Errore caricamento effetti scritta:", e); }
 }
 
-// --- Carica effetti sfondo
 async function caricaEffettiSfondo() {
   try {
     const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_effetti', {mode: 'cors'});
@@ -179,16 +261,10 @@ async function caricaEffettiSfondo() {
   } catch(e) { console.error("Errore caricamento effetti sfondo:", e); }
 }
 
-// --- Aggiorna anteprima con overlay e fix parsing CSS
 function aggiornaAnteprima() {
-  // Reset completo degli stili inline
   previewBox.style.cssText = '';
-  
-  // Font e colore testo
   previewBox.style.fontFamily = fontsSelect.value;
   previewBox.style.color = textColorInput.value;
-
-  // Variabili CSS
   const bgRgb = hexToRgb(bgColorInput.value);
   const bgSecondarioRgb = hexToRgb(bgColorSecondarioInput.value);
   previewBox.style.setProperty('--bg-color', bgColorInput.value);
@@ -196,9 +272,8 @@ function aggiornaAnteprima() {
   previewBox.style.setProperty('--bg-color-secondario', bgColorSecondarioInput.value);
   previewBox.style.setProperty('--bg-color-secondario-rgb', bgSecondarioRgb);
 
-  // Effetto scritta
   const effScritta = effettiScritta.find(e => e.id === effettiScrittaSelect.value);
-  if(effScritta && effScritta.css) {
+  if(effScritta && effScritta.css){
     let scrittaCss = effScritta.css.replace(/var\(--text-color\)/g, textColorInput.value);
     scrittaCss.split(';').forEach(rule => {
       if(rule.trim()){
@@ -209,10 +284,9 @@ function aggiornaAnteprima() {
     });
   }
 
-  // Effetto sfondo
   const effSfondo = effettiSfondo.find(e => e.id === effettiSfondoSelect.value);
-  let overlayColor = `rgba(${bgRgb}, 0.3)`;
-  if(effSfondo && effSfondo.css) {
+  let overlayColor = `rgba(${bgRgb},0.3)`;
+  if(effSfondo && effSfondo.css){
     let sfondoCss = effSfondo.css
       .replace(/var\(--bg-color\)/g, bgColorInput.value)
       .replace(/var\(--bg-color-rgb\)/g, bgRgb)
@@ -221,17 +295,16 @@ function aggiornaAnteprima() {
 
     sfondoCss.split(';').forEach(rule => {
       if(rule.trim()){
-        let [prop, ...rest] = rule.split(':'); // fix parsing CSS con ":" negli URL
+        let [prop, ...rest] = rule.split(':');
         let val = rest.join(':');
         if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
       }
     });
 
-    // Overlay automatico se c'è immagine
     const bgImageMatch = sfondoCss.match(/url\(([^)]+)\)/);
-    if(bgImageMatch) {
+    if(bgImageMatch){
       previewBox.style.position = 'relative';
-      if(!previewBox.querySelector('.overlay')) {
+      if(!previewBox.querySelector('.overlay')){
         const overlay = document.createElement('div');
         overlay.className = 'overlay';
         overlay.style.backgroundColor = overlayColor;
@@ -246,7 +319,6 @@ function aggiornaAnteprima() {
   }
 }
 
-// --- Event listeners
 [bgColorInput, bgColorSecondarioInput, textColorInput, fontsSelect, effettiScrittaSelect, effettiSfondoSelect]
   .forEach(el => el.addEventListener('input', aggiornaAnteprima));
 
@@ -270,7 +342,6 @@ saveBtn.addEventListener('click', async () => {
   } catch(e) { console.error('Errore save theme:', e); }
 });
 
-// --- Init
 async function init() {
   await caricaFonts();
   await caricaEffettiScritta();
