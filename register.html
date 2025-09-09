@@ -65,8 +65,7 @@ registerForm.addEventListener('submit', async (e) => {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({email, password})
         }).then(res => res.json());
-        const data = await res.json();
-        console.log("json che passo:", data);
+        
         if(response.success){
             localStorage.setItem("auth_token", response.token);
             msg.style.color = 'green';
