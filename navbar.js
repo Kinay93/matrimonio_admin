@@ -1,6 +1,7 @@
 // --- Logout
 function logout() {
     localStorage.removeItem('admin_username');
+    localStorage.removeItem('auth_token'); // rimuoviamo anche il token
     window.location.href = 'login.html';
 }
 
@@ -48,6 +49,7 @@ function initNavbar() {
 
     // --- Aggiorna link con username
     const username = localStorage.getItem('admin_username') || 'admin';
+    const token = localStorage.getItem('auth_token'); // token sicuro in localStorage
     const usernameLabel = document.getElementById('username-label');
     const linkProfilo = document.getElementById('link-profilo');
     const linkTemi = document.getElementById('link-temi');
@@ -104,6 +106,16 @@ function initNavbar() {
             mainNav.style.display = 'none';
         }
     });
+
+    // --- Funzione fetch sicura con token
+    window.fetchWithAuth = async (url, options = {}) => {
+        const token = localStorage.getItem('auth_token');
+        options.headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`
+        };
+        return fetch(url, options);
+    };
 }
 
 // --- Carica navbar dinamicamente
