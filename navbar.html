@@ -1,58 +1,50 @@
-<div id="navbar-container">
-  <header>
-    <button id="menuBtn" class="toggle-btn">☰</button>
-    <h1 id="pageTitle">Amministrazione</h1>
+<header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#2EC4B6; color:white; font-family:'Segoe UI', sans-serif;">
+  <!-- Pulsante hamburger -->
+  <button id="menu-toggle" style="font-size:24px; background:none; border:none; color:white; cursor:pointer;">☰</button>
 
-    <div class="user-menu">
-      <button id="userBtn" class="user-btn">
-        <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
-        <span id="usernameDisplay">Admin</span>
-      </button>
-      <div id="dropdownMenu" class="dropdown-menu">
-        <a href="#" id="profiloLink">Profilo</a>
-        <a href="temaadmin.html">Temi</a>
-        <a href="#" onclick="logout()">Logout</a>
-      </div>
+  <!-- Titolo -->
+  <h1 style="margin:0; font-size:1.5em;">Header di esempio</h1>
+
+  <!-- Dropdown Admin -->
+  <div class="user-menu" style="position:relative;">
+    <button id="user-btn" style="display:flex; align-items:center; gap:8px; background:white; color:#2EC4B6; border:none; border-radius:20px; padding:6px 12px; cursor:pointer;">
+      <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" style="width:28px;height:28px;border-radius:50%;">
+      <span id="username-label">Admin</span>
+    </button>
+    <div id="dropdown-menu" style="display:none; position:absolute; right:0; top:40px; background:white; border-radius:8px; min-width:150px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:100;">
+      <a href="#" id="link-profilo" style="display:block;padding:10px;text-decoration:none;color:#333;">Profilo</a>
+      <a href="#" id="link-temi" style="display:block;padding:10px;text-decoration:none;color:#333;">Temi</a>
+      <a href="#" onclick="logout()" style="display:block;padding:10px;text-decoration:none;color:#333;">Logout</a>
     </div>
-  </header>
+  </div>
+</header>
 
-  <nav id="sideNavbar" class="sidebar">
-    <span class="closebtn" onclick="closeSidebar()">×</span>
-    <a href="index.html">Home</a>
-    <a href="marketplace.html">Marketplace</a>
-    <a href="coppie.html">Coppie</a>
-  </nav>
-</div>
+<!-- Barra link principale -->
+<nav id="main-nav" style="display:flex; gap:15px; padding:10px 20px; background:#3AAFA9; color:white; font-weight:bold; font-family:'Segoe UI', sans-serif;">
+  <a href="index.html" style="color:white;text-decoration:none;">Home</a>
+  <a href="marketplace.html" style="color:white;text-decoration:none;">Marketplace</a>
+  <a href="coppie.html" style="color:white;text-decoration:none;">Coppie</a>
+</nav>
 
 <script>
-  // Dropdown toggle
-  const userBtn = document.getElementById('userBtn');
-  const dropdownMenu = document.getElementById('dropdownMenu');
+  // Toggle dropdown
+  const userBtn = document.getElementById('user-btn');
+  const dropdownMenu = document.getElementById('dropdown-menu');
+
   userBtn.addEventListener('click', () => {
     dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
   });
+
   // Chiudi dropdown se clic fuori
   window.addEventListener('click', e => {
-    if (!userBtn.contains(e.target)) dropdownMenu.style.display = 'none';
+    if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
+      dropdownMenu.style.display = 'none';
+    }
   });
 
-  // Sidebar toggle
-  const sideNavbar = document.getElementById('sideNavbar');
-  document.getElementById('menuBtn').addEventListener('click', () => {
-    sideNavbar.style.width = sideNavbar.style.width === '250px' ? '0' : '250px';
-  });
-  function closeSidebar() { sideNavbar.style.width = '0'; }
-
-  // Inserimento username loggato
-  const urlParams = new URLSearchParams(window.location.search);
-  const usernameAdmin = urlParams.get('username') || localStorage.getItem('admin_username') || 'Admin';
-  document.getElementById('usernameDisplay').textContent = usernameAdmin;
-  document.getElementById('profiloLink').href = `profilo.html?username=${usernameAdmin}`;
-
-  // Logout
-  function logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('admin_username');
-    window.location.href = 'login.html';
-  }
+  // Aggiorna link Profilo e Temi con username
+  const username = localStorage.getItem('admin_username') || 'admin';
+  document.getElementById('username-label').textContent = username;
+  document.getElementById('link-profilo').href = `profilo.html?username=${encodeURIComponent(username)}`;
+  document.getElementById('link-temi').href = `temaadmin.html?username=${encodeURIComponent(username)}`;
 </script>
