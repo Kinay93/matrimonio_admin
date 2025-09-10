@@ -51,10 +51,15 @@ function initNavbar() {
 
     // --- Aggiorna link principali con ?admin=username
     mainNav.querySelectorAll('a[data-page]').forEach(a => {
-        if(a.dataset.page === 'coppie'){
-            a.href = `index.html?admin=${encodeURIComponent(username)}`;
-        }
-    });
+    const page = a.dataset.page;
+    if(page === 'coppie') {
+        a.href = `index.html?admin=${encodeURIComponent(username)}`;
+    } else if(page === 'home') {
+        a.href = `home.html?admin=${encodeURIComponent(username)}`;
+    } else if(page === 'marketplace') {
+        a.href = `marketplace.html?admin=${encodeURIComponent(username)}`;
+    }
+});
 
     // --- Nascondi link della pagina corrente
     const currentPage = window.location.pathname.split('/').pop().replace('.html','');
