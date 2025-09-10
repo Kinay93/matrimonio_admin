@@ -2,473 +2,293 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Nuovo Evento</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Matrimonio</title>
 <link rel="stylesheet" href="style.css">
 <style>
-body {
-    margin: 0;
-    font-family: sans-serif;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+/* Anteprima più proporzionata */
+.preview-box {
+  margin-top: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 600px;
+  min-height: 150px;
+  background: #f0f0f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-sizing: border-box;
+  position: relative;
 }
-
-/* Evidenziazione link attivo nella navbar */
-.navbar .active {
-    font-weight: bold;
-    text-decoration: underline;
-}
-
-/* Container principale */
-.container {
-    display: flex;
-    flex: 1;
-    height: 100vh;
-    overflow: hidden;
-}
-
-/* Colonna form */
-.form-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 20px;
-    overflow-y: auto;
-    border-right: 1px solid #ccc;
-    box-sizing: border-box;
-}
-
-/* Colonna anteprima */
-.anteprima-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    box-sizing: border-box;
-}
-
-/* Anteprima interna */
-#anteprima {
-    width: 80%;
-    height: 80%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-    position: relative;
-    max-width: 400px;
-    max-height: 400px;
-    border-radius: 12px;
-    overflow: hidden;
-    background: linear-gradient(135deg,#ffffff,#ffffff);
-    transition: background 200ms ease, color 200ms ease;
-}
-
-#anteprimaFoto {
-    width: 150px;
-    height: 150px;
-    background-color: rgba(0,0,0,0.06);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: #666;
-    object-fit: cover;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-#anteprimaFoto:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-}
-
-#anteprimaTesto {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    font-size: 24px;
-    pointer-events: none;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.08);
-}
-
 .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
+  position: absolute;
+  top:0; left:0; right:0; bottom:0;
+  pointer-events: none;
+  border-radius: 12px;
 }
-
-/* Footer */
-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-    background-color: rgba(255,255,255,0.9);
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-}
-
-footer a {
-    text-decoration: none;
-    background: #c235d4;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-weight: bold;
-    transition: background 0.2s ease;
-}
-
-footer a:hover {
-    background: #a91eb9;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    body { overflow: hidden; }
-    .container { flex-direction: column; height: 100vh; }
-    .anteprima-col {
-        width: 80%;
-        height: 40vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: white;
-        z-index: 1000;
-        border-bottom: 1px solid #ccc;
-    }
-    .form-col { margin-top: 40vh; flex: 1; overflow-y: auto; border-right: none; border-bottom: 1px solid #ccc; }
-    #anteprima { width: 80%; height: 80%; max-width: none; max-height: none; }
-}
-
-@media (max-width: 480px) {
-    .anteprima-col { height: 35vh; }
-    .form-col { margin-top: 35vh; }
-}
-
-@media (max-width: 768px) {
-    footer { flex-direction: column; gap: 10px; }
-    footer a { width: 80%; text-align: center; }
+/* Evidenziazione pagina corrente navbar */
+.navbar .active {
+  font-weight: bold;
+  text-decoration: underline;
 }
 </style>
-
-<!-- La navbar è caricata dinamicamente da navbar.js -->
 <script src="navbar.js" defer></script>
 <script src="script.js" defer></script>
 </head>
 <body>
-  <!-- Navbar -->
-  <div id="navbar-placeholder"></div>
 
-  <header>
-    <h1>Nuovo Evento</h1>
-  </header>
+<!-- Navbar inclusa dinamicamente -->
+<div id="navbar-placeholder"></div>
 
-<div class="container">
-    <div class="form-col">
-        <label>Nome evento:<input type="text" id="nomeEvento" placeholder="Nome evento"></label>
-        <label>Foto evento:<input type="file" id="fotoEvento" accept="image/*"></label>
-        <label>Colore sfondo primario:<input type="color" id="colorSfondo" value="#ffffff"></label>
-        <label>Colore sfondo secondario:<input type="color" id="colorSfondoSecondario" value="#eeeeee"></label>
-        <label>Colore testo:<input type="color" id="colorTesto" value="#000000"></label>
-        <label>Font:<select id="fontScelto"></select></label>
-        <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
-        <label>Effetto scritta:<select id="effettoScritta"></select></label>
-        <button id="creaEventoBtn">Crea Evento</button>
-        <div id="msg"></div>
-    </div>
+<header>
+  <h1>Admin Matrimonio</h1>
+</header>
 
-    <div class="anteprima-col">
-        <h3>Anteprima</h3>
-        <div id="anteprima">
-            <img id="anteprimaFoto" src="" alt="Foto Evento">
-            <span id="anteprimaTesto">Titolo Evento</span>
-        </div>
-    </div>
+<div class="form-box">
+  <h2>Impostazioni Tema</h2>
+  <label>Colore Sfondo Primario:</label>
+  <input type="color" id="bgColorInput" value="#ffffff"><br><br>
+  <label>Colore Sfondo Secondario:</label>
+  <input type="color" id="bgColorSecondarioInput" value="#eeeeee"><br><br>
+  <label>Colore Testo:</label>
+  <input type="color" id="textColorInput" value="#000000"><br><br>
+  <label>Font:</label>
+  <select id="fontsSelect"></select><br><br>
+  <label>Effetto Scritta:</label>
+  <select id="effettiScrittaSelect"></select><br><br>
+  <label>Effetto Sfondo:</label>
+  <select id="effettiSfondoSelect"></select><br><br>
+  <button id="saveBtn">Salva Tema</button>
 </div>
 
-<footer>
-    <a href="index.html" id="home-btn">Menu</a>
-</footer>
+<div class="preview-box" id="previewBox">Anteprima Testo</div>
 
 <script>
-/*
-  Aggiornamento:
-  - attende la navbar caricata (兼 compatibile con id user-btn / userBtn e dropdown-menu / dropdownMenu)
-  - passa token alle chiamate che lo richiedono
-  - aggiorna l'anteprima applicando i colori scelti al container #anteprima
-  - debug console.log per aiutare se qualcosa non carica
-*/
-
-// --- Controllo autenticazione
 async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token) {
-        console.warn("token mancante -> redirect login");
-        window.location.href = "login.html";
-        return;
-    }
-
+    if(!token) return window.location.href = "login.html";
     try {
         const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", {
             headers: { "Authorization": "Bearer " + token }
         });
         const data = await res.json();
-        // se /me risponde senza success -> logout forzato
         if(!data.success){
-            console.warn("/me ha risposto non success:", data);
             localStorage.removeItem("auth_token");
             localStorage.removeItem("admin_username");
             window.location.href = "login.html";
-        } else {
-            // Salva username restituito se presente (utile se non era presente prima)
-            if(data.username) localStorage.setItem("admin_username", data.username);
         }
     } catch(err){
-        console.error("errore checkAuth:", err);
         localStorage.removeItem("auth_token");
         localStorage.removeItem("admin_username");
         window.location.href = "login.html";
     }
 }
 
-// --- Hook navbar (attende caricamento dinamico di navbar.html)
-function waitForNavbar(callback, timeout = 5000) {
-    const start = Date.now();
-    const iv = setInterval(() => {
-        // supporta sia id con dash che camelCase (compatibilità)
-        const userBtn = document.querySelector('#user-btn, #userBtn');
-        const dropdown = document.querySelector('#dropdown-menu, #dropdownMenu');
-        const logoutLink = document.querySelector('#link-logout, #logoutBtn, a[data-action="logout"]');
-        const mainNav = document.querySelector('#main-nav');
-        if (userBtn && dropdown && mainNav) {
-            clearInterval(iv);
-            callback({ userBtn, dropdown, logoutLink, mainNav });
-            return;
+// Attende che la navbar sia caricata
+function waitForNavbar(callback){
+    const interval = setInterval(() => {
+        const userBtn = document.getElementById('userBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const temaNav = document.getElementById('navTemaAdmin');
+        if(userBtn && dropdownMenu && temaNav){
+            clearInterval(interval);
+            callback(userBtn, dropdownMenu, temaNav);
         }
-        if (Date.now() - start > timeout) {
-            clearInterval(iv);
-            console.warn('waitForNavbar: timeout, navbar prob. non caricata o id diversi');
-        }
-    }, 60);
+    }, 50);
 }
 
-// --- Funzione che configura dropdown / username / logout
-function setupNavbarBindings({ userBtn, dropdown, logoutLink }) {
-    try {
-        // aggiorna label username (diversa possibilità: username-label o span interno)
-        const usernameLabel = document.querySelector('#username-label') || userBtn.querySelector('span');
-        if (usernameLabel) {
-            usernameLabel.textContent = localStorage.getItem('admin_username') || usernameLabel.textContent || 'Admin';
+// Inizializza dropdown navbar e evidenzia pagina corrente
+waitForNavbar((userBtn, dropdownMenu, temaNav) => {
+    // Dropdown username
+    userBtn.querySelector('span').textContent = localStorage.getItem('admin_username') || 'Admin';
+    userBtn.addEventListener('click', () => {
+        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    });
+    window.addEventListener('click', (e) => {
+        if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
+            dropdownMenu.style.display = 'none';
         }
+    });
 
-        // toggle dropdown
-        userBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    // Evidenzia pagina corrente
+    temaNav.classList.add('active');
+
+    // Logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if(logoutBtn){
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("admin_username");
+            window.location.href = "login.html";
         });
-
-        // chiudi clicando fuori
-        window.addEventListener('click', (e) => {
-            if (!userBtn.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
-
-        // logout bind (se esiste un link esplicito)
-        if (logoutLink) {
-            logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
-        } else {
-            // fallback: cerca link testuale "Logout" dentro dropdown
-            const possible = Array.from(dropdown.querySelectorAll('a')).find(a => /logout/i.test(a.textContent));
-            if (possible) possible.addEventListener('click', (e) => { e.preventDefault(); logout(); });
-        }
-    } catch (e) {
-        console.error('setupNavbarBindings error', e);
     }
-}
+});
 
-// --- Logout
-function logout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("admin_username");
-    window.location.href = "login.html";
-}
-
-// --- Elementi DOM
-const anteprimaContainer = document.getElementById("anteprima");
-const anteprimaFoto = document.getElementById("anteprimaFoto");
-const anteprimaTesto = document.getElementById("anteprimaTesto");
-
-const inputSfondo = document.getElementById("colorSfondo");
-const inputSfondoSecondario = document.getElementById("colorSfondoSecondario");
-const inputTesto = document.getElementById("colorTesto");
-const selectFont = document.getElementById("fontScelto");
-const selectEffettoSfondo = document.getElementById("effettoSfondo");
-const selectEffettoScritta = document.getElementById("effettoScritta");
+// Funzioni tema admin
+const previewBox = document.getElementById('previewBox');
+const bgColorInput = document.getElementById('bgColorInput');
+const bgColorSecondarioInput = document.getElementById('bgColorSecondarioInput');
+const textColorInput = document.getElementById('textColorInput');
+const fontsSelect = document.getElementById('fontsSelect');
+const effettiScrittaSelect = document.getElementById('effettiScrittaSelect');
+const effettiSfondoSelect = document.getElementById('effettiSfondoSelect');
+const saveBtn = document.getElementById('saveBtn');
 
 let effettiScritta = [];
 let effettiSfondo = [];
 let fonts = [];
 
-// --- Carica fonts ed effetti (invia token quando disponibile)
+function hexToRgb(hex) {
+  hex = hex.replace('#','');
+  if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+  const bigint = parseInt(hex,16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `${r}, ${g}, ${b}`;
+}
+
+// Carica fonts ed effetti
 async function caricaFontsEdEffetti() {
+  try {
     const token = localStorage.getItem("auth_token");
-    const headers = token ? { "Authorization": "Bearer " + token } : {};
-    try {
-        // fonts
-        const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { headers });
-        const dataFonts = await resFonts.json();
-        fonts = dataFonts.fonts || [];
-        selectFont.innerHTML = "";
-        fonts.forEach(f=>{
-            const o = document.createElement("option");
-            o.value = f.css_family || f.name || f;
-            o.textContent = f.name || f.css_family || f;
-            o.style.fontFamily = f.css_family || '';
-            selectFont.appendChild(o);
-        });
+    const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", {
+        headers: { "Authorization": "Bearer " + token }
+    });
+    const dataFonts = await resFonts.json();
+    fonts = dataFonts.fonts;
+    fontsSelect.innerHTML = '';
+    fonts.forEach(f => {
+      const option = document.createElement('option');
+      option.value = f.css_family;
+      option.textContent = f.name;
+      fontsSelect.appendChild(option);
+    });
 
-        // effetti
-        const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { headers });
-        const dataEffetti = await resEffetti.json();
-        effettiSfondo = dataEffetti.sfondo || [];
-        effettiScritta = dataEffetti.scritta || [];
+    const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", {
+        headers: { "Authorization": "Bearer " + token }
+    });
+    const dataEffetti = await resEffetti.json();
+    effettiScritta = dataEffetti.scritta;
+    effettiSfondo = dataEffetti.sfondo;
 
-        selectEffettoSfondo.innerHTML = '';
-        effettiSfondo.forEach(e=>{
-            const o = document.createElement("option");
-            o.value = e.id || e.name || '';
-            o.textContent = e.name || e.id || '';
-            selectEffettoSfondo.appendChild(o);
-        });
+    effettiScrittaSelect.innerHTML = '';
+    effettiScritta.forEach(e => {
+      const option = document.createElement('option');
+      option.value = e.id;
+      option.textContent = e.name;
+      effettiScrittaSelect.appendChild(option);
+    });
 
-        selectEffettoScritta.innerHTML = '';
-        effettiScritta.forEach(e=>{
-            const o = document.createElement("option");
-            o.value = e.id || e.name || '';
-            o.textContent = e.name || e.id || '';
-            selectEffettoScritta.appendChild(o);
-        });
-    } catch(e){
-        console.error('caricaFontsEdEffetti error:', e);
-    }
+    effettiSfondoSelect.innerHTML = '';
+    effettiSfondo.forEach(e => {
+      const option = document.createElement('option');
+      option.value = e.id;
+      option.textContent = e.name;
+      effettiSfondoSelect.appendChild(option);
+    });
+  } catch(e){ console.error(e); }
 }
 
-// --- Aggiorna anteprima (applica colori/font/immagine)
+// Anteprima tema
 function aggiornaAnteprima() {
-    // background (gradiente tra primario e secondario)
-    const bg1 = inputSfondo.value || '#ffffff';
-    const bg2 = inputSfondoSecondario.value || bg1;
-    anteprimaContainer.style.background = `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`;
+  previewBox.style.cssText = '';
+  previewBox.style.fontFamily = fontsSelect.value;
+  previewBox.style.color = textColorInput.value;
+  previewBox.style.display = 'flex';
+  previewBox.style.alignItems = 'center';
+  previewBox.style.justifyContent = 'center';
+  previewBox.style.fontSize = '24px';
+  previewBox.style.minHeight = '150px';
+  previewBox.style.padding = '20px';
 
-    // testo
-    const textColor = inputTesto.value || '#000';
-    anteprimaTesto.style.color = textColor;
-    anteprimaTesto.style.fontFamily = selectFont.value || 'Arial';
+  const bgRgb = hexToRgb(bgColorInput.value);
+  const bgSecondarioRgb = hexToRgb(bgColorSecondarioInput.value);
 
-    // immagine
-    if (anteprimaFoto.src && anteprimaFoto.src !== window.location.href && anteprimaFoto.src !== '') {
-        anteprimaFoto.style.display = 'block';
+  previewBox.style.setProperty('--bg-color', bgColorInput.value);
+  previewBox.style.setProperty('--bg-color-rgb', bgRgb);
+  previewBox.style.setProperty('--bg-color-secondario', bgColorSecondarioInput.value);
+  previewBox.style.setProperty('--bg-color-secondario-rgb', bgSecondarioRgb);
+
+  const effScritta = effettiScritta.find(e => e.id === effettiScrittaSelect.value);
+  if(effScritta && effScritta.css){
+    let scrittaCss = effScritta.css.replace(/var\(--text-color\)/g, textColorInput.value);
+    scrittaCss.split(';').forEach(rule => {
+      if(rule.trim()){
+        let [prop, ...rest] = rule.split(':');
+        let val = rest.join(':');
+        if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
+      }
+    });
+  }
+
+  const effSfondo = effettiSfondo.find(e => e.id === effettiSfondoSelect.value);
+  let overlayColor = `rgba(${bgRgb},0.3)`;
+  if(effSfondo && effSfondo.css){
+    let sfondoCss = effSfondo.css
+      .replace(/var\(--bg-color\)/g, bgColorInput.value)
+      .replace(/var\(--bg-color-rgb\)/g, bgRgb)
+      .replace(/var\(--bg-color-secondario\)/g, bgColorSecondarioInput.value)
+      .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
+
+    sfondoCss.split(';').forEach(rule => {
+      if(rule.trim()){
+        let [prop, ...rest] = rule.split(':');
+        let val = rest.join(':');
+        if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
+      }
+    });
+
+    const bgImageMatch = sfondoCss.match(/url\(([^)]+)\)/);
+    if(bgImageMatch){
+      previewBox.style.position = 'relative';
+      if(!previewBox.querySelector('.overlay')){
+        const overlay = document.createElement('div');
+        overlay.className = 'overlay';
+        overlay.style.backgroundColor = overlayColor;
+        previewBox.appendChild(overlay);
+      } else {
+        previewBox.querySelector('.overlay').style.backgroundColor = overlayColor;
+      }
     } else {
-        anteprimaFoto.style.display = 'block';
-        anteprimaFoto.src = ''; // placeholder visivo
+      const existingOverlay = previewBox.querySelector('.overlay');
+      if(existingOverlay) existingOverlay.remove();
     }
-
-    // se ci sono effetti scritta personalizzati (css), applicali
-    const effScr = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
-    if (effScr && effScr.css) {
-        // semplice parsing: `prop:value;prop:value;`
-        effScr.css.split(';').forEach(rule => {
-            if (!rule.trim()) return;
-            const [propRaw, ...valParts] = rule.split(':');
-            const prop = propRaw && propRaw.trim();
-            const val = valParts.join(':') && valParts.join(':').trim();
-            if (prop && val) {
-                anteprimaTesto.style.setProperty(prop, val.replace(/var\(--text-color\)/g, textColor));
-            }
-        });
-    }
+  }
 }
 
-// --- Listener cambio file (anteprima immagine)
-document.getElementById("fotoEvento").addEventListener("change", (e)=>{
-    const file = e.target.files[0];
-    if (file) {
-        anteprimaFoto.src = URL.createObjectURL(file);
-    }
-});
+[bgColorInput, bgColorSecondarioInput, textColorInput, fontsSelect, effettiScrittaSelect, effettiSfondoSelect]
+  .forEach(el => el.addEventListener('input', aggiornaAnteprima));
 
-// --- Event listeners per input/selector
-[inputSfondo, inputSfondoSecondario, inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
-[selectFont, selectEffettoSfondo, selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
+saveBtn.addEventListener('click', async () => {
+  const formData = new FormData();
+  formData.append('bg_color', bgColorInput.value);
+  formData.append('bg_color_secondario', bgColorSecondarioInput.value);
+  formData.append('text_color', textColorInput.value);
+  formData.append('font_family', fontsSelect.value);
+  formData.append('effetto_scritta', effettiScrittaSelect.value);
+  formData.append('effetto_sfondo', effettiSfondoSelect.value);
 
-// --- Creazione evento (POST con token)
-document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
-    const nome = document.getElementById("nomeEvento").value.trim();
-    const fotoFile = document.getElementById("fotoEvento").files[0];
-    if(!nome || !fotoFile){ alert("Inserisci nome e foto"); return; }
-
-    const formData = new FormData();
-    formData.append("nome_evento", nome);
-    formData.append("foto_evento", fotoFile);
-    formData.append("sfondo", inputSfondo.value);
-    formData.append("sfondo_secondario", inputSfondoSecondario.value);
-    formData.append("testo", inputTesto.value);
-    formData.append("font", selectFont.value);
-    formData.append("effetto_sfondo", selectEffettoSfondo.value || "");
-    formData.append("effetto_scritta", selectEffettoScritta.value || "");
-    // admin verrà preso dal token sul server (/crea_evento legge admin da form in alcune versioni).
-    // Se server aspetta admin nel form, puoi aggiungerlo:
-    const username = localStorage.getItem('admin_username');
-    if (username) formData.append('admin', username);
-
+  try {
     const token = localStorage.getItem("auth_token");
-
-    try {
-        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_evento',{
-            method:"POST",
-            headers: token ? { "Authorization": `Bearer ${token}` } : {},
-            body: formData
-        });
-        const data = await res.json();
-        document.getElementById("msg").innerText = data.success ? "Evento creato!" : "Errore: "+(data.error||"imprevisto");
-
-        if(data.success){
-            setTimeout(()=>{ window.location.href = "index.html"; }, 800);
-        }
-    } catch(err){
-        console.error(err);
-        document.getElementById("msg").innerText = "Errore creazione evento.";
-    }
+    const username = localStorage.getItem('admin_username') || 'default';
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=${encodeURIComponent(username)}`, {
+      method: 'POST',
+      headers: { "Authorization": "Bearer " + token },
+      body: formData
+    });
+    const data = await res.json();
+    if(data.success) alert('Tema salvato!');
+    else alert('Errore salvataggio tema');
+  } catch(e) { console.error('Errore save theme:', e); }
 });
 
-// --- Init dopo caricamento DOM
-window.addEventListener("DOMContentLoaded", async () => {
-    await checkAuth();
-    await caricaFontsEdEffetti();
-    aggiornaAnteprima();
-
-    // bind navbar when loaded
-    waitForNavbar((found) => {
-        setupNavbarBindings(found);
-        console.log('Navbar bindings applied');
-    }, 3500);
+window.addEventListener('DOMContentLoaded', async () => {
+  await checkAuth();
+  await caricaFontsEdEffetti();
+  aggiornaAnteprima();
 });
 </script>
 </body>
