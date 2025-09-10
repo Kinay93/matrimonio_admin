@@ -13,10 +13,68 @@ body {
     min-height: 100vh;
 }
 
-/* Evidenziazione link attivo nella navbar */
-.navbar .active {
+/* Header con menu utente */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #2EC4B6;
+    color: white;
+    flex-wrap: wrap;
+}
+
+header h1 {
+    font-size: 1.3rem;
+    margin: 5px 0;
+}
+
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
     font-weight: bold;
-    text-decoration: underline;
+    color: #2EC4B6;
+}
+
+.user-btn img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    min-width: 150px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    z-index: 1000;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+}
+
+.dropdown-menu a:hover {
+    background: #f0f0f0;
 }
 
 /* Container principale */
@@ -127,7 +185,7 @@ footer a:hover {
     background: #a91eb9;
 }
 
-/* Responsive */
+/* Responsive tablet e mobile */
 @media (max-width: 1024px) {
     body { overflow: hidden; }
     .container { flex-direction: column; height: 100vh; }
@@ -156,16 +214,26 @@ footer a:hover {
     footer a { width: 80%; text-align: center; }
 }
 </style>
-<script src="navbar.js" defer></script>
-<script src="script.js" defer></script>
+	  <script src="navbar.js" defer></script>
+	  <script src="script.js" defer></script>
 </head>
 <body>
-  <!-- Navbar -->
   <div id="navbar-placeholder"></div>
-
-  <header>
+    
+<header>
     <h1>Nuovo Evento</h1>
-  </header>
+    <div class="user-menu">
+        <button id="userBtn" class="user-btn">
+            <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+            <span>Admin</span>
+        </button>
+        <div id="dropdownMenu" class="dropdown-menu">
+            <a href="profilo.html">Profilo</a>
+            <a href="temaadmin.html">Temi</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
+</header>
 
 <div class="container">
     <div class="form-col">
@@ -217,40 +285,37 @@ async function checkAuth() {
     }
 }
 
-// --- Evidenzia "Nuovo Evento" in navbar e abilita logout
-function waitForNavbar(callback){
-    const interval = setInterval(() => {
-        const nuovoEventoNav = document.getElementById('navNuovoEvento');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userBtn = document.getElementById('userBtn');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        if(nuovoEventoNav && logoutBtn && userBtn && dropdownMenu){
-            clearInterval(interval);
-            callback(nuovoEventoNav, logoutBtn, userBtn, dropdownMenu);
-        }
-    }, 50);
+// --- Logout
+function logout() {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("admin_username");
+    window.location.href = "login.html";
 }
 
-waitForNavbar((nuovoEventoNav, logoutBtn, userBtn, dropdownMenu) => {
-    nuovoEventoNav.classList.add('active');
+// --- Dropdown menu
+const userBtn = document.getElementById('userBtn');
+const dropdownMenu = document.getElementById('dropdownMenu');
+const username = localStorage.getItem('admin_username') || 'Admin';
+userBtn.querySelector('span').textContent = username;
 
-    // Dropdown username
-    userBtn.querySelector('span').textContent = localStorage.getItem('admin_username') || 'Admin';
-    userBtn.addEventListener('click', () => {
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+userBtn.addEventListener('click', () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+});
+window.addEventListener('click', (e) => {
+        const userBtn = document.getElementById('userBtn');
+  	 if (userBtn) {
+     userBtn.querySelector('span').textContent = localStorage.getItem('admin_username') || 'Admin';
+    
+     const dropdownMenu = document.getElementById('dropdownMenu');
+     userBtn.addEventListener('click', () => {
+      dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+     });
+     window.addEventListener('click', (e) => {
+     if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
+          dropdownMenu.style.display = 'none';
+      }
     });
-    window.addEventListener('click', (e) => {
-        if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
-            dropdownMenu.style.display = 'none';
-        }
-    });
-
-    // Logout
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("admin_username");
-        window.location.href = "login.html";
-    });
+  }
 });
 
 // --- Elementi DOM
@@ -309,8 +374,10 @@ async function caricaFontsEdEffetti() {
 // --- Aggiorna anteprima
 function aggiornaAnteprima() {
     anteprimaFoto.style.backgroundColor = "#ddd";
+    anteprimaFoto.src = anteprimaFoto.src || '';
     anteprimaTesto.style.color = inputTesto.value || "#000000";
     anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
+    // Qui puoi aggiungere logica effetti sfondo / scritta
 }
 
 // --- Aggiorna immagine anteprima al selezionare file
@@ -321,11 +388,11 @@ document.getElementById("fotoEvento").addEventListener("change", (e)=>{
     }
 });
 
-// --- Event listeners
+// --- Event listeners per input/selector
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
-// --- Creazione evento
+// --- Creazione evento con token
 document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
     const nome = document.getElementById("nomeEvento").value.trim();
     const fotoFile = document.getElementById("fotoEvento").files[0];
@@ -346,14 +413,18 @@ document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
     try {
         const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_evento',{
             method:"POST",
-            headers: { "Authorization": `Bearer ${token}` },
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
             body: formData
         });
         const data = await res.json();
         document.getElementById("msg").innerText = data.success ? "Evento creato!" : "Errore: "+(data.error||"imprevisto");
 
         if(data.success){
-            setTimeout(()=>{ window.location.href = "index.html"; }, 1000);
+            setTimeout(()=>{
+                window.location.href = "index.html";
+            }, 1000);
         }
     } catch(err){
         console.error(err);
@@ -361,12 +432,12 @@ document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
     }
 });
 
-// --- Init
-window.addEventListener("DOMContentLoaded", async ()=>{
+// --- Al caricamento pagina
+window.onload = async ()=>{
     await checkAuth();
     await caricaFontsEdEffetti();
     aggiornaAnteprima();
-});
+};
 </script>
 </body>
 </html>
