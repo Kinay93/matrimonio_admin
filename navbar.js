@@ -35,11 +35,7 @@ function initNavbar() {
                 overlay.style.display = 'none';
             } else {
                 mainNav.style.display = 'flex';
-                if(window.innerWidth <= 768){
-                    mainNav.style.flexDirection = 'column';
-                } else {
-                    mainNav.style.flexDirection = 'row';
-                }
+                mainNav.style.flexDirection = window.innerWidth <= 768 ? 'column' : 'row';
                 overlay.style.display = 'block';
             }
         });
@@ -55,10 +51,30 @@ function initNavbar() {
     const usernameLabel = document.getElementById('username-label');
     const linkProfilo = document.getElementById('link-profilo');
     const linkTemi = document.getElementById('link-temi');
+    const linkLogout = document.getElementById('link-logout');
 
     if(usernameLabel) usernameLabel.textContent = username;
-    if(linkProfilo) linkProfilo.href = `profilo.html?admin=${encodeURIComponent(username)}`;
-    if(linkTemi) linkTemi.href = `temaadmin.html?admin=${encodeURIComponent(username)}`;
+
+    if(linkProfilo){
+        linkProfilo.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = `profilo.html?admin=${encodeURIComponent(username)}`;
+        });
+    }
+
+    if(linkTemi){
+        linkTemi.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = `temaadmin.html?admin=${encodeURIComponent(username)}`;
+        });
+    }
+
+    if(linkLogout){
+        linkLogout.addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+    }
 
     // --- Nascondi link della pagina corrente
     const currentPage = window.location.pathname.split('/').pop().replace('.html','');
