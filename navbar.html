@@ -1,32 +1,32 @@
 <div id="navbar-container">
-<header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#2EC4B6; color:white; font-family:'Segoe UI', sans-serif; position:relative; z-index:102;">
-  <!-- Pulsante hamburger -->
-  <button id="menu-toggle" style="font-size:24px; background:none; border:none; color:white; cursor:pointer;">☰</button>
+  <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#2EC4B6; color:white; font-family:'Segoe UI', sans-serif; position:relative; z-index:102;">
+    <!-- Pulsante hamburger -->
+    <button id="menu-toggle" style="font-size:24px; background:none; border:none; color:white; cursor:pointer;">☰</button>
 
-  <!-- Titolo -->
-  <h1 style="margin:0; font-size:1.5em;">Header di esempio</h1>
+    <!-- Titolo -->
+    <h1 style="margin:0; font-size:1.5em;">Header di esempio</h1>
 
-  <!-- Dropdown Admin -->
-  <div class="user-menu" style="position:relative;">
-    <button id="user-btn" style="display:flex; align-items:center; gap:8px; background:white; color:#2EC4B6; border:none; border-radius:20px; padding:6px 12px; cursor:pointer;">
-      <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" style="width:28px;height:28px;border-radius:50%;">
-      <span id="username-label">Admin</span>
-    </button>
-    <div id="dropdown-menu" style="display:none; position:absolute; right:0; top:40px; background:white; border-radius:8px; min-width:150px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:103;">
-      <a href="#" id="link-profilo" style="display:block;padding:10px;text-decoration:none;color:#333;">Profilo</a>
-      <a href="#" id="link-temi" style="display:block;padding:10px;text-decoration:none;color:#333;">Temi</a>
-      <a href="#" onclick="logout()" style="display:block;padding:10px;text-decoration:none;color:#333;">Logout</a>
+    <!-- Dropdown Admin -->
+    <div class="user-menu" style="position:relative;">
+      <button id="user-btn" style="display:flex; align-items:center; gap:8px; background:white; color:#2EC4B6; border:none; border-radius:20px; padding:6px 12px; cursor:pointer;">
+        <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" style="width:28px;height:28px;border-radius:50%;">
+        <span id="username-label">Admin</span>
+      </button>
+      <div id="dropdown-menu" style="display:none; position:absolute; right:0; top:40px; background:white; border-radius:8px; min-width:150px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:103;">
+        <a href="#" id="link-profilo" style="display:block;padding:10px;text-decoration:none;color:#333;">Profilo</a>
+        <a href="#" id="link-temi" style="display:block;padding:10px;text-decoration:none;color:#333;">Temi</a>
+        <a href="#" onclick="logout()" style="display:block;padding:10px;text-decoration:none;color:#333;">Logout</a>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<!-- Overlay mobile -->
-<div id="mobile-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:100;"></div>
+  <!-- Overlay mobile -->
+  <div id="mobile-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:100;"></div>
 
-<!-- Barra link principale -->
-<nav id="main-nav" style="display:flex; gap:15px; padding:10px 20px; background:#3AAFA9; color:white; font-weight:bold; font-family:'Segoe UI', sans-serif; flex-wrap:wrap; z-index:101; position:relative;">
-  <a href="home.html" data-page="home" style="color:white;text-decoration:none;">Home</a>
-  <a href="marketplace.html" data-page="marketplace" style="color:white;text-decoration:none;">Marketplace</a>
-  <a href="index.html" data-page="coppie" style="color:white;text-decoration:none;">I tuoi eventi</a>
-</nav>
+  <!-- Barra link principale -->
+  <nav id="main-nav" style="display:flex; gap:15px; padding:10px 20px; background:#3AAFA9; color:white; font-weight:bold; font-family:'Segoe UI', sans-serif; flex-wrap:wrap; z-index:101; position:relative;">
+    <a href="home.html" data-page="home" style="color:white;text-decoration:none;">Home</a>
+    <a href="marketplace.html" data-page="marketplace" style="color:white;text-decoration:none;">Marketplace</a>
+    <a href="index.html" data-page="coppie" style="color:white;text-decoration:none;">I tuoi eventi</a>
+  </nav>
 </div>
