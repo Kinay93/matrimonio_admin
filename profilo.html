@@ -19,6 +19,28 @@
   </div>
 
   <script>
+    async function checkAuth() {
+      const token = localStorage.getItem("auth_token");
+      const username = localStorage.getItem("admin_username");
+      if(!token || !username) {
+        window.location.href = "login.html";
+        return;
+      }
+      try {
+        const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token }});
+        const data = await res.json();
+        if(!data.success){
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("admin_username");
+          window.location.href = "login.html";
+        }
+      } catch(err){
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("admin_username");
+        window.location.href = "login.html";
+      }
+    }
+
     async function caricaProfilo() {
       const username = localStorage.getItem('admin_username');
       if (!username) {
@@ -47,22 +69,6 @@
       } catch(err) {
         document.getElementById('profile-info').innerHTML = "<p>Errore di connessione.</p>";
         console.error(err);
-      }
-    }
-
-    async function checkAuth() {
-      const token = localStorage.getItem("auth_token");
-      if(!token) window.location.href = "login.html";
-      try {
-        const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token }});
-        const data = await res.json();
-        if(!data.success){
-          localStorage.removeItem("auth_token");
-          window.location.href = "login.html";
-        }
-      } catch(err) {
-        localStorage.removeItem("auth_token");
-        window.location.href = "login.html";
       }
     }
 
