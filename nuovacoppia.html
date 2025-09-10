@@ -210,7 +210,16 @@ footer a:hover {
 </style>
 </head>
 <body>
+  <div id="navbar-container"></div>
 
+  <!-- Script per caricare la navbar -->
+  <script>
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-container").innerHTML = html;
+      });
+  </script>
 <header>
     <h1>Nuova Coppia</h1>
     <div class="user-menu">
