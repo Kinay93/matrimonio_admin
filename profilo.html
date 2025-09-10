@@ -1,236 +1,59 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<title>Profilo Utente</title>
-<link rel="stylesheet" href="style.css">
-<style>
-body {
-    margin: 0;
-    font-family: sans-serif;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-    background-color: #2EC4B6;
-    color: white;
-    flex-wrap: wrap;
-}
-
-header h1 {
-    font-size: 1.3rem;
-    margin: 5px 0;
-}
-
-.user-menu {
-    position: relative;
-    display: inline-block;
-}
-
-.user-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: white;
-    border: none;
-    border-radius: 20px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #2EC4B6;
-}
-
-.user-btn img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 45px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    min-width: 150px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    z-index: 1000;
-}
-
-.dropdown-menu a {
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    color: #333;
-}
-
-.dropdown-menu a:hover {
-    background: #f0f0f0;
-}
-
-.container {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    padding: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 10px;
-}
-
-input[type="text"], input[type="email"], input[type="password"] {
-    width: 100%;
-    padding: 6px 8px;
-    margin-top: 4px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-}
-
-button {
-    background: #2EC4B6;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-button:hover {
-    background: #279d94;
-}
-
-#msg {
-    margin-top: 10px;
-    font-weight: bold;
-    color: green;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Profilo Amministratore</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <div id="navbar-container"></div>
-
-  <!-- Script per caricare la navbar -->
+  <!-- Navbar inclusa -->
+  <div id="navbar-placeholder"></div>
   <script>
-    fetch("navbar.html")
+    fetch('navbar.html')
       .then(res => res.text())
-      .then(html => {
-        document.getElementById("navbar-container").innerHTML = html;
-      });
+      .then(html => document.getElementById('navbar-placeholder').innerHTML = html)
+      .catch(err => console.error('Errore caricamento navbar:', err));
   </script>
-<header>
-    <h1>Profilo Utente</h1>
-    <div class="user-menu">
-        <button id="userBtn" class="user-btn">
-            <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
-            <span>Admin</span>
-        </button>
-        <div id="dropdownMenu" class="dropdown-menu">
-            <a href="profilo.html">Profilo</a>
-            <a href="temaadmin.html">Temi</a>
-            <a href="#" onclick="logout()">Logout</a>
-        </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <h2>Profilo Admin</h2>
+    <div id="profile-info">
+      <p><i>Caricamento dati utente...</i></p>
     </div>
-</header>
+  </div>
 
-<div class="container">
-    <label>Nome:<input type="text" id="nome" disabled></label>
-    <label>Cognome:<input type="text" id="cognome" disabled></label>
-    <label>Email:<input type="email" id="email" placeholder="Email"></label>
-    <label>Password:<input type="password" id="password" placeholder="Nuova password"></label>
-    <button id="aggiornaUtenteBtn">Aggiorna Dati</button>
-    <div id="msg"></div>
-</div>
-
-<script>
-async function checkAuth() {
-    const token = localStorage.getItem("auth_token");
-    if(!token){
-        window.location.href = "/login_page";
+  <script>
+    async function caricaProfilo() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const username = urlParams.get('username') || localStorage.getItem('admin_username');
+      if (!username) {
+        document.getElementById('profile-info').innerHTML = "<p>Errore: utente non trovato.</p>";
         return;
-    }
+      }
 
-    try {
-        const res = await fetch("/me", {
-            headers: { "Authorization": "Bearer " + token }
-        });
+      try {
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/get_user?username=${encodeURIComponent(username)}`);
         const data = await res.json();
-        if(!data.success){
-            localStorage.removeItem("auth_token");
-            window.location.href = "/login_page";
+        if(data.success) {
+          const u = data.user;
+          document.getElementById('profile-info').innerHTML = `
+            <p><b>Username:</b> ${u.username}</p>
+            <p><b>Email:</b> ${u.email}</p>
+            <p><b>Nome:</b> ${u.nome || '-'}</p>
+            <p><b>Cognome:</b> ${u.cognome || '-'}</p>
+          `;
         } else {
-            // popola campi con dati utente
-            document.getElementById("nome").value = data.nome || "";
-            document.getElementById("cognome").value = data.cognome || "";
-            document.getElementById("email").value = data.email || "";
-            localStorage.setItem("admin_username", data.username); // salva username per aggiornamento
+          document.getElementById('profile-info').innerHTML = "<p>Utente non trovato.</p>";
         }
-    } catch(err){
-        localStorage.removeItem("auth_token");
-        window.location.href = "/login_page";
-    }
-}
-
-checkAuth();
-
-// Dropdown utente
-const userBtn = document.getElementById('userBtn');
-const dropdownMenu = document.getElementById('dropdownMenu');
-userBtn.addEventListener('click', () => {
-    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-});
-window.addEventListener('click', (e) => {
-    if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
-        dropdownMenu.style.display = 'none';
-    }
-});
-
-function logout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("admin_username");
-    window.location.href = "login.html";
-}
-
-// Aggiorna dati utente
-document.getElementById("aggiornaUtenteBtn").addEventListener("click", async () => {
-    const username = localStorage.getItem("admin_username");
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    if(!email && !password){
-        alert("Inserisci almeno un campo da aggiornare");
-        return;
-    }
-
-    try {
-        const res = await fetch("/update_user", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ username, email, password })
-        });
-
-        const data = await res.json();
-        if(data.success){
-            document.getElementById("msg").innerText = "Dati aggiornati correttamente!";
-        } else {
-            document.getElementById("msg").innerText = "Errore: " + (data.error || "imprevisto");
-        }
-    } catch(err){
+      } catch(err) {
+        document.getElementById('profile-info').innerHTML = "<p>Errore di connessione.</p>";
         console.error(err);
-        document.getElementById("msg").innerText = "Errore di connessione";
+      }
     }
-});
-</script>
+
+    document.addEventListener("DOMContentLoaded", caricaProfilo);
+  </script>
 </body>
 </html>
