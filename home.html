@@ -4,20 +4,16 @@
   <meta charset="UTF-8">
   <title>Home Amministratore</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- Lo script della navbar include anche la logica responsive -->
+  <script src="navbar.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
-  <!-- Navbar inclusa -->
+  <!-- Navbar inclusa dinamicamente -->
   <div id="navbar-placeholder"></div>
-  <script>
-    fetch('navbar.html')
-      .then(res => res.text())
-      .then(html => document.getElementById('navbar-placeholder').innerHTML = html)
-      .catch(err => console.error('Errore caricamento navbar:', err));
-  </script>
 
   <!-- MAIN CONTENT -->
-  <div class="main-content">
+  <div class="main-content" style="padding:20px;">
     <h2>Benvenuto nella Home!</h2>
     <p>Qui compariranno le informazioni prese da siti esterni (notizie, aggiornamenti, feed, ecc.).</p>
     <div id="feed"><p><i>Caricamento informazioni...</i></p></div>
@@ -39,6 +35,7 @@
         feed.innerHTML = "<p>Errore nel caricare le informazioni esterne.</p>";
       }
     }
+
     document.addEventListener("DOMContentLoaded", caricaFeed);
   </script>
 </body>
