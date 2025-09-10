@@ -1,343 +1,360 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<title>Nuovo Evento</title>
-<link rel="stylesheet" href="style.css">
-<style>
-/* (il tuo CSS rimane praticamente invariato) */
-body {
-    margin: 0;
-    font-family: sans-serif;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-.container { display:flex; flex:1; height:100vh; overflow:hidden; }
-.form-col { flex:1; padding:20px; overflow-y:auto; border-right:1px solid #ccc; box-sizing:border-box; }
-.anteprima-col { flex:1; padding:20px; position:sticky; top:0; height:100vh; box-sizing:border-box; }
-#anteprima { width:80%; height:80%; max-width:400px; max-height:400px; border-radius:12px; overflow:hidden;
-    display:flex; align-items:center; justify-content:center; transition: background 200ms ease, color 200ms ease; }
-#anteprimaFoto { width:150px; height:150px; border-radius:10px; object-fit:cover; background:#eee; }
-#anteprimaTesto { position:absolute; top:12px; left:12px; font-size:24px; }
-footer { position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; padding:10px; background:rgba(255,255,255,0.9); box-shadow:0 -2px 5px rgba(0,0,0,0.1); }
-footer a { text-decoration:none; background:#c235d4; color:white; padding:10px 20px; border-radius:20px; }
-</style>
-
-<!-- Carica la navbar dinamica (defer per eseguire prima del nostro script inline se possibile) -->
-<script src="navbar.js" defer></script>
+  <meta charset="UTF-8">
+  <title>Modifica Evento</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="navbar.js" defer></script>
+  <script src="script.js" defer></script>
+  <style>
+    /* Stili base (mantieni i tuoi style.css per il resto) */
+    body { margin: 0; font-family: sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+    .container { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; padding-top: 10px; box-sizing: border-box; }
+    .form-col { flex: 1; display:flex; flex-direction:column; gap:10px; padding:20px; overflow-y:auto; border-right:1px solid #ccc; box-sizing:border-box; }
+    .anteprima-col { flex:1; display:flex; flex-direction:column; align-items:center; padding:20px; box-sizing:border-box; }
+    #anteprima { width:80%; height:80%; display:flex; align-items:center; justify-content:center; border:1px solid #ccc; margin-top:20px; position:relative; max-width:420px; max-height:420px; border-radius:10px; overflow:hidden; background:#fff; }
+    #anteprimaFoto { width:150px; height:150px; background:#ddd; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#666; object-fit:cover; }
+    #anteprimaTesto { position:absolute; top:12px; left:12px; font-size:22px; pointer-events:none; }
+    .overlay { position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; }
+    footer { position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; padding:10px; background:rgba(255,255,255,0.95); box-shadow:0 -2px 6px rgba(0,0,0,0.08); }
+    footer a { text-decoration:none; background:#c235d4; color:#fff; padding:10px 18px; border-radius:20px; font-weight:bold; }
+    @media(max-width:1024px){ .container{flex-direction:column;height:auto} .anteprima-col{position:static;height:auto} }
+  </style>
 </head>
 <body>
-  <!-- Placeholder per navbar -->
+  <!-- navbar sarà inserita qui da navbar.js -->
   <div id="navbar-placeholder"></div>
 
-  <header>
-    <h1>Nuovo Evento</h1>
-  </header>
-
-<div class="container">
+  <div class="container">
     <div class="form-col">
-        <label>Nome evento:<input type="text" id="nomeEvento" placeholder="Nome evento"></label>
-        <label>Foto evento:<input type="file" id="fotoEvento" accept="image/*"></label>
-
-        <!-- hidden tipo (server richiede "tipo") -->
-        <input type="hidden" id="tipoEvento" value="evento">
-
-        <label>Colore sfondo primario:<input type="color" id="colorSfondo" value="#ffffff"></label>
-        <label>Colore sfondo secondario:<input type="color" id="colorSfondoSecondario" value="#eeeeee"></label>
-        <label>Colore testo:<input type="color" id="colorTesto" value="#000000"></label>
-        <label>Font:<select id="fontScelto"></select></label>
-        <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
-        <label>Effetto scritta:<select id="effettoScritta"></select></label>
-        <button id="creaEventoBtn">Crea Evento</button>
-        <div id="msg" style="margin-top:10px;font-weight:bold;"></div>
+      <label>Nome evento:<input type="text" id="nomeEvento" disabled></label>
+      <label>Foto evento:<input type="file" id="fotoEvento" accept="image/*"></label>
+      <label>Colore sfondo primario:<input type="color" id="sfondo"></label>
+      <label>Colore sfondo secondario:<input type="color" id="sfondoSecondario"></label>
+      <label>Colore testo:<input type="color" id="testo"></label>
+      <label>Font:<select id="font"></select></label>
+      <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
+      <label>Effetto scritta:<select id="effettoScritta"></select></label>
+      <button id="aggiornaEventoBtn">Aggiorna evento</button>
+      <div id="msg" style="margin-top:8px;font-weight:bold"></div>
     </div>
 
     <div class="anteprima-col">
-        <h3>Anteprima</h3>
-        <div id="anteprima" style="background:linear-gradient(135deg,#ffffff,#eeeeee); position:relative;">
-            <img id="anteprimaFoto" src="" alt="Foto Evento">
-            <span id="anteprimaTesto">Titolo Evento</span>
-        </div>
+      <h3>Anteprima</h3>
+      <div id="anteprima">
+        <img id="anteprimaFoto" src="" alt="Foto evento">
+        <span id="anteprimaTesto">Titolo Evento</span>
+      </div>
     </div>
-</div>
+  </div>
 
-<footer>
-    <a href="index.html" id="home-btn">Menu</a>
-</footer>
+  <footer>
+    <a href="index.html" id="home-btn">Home</a>
+  </footer>
 
 <script>
-/*
-  Fixes applicati:
-  - waitForNavbar + setupNavbarBindings: aggancia correttamente il toggle della dropdown
-  - formData ora include 'tipo' e 'admin' (se presente)
-  - debug console.log sulla response dal server per vedere esatto errore
-*/
-
-// --- Controllo autenticazione
-async function checkAuth() {
-    const token = localStorage.getItem("auth_token");
-    if(!token) {
-        console.warn("Token mancante: redirect a login");
-        window.location.href = "login.html";
-        return;
-    }
-    try {
-        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", {
-            headers: { "Authorization": "Bearer " + token }
-        });
-        const data = await res.json();
-        console.log("checkAuth /me:", data);
-        if(!data.success){
-            localStorage.removeItem("auth_token");
-            localStorage.removeItem("admin_username");
-            window.location.href = "login.html";
-        } else {
-            if(data.username) localStorage.setItem("admin_username", data.username);
-        }
-    } catch(err){
-        console.error("Errore checkAuth:", err);
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("admin_username");
-        window.location.href = "login.html";
-    }
-}
-
-// --- Attende la navbar caricata e restituisce elementi utili
-function waitForNavbar(callback, timeout = 4000) {
-    const start = Date.now();
-    const iv = setInterval(() => {
-        // supporta diversi nomi di id (user-btn / userBtn, dropdown-menu / dropdownMenu)
-        const userBtn = document.querySelector('#user-btn, #userBtn');
-        const dropdown = document.querySelector('#dropdown-menu, #dropdownMenu');
-        const logoutLink = document.querySelector('#link-logout, #logoutBtn, a[data-action="logout"]');
-        const mainNav = document.querySelector('#main-nav');
-        if (userBtn && dropdown && mainNav) {
-            clearInterval(iv);
-            callback({ userBtn, dropdown, logoutLink, mainNav });
-            return;
-        }
-        if (Date.now() - start > timeout) {
-            clearInterval(iv);
-            console.warn('waitForNavbar: timeout, la navbar potrebbe avere id diversi o non essere caricata.');
-        }
-    }, 60);
-}
-
-// --- Imposta i binding per la dropdown della navbar
-function setupNavbarBindings({ userBtn, dropdown, logoutLink }) {
-    try {
-        // Aggiorna label username se presente #username-label o lo span interno
-        const usernameLabel = document.querySelector('#username-label') || (userBtn ? userBtn.querySelector('span') : null);
-        if (usernameLabel) {
-            usernameLabel.textContent = localStorage.getItem('admin_username') || usernameLabel.textContent || 'Admin';
-        }
-
-        // Toggle dropdown on user button click
-        userBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = dropdown.style.display === 'block' || dropdown.classList.contains('open');
-            if (isOpen) {
-                dropdown.style.display = 'none';
-                dropdown.classList.remove('open');
-            } else {
-                dropdown.style.display = 'block';
-                dropdown.classList.add('open');
-            }
-        });
-
-        // Close dropdown clicking outside
-        window.addEventListener('click', (e) => {
-            if (!userBtn.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
-                dropdown.classList.remove('open');
-            }
-        });
-
-        // Logout binding
-        if (logoutLink) {
-            logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
-        } else {
-            // fallback: cerca link "Logout" dentro dropdown
-            const possible = Array.from(dropdown.querySelectorAll('a')).find(a => /logout/i.test(a.textContent));
-            if (possible) possible.addEventListener('click', (e) => { e.preventDefault(); logout(); });
-        }
-    } catch (err) {
-        console.error("setupNavbarBindings error:", err);
-    }
-}
-
-// --- Logout
+/* ========== Helpers & Auth ========== */
 function logout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("admin_username");
-    window.location.href = "login.html";
+  localStorage.removeItem("auth_token");
+  localStorage.removeItem("admin_username");
+  window.location.href = "login.html";
 }
 
-// --- DOM elements
+async function checkAuth() {
+  const token = localStorage.getItem("auth_token");
+  if(!token) { logout(); return; }
+  try {
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { headers: { "Authorization": "Bearer " + token }});
+    const data = await res.json();
+    if(!data || !data.success) { logout(); return; }
+    // opzionale: aggiorna admin_username se server ritorna username
+    if(data.username) localStorage.setItem("admin_username", data.username);
+  } catch(e) {
+    console.error("checkAuth error", e);
+    logout();
+  }
+}
+
+/* ========== Attendi che la navbar sia stata caricata e inizializzata ========== */
+function whenNavbarReady(cb){
+  const interval = setInterval(()=>{
+    const userBtn = document.getElementById('user-btn'); // id usato in navbar.js
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    const mainNav = document.getElementById('main-nav');
+    const logoutLink = document.getElementById('link-logout'); // id usato in navbar.html/js
+    if(userBtn && dropdownMenu && mainNav){
+      clearInterval(interval);
+      cb({ userBtn, dropdownMenu, mainNav, logoutLink });
+    }
+  }, 50);
+}
+
+/* setup integrazione navbar: mostra username e gestisce dropdown (no crash se elementi non presenti) */
+function setupNavbarIntegration(){
+  whenNavbarReady(({userBtn, dropdownMenu, mainNav, logoutLink})=>{
+    const username = localStorage.getItem('admin_username') || 'Admin';
+    // aggiorna label se presente
+    const usernameLabel = document.getElementById('username-label');
+    if(usernameLabel) usernameLabel.textContent = username;
+    // aggiorna span interno se presente
+    try { const span = userBtn.querySelector('span'); if(span) span.textContent = username; } catch(e){}
+
+    // toggle dropdown (navbar may already do this, but ensure works)
+    userBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block'; });
+
+    window.addEventListener('click', (ev)=>{
+      if(!userBtn.contains(ev.target) && !dropdownMenu.contains(ev.target)){
+        dropdownMenu.style.display = 'none';
+      }
+    });
+
+    // override/attach logout action
+    if(logoutLink){
+      logoutLink.addEventListener('click', (e)=>{ e.preventDefault(); logout(); });
+    }
+  });
+}
+
+/* ========== DOM elements ========== */
+const params = new URLSearchParams(window.location.search);
+const nomeEventoParam = params.get("evento");
+
+const inputNome = document.getElementById("nomeEvento");
+const inputFoto = document.getElementById("fotoEvento");
+const inputSfondo = document.getElementById("sfondo");
+const inputSfondoSecondario = document.getElementById("sfondoSecondario");
+const inputTesto = document.getElementById("testo");
+const selectFont = document.getElementById("font");
+const selectEffettoSfondo = document.getElementById("effettoSfondo");
+const selectEffettoScritta = document.getElementById("effettoScritta");
+const btnAggiorna = document.getElementById("aggiornaEventoBtn");
+const msgDiv = document.getElementById("msg");
+
 const anteprima = document.getElementById("anteprima");
 const anteprimaFoto = document.getElementById("anteprimaFoto");
 const anteprimaTesto = document.getElementById("anteprimaTesto");
-const inputSfondo = document.getElementById("colorSfondo");
-const inputSfondoSecondario = document.getElementById("colorSfondoSecondario");
-const inputTesto = document.getElementById("colorTesto");
-const selectFont = document.getElementById("fontScelto");
-const selectEffettoSfondo = document.getElementById("effettoSfondo");
-const selectEffettoScritta = document.getElementById("effettoScritta");
-const tipoEventoInput = document.getElementById("tipoEvento");
 
-let effettiScritta = [];
-let effettiSfondo = [];
-let fonts = [];
+/* ========== Fonts & Effetti ========== */
+let fonts = [], effettiSfondo = [], effettiScritta = [];
 
-// --- Carica fonts ed effetti da API (invia token quando presente)
-async function caricaFontsEdEffetti() {
-    const token = localStorage.getItem("auth_token");
-    const headers = token ? { "Authorization": "Bearer " + token } : {};
-    try {
-        const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { headers });
-        const dataFonts = await resFonts.json();
-        fonts = dataFonts.fonts || [];
-        selectFont.innerHTML = '';
-        fonts.forEach(f => {
-            const o = document.createElement('option');
-            o.value = f.css_family || f.name || f;
-            o.textContent = f.name || f.css_family || f;
-            o.style.fontFamily = f.css_family || '';
-            selectFont.appendChild(o);
-        });
+async function caricaFontsEdEffetti(){
+  const token = localStorage.getItem("auth_token");
+  try {
+    const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { headers: { "Authorization": "Bearer " + token }});
+    const dataFonts = await resFonts.json();
+    fonts = dataFonts.fonts || [];
+    selectFont.innerHTML = "";
+    fonts.forEach(f=>{
+      const o = document.createElement("option");
+      o.value = f.css_family || f;
+      o.textContent = f.name || f;
+      o.style.fontFamily = f.css_family || "";
+      selectFont.appendChild(o);
+    });
+  } catch(e){ console.warn("get_fonts failed", e); }
 
-        const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { headers });
-        const dataEffetti = await resEffetti.json();
-        effettiSfondo = dataEffetti.sfondo || [];
-        effettiScritta = dataEffetti.scritta || [];
-
-        selectEffettoSfondo.innerHTML = '';
-        effettiSfondo.forEach(e => {
-            const o = document.createElement('option');
-            o.value = e.id || e.name || '';
-            o.textContent = e.name || e.id || '';
-            selectEffettoSfondo.appendChild(o);
-        });
-
-        selectEffettoScritta.innerHTML = '';
-        effettiScritta.forEach(e => {
-            const o = document.createElement('option');
-            o.value = e.id || e.name || '';
-            o.textContent = e.name || e.id || '';
-            selectEffettoScritta.appendChild(o);
-        });
-    } catch (err) {
-        console.error("caricaFontsEdEffetti error:", err);
-    }
+  try {
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { headers: { "Authorization": "Bearer " + token }});
+    const data = await res.json();
+    effettiSfondo = data.sfondo || [];
+    effettiScritta = data.scritta || [];
+    selectEffettoSfondo.innerHTML = "";
+    effettiSfondo.forEach(e => { const o=document.createElement("option"); o.value = e.id || ""; o.textContent = e.name || e.id || ""; selectEffettoSfondo.appendChild(o); });
+    selectEffettoScritta.innerHTML = "";
+    effettiScritta.forEach(e => { const o=document.createElement("option"); o.value = e.id || ""; o.textContent = e.name || e.id || ""; selectEffettoScritta.appendChild(o); });
+  } catch(e){ console.warn("get_effetti failed", e); }
 }
 
-// --- Aggiorna anteprima (applica gradient + testo + font)
-function aggiornaAnteprima() {
-    const bg1 = inputSfondo.value || '#ffffff';
-    const bg2 = inputSfondoSecondario.value || bg1;
-    anteprima.style.background = `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`;
+/* ========== Carica dati evento dal server ========== */
+async function caricaDatiEvento(){
+  if(!nomeEventoParam){
+    msgDiv.textContent = "Parametro evento mancante nell'URL";
+    return;
+  }
+  const token = localStorage.getItem("auth_token");
+  try {
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${encodeURIComponent(nomeEventoParam)}`, { headers: { "Authorization": "Bearer " + token }});
+    if(!res.ok){ console.warn("get_evento non ok", res.status); }
+    const data = await res.json();
+    if(data.error){ msgDiv.textContent = "Evento non trovato: " + (data.error||""); return; }
 
-    const textColor = inputTesto.value || '#000';
-    anteprimaTesto.style.color = textColor;
-    anteprimaTesto.style.fontFamily = selectFont.value || 'Arial';
+    // riempi i campi con i dati ricevuti
+    inputNome.value = nomeEventoParam;
+    inputSfondo.value = data.sfondo || "#ffffff";
+    inputSfondoSecondario.value = data.sfondo_secondario || data.sfondo_secondario || "#eeeeee";
+    inputTesto.value = data.testo || "#000000";
+    selectFont.value = data.font || selectFont.value || "Arial";
+    selectEffettoSfondo.value = data.effetto_sfondo || "";
+    selectEffettoScritta.value = data.effetto_scritta || "";
 
-    // Effetto scritta (se presente)
-    const eff = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
-    if (eff && eff.css) {
-        eff.css.split(';').forEach(rule => {
-            if (!rule.trim()) return;
-            const [propRaw, ...valParts] = rule.split(':');
-            const prop = propRaw && propRaw.trim();
-            const val = valParts.join(':') && valParts.join(':').trim();
-            if (prop && val) anteprimaTesto.style.setProperty(prop, val.replace(/var\(--text-color\)/g, textColor));
-        });
+    // foto: se presente mostra
+    if(data.foto_url){
+      // se è un URL pubblico
+      anteprimaFoto.src = data.foto_url;
+    } else {
+      anteprimaFoto.src = "";
+      anteprimaFoto.style.background = "#ddd";
     }
+    anteprimaTesto.textContent = data.titolo_index || nomeEventoParam;
+    aggiornaAnteprima();
+  } catch(e){
+    console.error("caricaDatiEvento error", e);
+    msgDiv.textContent = "Errore caricamento evento.";
+  }
 }
 
-// --- gestione file immagine (anteprima)
-document.getElementById("fotoEvento").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        anteprimaFoto.src = URL.createObjectURL(file);
+/* ========== Anteprima in tempo reale ========== */
+function hexToRgb(hex){
+  if(!hex) return "255,255,255";
+  hex = hex.replace('#','');
+  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('');
+  const n = parseInt(hex,16);
+  return `${(n>>16)&255},${(n>>8)&255},${n&255}`;
+}
+
+function applyEffettoScritta(effId){
+  const eff = effettiScritta.find(e => String(e.id) === String(effId));
+  if(!eff || !eff.css) return;
+  // eff.css expected as "prop:value;prop2:value2;"
+  eff.css.split(';').forEach(rule=>{
+    if(!rule.trim()) return;
+    const [prop, ...rest] = rule.split(':');
+    const val = rest.join(':').trim();
+    if(prop && val){
+      anteprimaTesto.style.setProperty(prop.trim(), val);
     }
+  });
+}
+
+function applyEffettoSfondo(effId){
+  const eff = effettiSfondo.find(e => String(e.id) === String(effId));
+  if(!eff || !eff.css) return;
+  // applichiamo regole di sfondo al contenitore #anteprima
+  eff.css.split(';').forEach(rule=>{
+    if(!rule.trim()) return;
+    const [prop, ...rest] = rule.split(':');
+    const val = rest.join(':').trim();
+    if(prop && val){
+      anteprima.style.setProperty(prop.trim(), val);
+    }
+  });
+}
+
+function aggiornaAnteprima(){
+  // ripulisce prima le proprietà dinamiche usate
+  anteprima.style.background = inputSfondo.value || "#ffffff";
+  anteprima.style.removeProperty('background-image');
+  anteprima.style.removeProperty('background-size');
+  anteprima.style.removeProperty('background-position');
+  anteprima.style.removeProperty('background-repeat');
+  anteprima.style.removeProperty('filter');
+
+  anteprimaTesto.style.color = inputTesto.value || "#000000";
+  anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
+
+  // applica effetti (se presenti) - prima reset
+  anteprimaTesto.style.cssText += ""; // nulla, serve a mantenere l'oggetto
+  // restore minimal props (we rely on inline styles above)
+
+  // effetto scritta
+  if(selectEffettoScritta.value){
+    applyEffettoScritta(selectEffettoScritta.value);
+  }
+
+  // effetto sfondo
+  if(selectEffettoSfondo.value){
+    // per sicurezza: usa i placeholders --bg-color e --bg-color-rgb
+    const bgRgb = hexToRgb(inputSfondo.value || "#ffffff");
+    const bgSecondRgb = hexToRgb(inputSfondoSecondario.value || "#eeeeee");
+
+    // alcuni effetti possono contenere url() o gradienti già impostati: applichiamoli tramite applyEffettoSfondo
+    applyEffettoSfondo(selectEffettoSfondo.value);
+
+    // se l'effetto non ha overlay, possiamo creare un overlay leggero
+    // (la logica qui rimane compatibile con i css passati dal server)
+    // se l'effetto ha url(...) la proprietà background-image verrà impostata da applyEffettoSfondo
+  }
+
+  // se l'utente ha caricato un'immagine locale -> rimostralo
+  // (anteprimaFoto.src è aggiornata nell'event listener filechange)
+}
+
+/* file input preview */
+inputFoto.addEventListener('change', (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  try {
+    const url = URL.createObjectURL(f);
+    anteprimaFoto.src = url;
+    anteprimaFoto.style.objectFit = 'cover';
+  } catch(e){ console.error(e); }
 });
 
-// listeners per aggiornare anteprima
+/* input listeners per aggiornamento in tempo reale */
 [inputSfondo, inputSfondoSecondario, inputTesto].forEach(el => el.addEventListener('input', aggiornaAnteprima));
 [selectFont, selectEffettoSfondo, selectEffettoScritta].forEach(el => el.addEventListener('change', aggiornaAnteprima));
 
-// --- Creazione evento (POST con token) - ora include tipo e admin
-document.getElementById("creaEventoBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById("nomeEvento").value.trim();
-    const fotoFile = document.getElementById("fotoEvento").files[0];
-    if (!nome || !fotoFile) { alert("Inserisci nome e foto"); return; }
+/* ========== Salvataggio evento (POST) ========== */
+btnAggiorna.addEventListener('click', async ()=>{
+  btnAggiorna.disabled = true;
+  msgDiv.textContent = "";
+  const token = localStorage.getItem("auth_token");
+  const admin = localStorage.getItem("admin_username") || "";
 
-    const formData = new FormData();
-    formData.append("nome_evento", nome);
-    formData.append("foto_evento", fotoFile);
-    formData.append("sfondo", inputSfondo.value || '');
-    formData.append("sfondo_secondario", inputSfondoSecondario.value || '');
-    formData.append("testo", inputTesto.value || '');
-    formData.append("font", selectFont.value || '');
-    formData.append("effetto_sfondo", selectEffettoSfondo.value || '');
-    formData.append("effetto_scritta", selectEffettoScritta.value || '');
+  if(!admin){
+    msgDiv.textContent = "Utente admin non presente (login).";
+    btnAggiorna.disabled = false; return;
+  }
 
-    // aggiungo tipo (server lo richiede)
-    formData.append("tipo", tipoEventoInput.value || "evento");
+  const fd = new FormData();
+  fd.append("nome_evento", nomeEventoParam);
+  fd.append("admin", admin);
+  const f = inputFoto.files[0];
+  if(f) fd.append("foto_evento", f);
+  fd.append("sfondo", inputSfondo.value || "");
+  fd.append("sfondo_secondario", inputSfondoSecondario.value || "");
+  fd.append("testo", inputTesto.value || "");
+  fd.append("font", selectFont.value || "");
+  fd.append("effetto_sfondo", selectEffettoSfondo.value || "");
+  fd.append("effetto_scritta", selectEffettoScritta.value || "");
 
-    // admin - utile se server lo richiede esplicitamente
-    const adminName = localStorage.getItem('admin_username');
-    if (adminName) formData.append("admin", adminName);
-
-    const token = localStorage.getItem("auth_token");
-    const headers = token ? { "Authorization": `Bearer ${token}` } : {};
-
-    try {
-        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_evento', {
-            method: "POST",
-            headers, // non impostare Content-Type: fetch lo gestisce per FormData
-            body: formData
-        });
-
-        // debug: stampa status e body
-        const text = await res.text();
-        let json;
-        try { json = JSON.parse(text); } catch(_) { json = { raw: text }; }
-        console.log('crea_evento response status:', res.status, json);
-
-        if (!res.ok) {
-            document.getElementById("msg").innerText = "Errore server: " + (json.error || JSON.stringify(json));
-            return;
-        }
-
-        if (json.success) {
-            document.getElementById("msg").innerText = "Evento creato!";
-            setTimeout(() => { window.location.href = "index.html"; }, 800);
-        } else {
-            document.getElementById("msg").innerText = "Errore: " + (json.error || 'imprevisto');
-        }
-    } catch (err) {
-        console.error('Errore fetch crea_evento:', err);
-        document.getElementById("msg").innerText = "Errore creazione evento (client).";
+  try {
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: fd
+    });
+    const data = await res.json();
+    if(data && data.success){
+      msgDiv.style.color = "green";
+      msgDiv.textContent = "Evento aggiornato!";
+      setTimeout(()=> window.location.href = "index.html", 900);
+    } else {
+      msgDiv.style.color = "red";
+      msgDiv.textContent = "Errore aggiornamento: " + (data && (data.error||data.message) ? (data.error||data.message) : "imprevisto");
     }
+  } catch(e){
+    console.error("aggiorna_evento error", e);
+    msgDiv.style.color = "red";
+    msgDiv.textContent = "Errore connessione durante salvataggio.";
+  } finally {
+    btnAggiorna.disabled = false;
+  }
 });
 
-// --- Init
-window.addEventListener("DOMContentLoaded", async () => {
-    await checkAuth();
-    await caricaFontsEdEffetti();
-    aggiornaAnteprima();
+/* ========== Inizializzazione pagina ========== */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  // 1) integra navbar (quando pronta)
+  setupNavbarIntegration();
 
-    // binding navbar
-    waitForNavbar((found) => {
-        setupNavbarBindings(found);
-        console.log('Navbar bindings applicati');
-    }, 3500);
+  // 2) auth
+  await checkAuth();
+
+  // 3) carica fonts/effetti (prima di caricare dati evento così select hanno i valori)
+  await caricaFontsEdEffetti();
+
+  // 4) carica dati evento e inizializza anteprima
+  await caricaDatiEvento();
 });
 </script>
 </body>
