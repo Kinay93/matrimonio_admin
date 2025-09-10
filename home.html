@@ -13,6 +13,7 @@
       overflow-x: hidden;
     }
 
+    /* HEADER */
     header {
       background: #2EC4B6;
       color: white;
@@ -28,7 +29,7 @@
       font-size: 1.4em;
     }
 
-    /* -------- USER MENU -------- */
+    /* USER DROPDOWN */
     .user-menu {
       position: relative;
       display: inline-block;
@@ -78,43 +79,27 @@
       background: #f0f0f0;
     }
 
-    /* -------- SIDEBAR -------- */
-    .sidebar {
-      height: 100%;
-      width: 0;
-      position: fixed;
-      top: 0;
-      right: 0;
-      background-color: #302c2c;
-      overflow-x: hidden;
-      transition: 0.3s;
-      padding-top: 60px;
-      z-index: 900;
+    /* NAVBAR ORIZZONTALE */
+    .navbar {
+      display: flex;
+      justify-content: left;
+      background: #3498DB;
+      padding: 10px 20px;
+      gap: 15px;
     }
 
-    .sidebar a {
-      display: block;
-      padding: 12px 20px;
+    .navbar a {
       color: white;
       text-decoration: none;
-      font-size: 1.1em;
-      transition: 0.2s;
+      font-weight: bold;
+      transition: opacity 0.2s;
     }
 
-    .sidebar a:hover {
-      background: #444;
+    .navbar a:hover {
+      opacity: 0.7;
     }
 
-    .sidebar .closebtn {
-      position: absolute;
-      top: 10px;
-      left: 20px;
-      font-size: 25px;
-      color: white;
-      cursor: pointer;
-    }
-
-    /* -------- MAIN CONTENT -------- */
+    /* MAIN CONTENT */
     .main-content {
       padding: 20px;
       text-align: center;
@@ -123,60 +108,32 @@
     .main-content h2 {
       margin-top: 0;
     }
-
-    .toggle-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-      .main-content { padding: 15px; }
-    }
   </style>
 </head>
 <body>
-    <div id="navbar-container"></div>
-
-  <!-- Script per caricare la navbar -->
-  <script>
-    fetch("navbar.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("navbar-container").innerHTML = html;
-      });
-  </script>
   <!-- HEADER -->
   <header>
     <h1>Home Amministratore</h1>
-    <div style="display:flex; align-items:center; gap:15px;">
-      <button class="toggle-btn" onclick="openSidebar()">☰</button>
-
-      <!-- MENU UTENTE -->
-      <div class="user-menu">
-        <button id="userBtn" class="user-btn">
-          <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
-          <span>Admin</span>
-        </button>
-        <div id="dropdownMenu" class="dropdown-menu">
-          <a href="profilo.html">Profilo</a>
-          <a href="temaadmin.html">Temi</a>
-          <a href="#" onclick="logout()">Logout</a>
-        </div>
+    <div class="user-menu">
+      <button id="userBtn" class="user-btn">
+        <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+        <span>Admin</span>
+      </button>
+      <div id="dropdownMenu" class="dropdown-menu">
+        <a href="profilo.html">Profilo</a>
+        <a href="temaadmin.html">Temi</a>
+        <a href="#" onclick="logout()">Logout</a>
       </div>
     </div>
   </header>
 
-  <!-- SIDEBAR -->
-  <div id="sidebar" class="sidebar">
-    <span class="closebtn" onclick="closeSidebar()">×</span>
-    <a href="index.html">Gestione Coppie</a>
-    <a href="marketplace.html">Marketplace</a>
+  <!-- NAVBAR ORIZZONTALE -->
+  <div class="navbar">
+    <a href="index.html" id="linkCoppie">Gestione Coppie</a>
+    <a href="marketplace.html" id="linkMarketplace">Marketplace</a>
   </div>
 
-  <!-- MAIN CONTENT -->
+  <!-- CONTENUTO PRINCIPALE -->
   <div class="main-content">
     <h2>Benvenuto nella tua Home!</h2>
     <p>Qui compariranno le informazioni prese da siti esterni (notizie, aggiornamenti, feed, ecc.).</p>
@@ -185,19 +142,30 @@
     </div>
   </div>
 
-  <!-- SCRIPT THEME -->
-  <script src="script.js"></script>
   <script>
-    // Sidebar toggle
-    function openSidebar() {
-      document.getElementById("sidebar").style.width = "250px";
-    }
+    // DROPDOWN UTENTE
+    const userBtn = document.getElementById("userBtn");
+    const dropdownMenu = document.getElementById("dropdownMenu");
 
-    function closeSidebar() {
-      document.getElementById("sidebar").style.width = "0";
-    }
+    userBtn.addEventListener("click", () => {
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+    });
 
-    // Esempio di feed esterno (da sostituire con API reali)
+    // Chiudi dropdown quando clicchi un link
+    dropdownMenu.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => {
+        dropdownMenu.style.display = "none";
+      });
+    });
+
+    // Chiudi dropdown cliccando fuori
+    document.addEventListener("click", (event) => {
+      if (!userBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
+        dropdownMenu.style.display = "none";
+      }
+    });
+
+    // FEED ESEMPLIFICATIVO
     async function caricaFeed() {
       const feed = document.getElementById("feed");
       try {
@@ -215,6 +183,13 @@
     }
 
     document.addEventListener("DOMContentLoaded", caricaFeed);
+
+    // FUNZIONE LOGOUT Esempio
+    function logout() {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("admin_username");
+      window.location.href = "login.html";
+    }
   </script>
 </body>
 </html>
