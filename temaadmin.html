@@ -3,132 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <title>Admin Matrimonio</title>
-<style>
-  :root {
-    --bg-color: #ffffff;
-    --bg-color-rgb: 255,255,255;
-    --bg-color-secondario: #eeeeee;
-    --bg-color-secondario-rgb: 238,238,238;
-    --text-color: #000000;
-    --header-color: #007BFF;
-    --header-text: #ffffff;
-  }
-
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background: #2EC4B6;
-    color: white;
-    flex-wrap: wrap;
-  }
-
-  header h1 {
-    font-size: 1.3rem;
-    margin: 5px 0;
-    flex: 1 1 100%;
-  }
-
-  header h1:hover {
-    color: #e0fbfc;
-  }
-
-  .user-menu {
-    position: relative;
-    display: inline-block;
-  }
-
-  .user-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: white;
-    border: none;
-    border-radius: 20px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #2EC4B6;
-  }
-
-  .user-btn img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-  }
-
-  .dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 45px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    min-width: 150px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    z-index: 1000;
-  }
-
-  .dropdown-menu a {
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    color: #333;
-  }
-
-  .dropdown-menu a:hover {
-    background: #f0f0f0;
-  }
-
-  .form-box, .preview-box {
-    padding: 1rem;
-    margin: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-
-  .preview-box {
-    min-height: 200px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: var(--font-family, Arial);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-
-  h2 { margin-bottom: 0.5rem; }
-  .overlay {
-    position: absolute;
-    top:0; left:0; right:0; bottom:0;
-    pointer-events: none;
-  }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Navbar -->
   <div id="navbar-container"></div>
+  <script src="navbar.js"></script>
 
-  <!-- Script per caricare la navbar -->
-  <script>
-    fetch("navbar.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("navbar-container").innerHTML = html;
-      });
-  </script>
 <header>
   <h1>Admin Matrimonio</h1>
-
-  <!-- MENU UTENTE -->
   <div class="user-menu">
     <button id="userBtn" class="user-btn">
       <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
@@ -144,42 +27,33 @@
 
 <div class="form-box">
   <h2>Impostazioni Tema</h2>
-  
   <label>Colore Sfondo Primario:</label>
   <input type="color" id="bgColorInput" value="#ffffff"><br><br>
-
   <label>Colore Sfondo Secondario:</label>
   <input type="color" id="bgColorSecondarioInput" value="#eeeeee"><br><br>
-
   <label>Colore Testo:</label>
   <input type="color" id="textColorInput" value="#000000"><br><br>
-
   <label>Font:</label>
   <select id="fontsSelect"></select><br><br>
-
   <label>Effetto Scritta:</label>
   <select id="effettiScrittaSelect"></select><br><br>
-
   <label>Effetto Sfondo:</label>
   <select id="effettiSfondoSelect"></select><br><br>
-
   <button id="saveBtn">Salva Tema</button>
 </div>
 
-<div class="preview-box" id="previewBox">
-  Anteprima Testo
-</div>
+<div class="preview-box" id="previewBox">Anteprima Testo</div>
 
 <script src="script.js"></script>
 <script>
 async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token) window.location.href = "/login_page";
+    if(!token) window.location.href = "login.html";
 }
 
 checkAuth();
 
-// Dropdown utente
+// Dropdown menu utente
 const userBtn = document.getElementById('userBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
 userBtn.addEventListener('click', () => {
@@ -191,14 +65,14 @@ window.addEventListener('click', (e) => {
     }
 });
 
-// Funzione logout
+// Logout
 function logout() {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("admin_username");
     window.location.href = "login.html";
 }
 
-// Restante codice temaadmin
+// Tema admin
 const previewBox = document.getElementById('previewBox');
 const bgColorInput = document.getElementById('bgColorInput');
 const bgColorSecondarioInput = document.getElementById('bgColorSecondarioInput');
@@ -222,12 +96,12 @@ function hexToRgb(hex) {
   return `${r}, ${g}, ${b}`;
 }
 
-async function caricaFonts() {
+// Carica fonts ed effetti
+async function caricaFontsEdEffetti() {
   try {
-    const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_fonts', {mode: 'cors'});
-    if(!res.ok) throw new Error("Errore fetch fonts");
-    const data = await res.json();
-    fonts = data.fonts;
+    const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
+    const dataFonts = await resFonts.json();
+    fonts = dataFonts.fonts;
     fontsSelect.innerHTML = '';
     fonts.forEach(f => {
       const option = document.createElement('option');
@@ -235,15 +109,12 @@ async function caricaFonts() {
       option.textContent = f.name;
       fontsSelect.appendChild(option);
     });
-  } catch(e) { console.error("Errore caricamento fonts:", e); }
-}
 
-async function caricaEffettiScritta() {
-  try {
-    const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_effetti', {mode: 'cors'});
-    if(!res.ok) throw new Error("Errore fetch effetti");
-    const data = await res.json();
-    effettiScritta = data.scritta;
+    const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti");
+    const dataEffetti = await resEffetti.json();
+    effettiScritta = dataEffetti.scritta;
+    effettiSfondo = dataEffetti.sfondo;
+
     effettiScrittaSelect.innerHTML = '';
     effettiScritta.forEach(e => {
       const option = document.createElement('option');
@@ -251,15 +122,7 @@ async function caricaEffettiScritta() {
       option.textContent = e.name;
       effettiScrittaSelect.appendChild(option);
     });
-  } catch(e) { console.error("Errore caricamento effetti scritta:", e); }
-}
 
-async function caricaEffettiSfondo() {
-  try {
-    const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/get_effetti', {mode: 'cors'});
-    if(!res.ok) throw new Error("Errore fetch effetti");
-    const data = await res.json();
-    effettiSfondo = data.sfondo;
     effettiSfondoSelect.innerHTML = '';
     effettiSfondo.forEach(e => {
       const option = document.createElement('option');
@@ -267,15 +130,18 @@ async function caricaEffettiSfondo() {
       option.textContent = e.name;
       effettiSfondoSelect.appendChild(option);
     });
-  } catch(e) { console.error("Errore caricamento effetti sfondo:", e); }
+  } catch(e){ console.error(e); }
 }
 
+// Anteprima
 function aggiornaAnteprima() {
   previewBox.style.cssText = '';
   previewBox.style.fontFamily = fontsSelect.value;
   previewBox.style.color = textColorInput.value;
+
   const bgRgb = hexToRgb(bgColorInput.value);
   const bgSecondarioRgb = hexToRgb(bgColorSecondarioInput.value);
+
   previewBox.style.setProperty('--bg-color', bgColorInput.value);
   previewBox.style.setProperty('--bg-color-rgb', bgRgb);
   previewBox.style.setProperty('--bg-color-secondario', bgColorSecondarioInput.value);
@@ -341,7 +207,8 @@ saveBtn.addEventListener('click', async () => {
   formData.append('effetto_sfondo', effettiSfondoSelect.value);
 
   try {
-    const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=default', {
+    const username = localStorage.getItem('admin_username') || 'default';
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=${encodeURIComponent(username)}`, {
       method: 'POST',
       body: formData
     });
@@ -351,14 +218,11 @@ saveBtn.addEventListener('click', async () => {
   } catch(e) { console.error('Errore save theme:', e); }
 });
 
-async function init() {
-  await caricaFonts();
-  await caricaEffettiScritta();
-  await caricaEffettiSfondo();
+window.onload = async () => {
+  await checkAuth();
+  await caricaFontsEdEffetti();
   aggiornaAnteprima();
-}
-
-init();
+};
 </script>
 </body>
 </html>
