@@ -181,7 +181,8 @@ loginForm.addEventListener('submit', async (e) => {
             localStorage.setItem("admin_username", response.username); // salvo username per il tema
             msg.style.color = 'green';
             msg.textContent = "Login avvenuto con successo!";
-            setTimeout(()=>window.location.href='home.html', 1000);
+            // Redirect verso home.html con admin=username
+            setTimeout(()=>window.location.href=`home.html?admin=${response.username}`, 1000);
         } else {
             msg.textContent = response.error || "Credenziali non valide";
         }
