@@ -6,7 +6,7 @@
 <title>Amministrazione Matrimonio</title>
 <link rel="stylesheet" href="style.css">
 <style>
-/* Stili simili alla versione precedente */
+/* Tutto il tuo CSS rimane invariato */
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; }
 header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#2EC4B6; color:white; flex-wrap:wrap; }
 header h1 { font-size:1.3rem; margin:5px 0; flex:1 1 100%; }
@@ -87,13 +87,14 @@ const username = localStorage.getItem('admin_username') || 'Admin';
 
 // --- Tasto Nuovo Evento
 document.getElementById('nuovo-matrimonio').addEventListener('click', ()=>{
-    window.location.href = `nuovo_evento.html?admin=${encodeURIComponent(username)}`;
+    window.location.href = `nuovo_evento.html`;
 });
 
-// --- Carica Eventi
+// --- Carica Eventi con token
 async function caricaEventi() {
     try {
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_eventi?admin=${encodeURIComponent(username)}`);
+        const token = localStorage.getItem("auth_token");
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_eventi?admin=${encodeURIComponent(username)}`, { headers: { "Authorization": "Bearer " + token } });
         const data = await res.json();
         const grid = document.getElementById('Eventi-grid');
         grid.innerHTML = '';
@@ -117,7 +118,7 @@ async function caricaEventi() {
             imgContainer.appendChild(img);
 
             imgContainer.addEventListener('click', ()=>{
-                window.location.href = `modifica_evento.html?admin=${encodeURIComponent(username)}&evento=${encodeURIComponent(evento.nome)}`;
+                window.location.href = `modifica_evento.html?evento=${encodeURIComponent(evento.nome)}`;
             });
 
             card.appendChild(imgContainer);
