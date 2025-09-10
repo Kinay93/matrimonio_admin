@@ -6,79 +6,43 @@
 <title>Amministrazione Matrimonio</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fafafa; }
-  header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #2EC4B6; color: white; flex-wrap: wrap; }
-  header h1 { font-size: 1.3rem; margin: 5px 0; flex: 1 1 100%; transition: color 0.3s ease; }
-  header h1:hover { color: #e0fbfc; }
-  @media(min-width: 600px) { header h1 { flex: 0 0 auto; font-size: 1.5rem; } }
-  .center-btn { flex: 1 1 100%; text-align: center; margin: 5px 0; }
-  @media(min-width: 600px) { .center-btn { flex: 1; margin: 0; } }
-  header button { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; background: #007bff; color: white; margin: 5px 0; transition: background 0.3s ease, transform 0.2s ease; }
-  header button:hover { background: #0056b3; transform: scale(1.05); }
+/* Stili simili alla versione precedente */
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; }
+header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#2EC4B6; color:white; flex-wrap:wrap; }
+header h1 { font-size:1.3rem; margin:5px 0; flex:1 1 100%; }
+.center-btn { flex:1 1 100%; text-align:center; margin:5px 0; }
+header button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; background:#007bff; color:white; margin:5px 0; transition:0.3s; }
+header button:hover { background:#0056b3; transform: scale(1.05); }
 
-  .container { padding: 20px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
-  @media(min-width: 1024px) { .grid { grid-template-columns: repeat(5, 1fr); } }
+.container { padding:20px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:20px; }
+@media(min-width:1024px){.grid{grid-template-columns:repeat(5,1fr);}}
 
-  .evento-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    padding: 15px;
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.5s ease;
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  .evento-card.visible { opacity: 1; transform: translateY(0); }
-  .evento-card:hover { transform: translateY(-5px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+.evento-card { background:white; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); padding:15px; text-align:center; transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.5s ease; opacity:0; transform:translateY(20px);}
+.evento-card.visible{opacity:1; transform:translateY(0);}
+.evento-card:hover{transform:translateY(-5px); box-shadow:0 6px 15px rgba(0,0,0,0.15);}
 
-  .evento-card h3 { margin: 0 0 10px; font-size: 1rem; }
+.evento-card h3 { margin:0 0 10px; font-size:1rem; }
+.evento-img { width:80px; height:80px; border-radius:50%; background:#ddd; margin:0 auto 10px; overflow:hidden; }
+.evento-img img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s ease; }
+.evento-card:hover .evento-img img { transform:scale(1.1); }
 
-  .evento-img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: #ddd;
-    margin: 0 auto 10px;
-    overflow: hidden;
-  }
-  .evento-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s ease;
-  }
-  .evento-card:hover .evento-img img { transform: scale(1.1); }
+.evento-card button { display:block; width:100%; margin:5px 0; padding:6px; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem; transition:0.3s; }
+.btn-genera { background:#28a745; color:white; }
+.btn-genera:hover { background:#218838; transform:scale(1.03); }
+.btn-vedi { background:#6c757d; color:white; }
+.btn-vedi:hover { background:#5a6268; transform:scale(1.03); }
 
-  @media(min-width: 600px) { .evento-img { width: 100px; height: 100px; } }
-
-  .evento-card button {
-    display: block;
-    width: 100%;
-    margin: 5px 0;
-    padding: 6px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.3s ease, transform 0.2s ease;
-  }
-  .btn-genera { background: #28a745; color: white; }
-  .btn-genera:hover { background: #218838; transform: scale(1.03); }
-  .btn-vedi { background: #6c757d; color: white; }
-  .btn-vedi:hover { background: #5a6268; transform: scale(1.03); }
 </style>
 </head>
 <body>
-  <div id="navbar-placeholder"></div>
-  <script src="navbar.js" defer></script>
+<div id="navbar-placeholder"></div>
+<script src="navbar.js" defer></script>
 
 <header>
   <h1>Amministrazione Matrimonio</h1>
   <div class="center-btn">
-    <button id="nuovo-matrimonio">Nuovo evento</button>
+    <button id="nuovo-matrimonio">Nuovo Evento</button>
   </div>
 </header>
 
@@ -96,84 +60,101 @@
   </a>
 </div>
 
-<script src="script.js"></script>
 <script>
-const urlParams = new URLSearchParams(window.location.search);
-const username = urlParams.get("admin") || localStorage.getItem("admin_username");
-
-// --- Bottone nuovo evento
-document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
-  window.location.href = `nuovo_evento.html?admin=${encodeURIComponent(username)}`;
-});
-
-// --- Carica eventi
-async function caricaEventi() {
-  try {
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_eventi?admin=${encodeURIComponent(username)}`);
-    const data = await res.json();
-    const grid = document.getElementById('Eventi-grid');
-    grid.innerHTML = '';
-
-    if(!data.success || !data.eventi) {
-      grid.innerHTML = '<p>Nessun evento disponibile.</p>';
-      return;
+async function checkAuth() {
+    const token = localStorage.getItem("auth_token");
+    const username = localStorage.getItem("admin_username");
+    if(!token || !username){
+        window.location.href = "login.html";
+        return;
     }
-
-    data.eventi.forEach((evento, index) => {
-      if (!evento || !evento.nome) return;
-
-      const card = document.createElement('div');
-      card.className = 'evento-card';
-
-      const title = document.createElement('h3');
-      title.textContent = evento.nome;
-      card.appendChild(title);
-
-      const imgContainer = document.createElement('div');
-      imgContainer.className = 'evento-img';
-
-      const img = document.createElement('img');
-      img.src = evento.foto_url || 'https://via.placeholder.com/100';
-      img.alt = evento.nome;
-      imgContainer.appendChild(img);
-
-      imgContainer.addEventListener('click', () => {
-        window.location.href = `modifica_evento.html?admin=${encodeURIComponent(username)}&evento=${encodeURIComponent(evento.nome)}`;
-      });
-
-      card.appendChild(imgContainer);
-
-      const btnGenera = document.createElement('button');
-      btnGenera.textContent = 'Genera QR';
-      btnGenera.className = 'btn-genera';
-      btnGenera.disabled = evento.qr_generato;
-      btnGenera.addEventListener('click', (e) => {
-        e.stopPropagation();
-        generaQRCode(evento.nome, btnGenera);
-      });
-      card.appendChild(btnGenera);
-
-      const btnVedi = document.createElement('button');
-      btnVedi.textContent = 'Vedi QR';
-      btnVedi.className = 'btn-vedi';
-      btnVedi.disabled = !evento.qr_generato;
-      btnVedi.addEventListener('click', (e) => {
-        e.stopPropagation();
-        vediQRCode(evento.nome);
-      });
-      card.appendChild(btnVedi);
-
-      grid.appendChild(card);
-      setTimeout(() => card.classList.add('visible'), index * 100);
-    });
-  } catch (e) {
-    alert('Errore caricamento eventi: ' + e.message);
-  }
+    try {
+        const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token } });
+        const data = await res.json();
+        if(!data.success){
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("admin_username");
+            window.location.href = "login.html";
+        }
+    } catch(err){
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("admin_username");
+        window.location.href = "login.html";
+    }
 }
 
-window.onload = async () => {
-  await applicaTemaAdmin();
-  caricaEventi();
+const username = localStorage.getItem('admin_username') || 'Admin';
+
+// --- Tasto Nuovo Evento
+document.getElementById('nuovo-matrimonio').addEventListener('click', ()=>{
+    window.location.href = `nuovo_evento.html?admin=${encodeURIComponent(username)}`;
+});
+
+// --- Carica Eventi
+async function caricaEventi() {
+    try {
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_eventi?admin=${encodeURIComponent(username)}`);
+        const data = await res.json();
+        const grid = document.getElementById('Eventi-grid');
+        grid.innerHTML = '';
+
+        data.eventi.forEach((evento, index)=>{
+            if(!evento || !evento.nome) return;
+
+            const card = document.createElement('div');
+            card.className = 'evento-card';
+
+            const title = document.createElement('h3');
+            title.textContent = evento.nome;
+            card.appendChild(title);
+
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'evento-img';
+
+            const img = document.createElement('img');
+            img.src = evento.foto_url || 'https://via.placeholder.com/100';
+            img.alt = evento.nome;
+            imgContainer.appendChild(img);
+
+            imgContainer.addEventListener('click', ()=>{
+                window.location.href = `modifica_evento.html?admin=${encodeURIComponent(username)}&evento=${encodeURIComponent(evento.nome)}`;
+            });
+
+            card.appendChild(imgContainer);
+
+            const btnGenera = document.createElement('button');
+            btnGenera.textContent = 'Genera QR';
+            btnGenera.className = 'btn-genera';
+            btnGenera.disabled = evento.qr_generato;
+            btnGenera.addEventListener('click', e=>{
+                e.stopPropagation();
+                generaQRCode(evento.nome, btnGenera);
+            });
+            card.appendChild(btnGenera);
+
+            const btnVedi = document.createElement('button');
+            btnVedi.textContent = 'Vedi QR';
+            btnVedi.className = 'btn-vedi';
+            btnVedi.disabled = !evento.qr_generato;
+            btnVedi.addEventListener('click', e=>{
+                e.stopPropagation();
+                vediQRCode(evento.nome);
+            });
+            card.appendChild(btnVedi);
+
+            grid.appendChild(card);
+            setTimeout(()=>card.classList.add('visible'), index*100);
+        });
+
+    } catch(e){
+        console.error('Errore caricamento eventi', e);
+    }
+}
+
+// --- Al caricamento pagina
+window.onload = async ()=>{
+    await checkAuth();
+    caricaEventi();
 };
 </script>
 </body>
