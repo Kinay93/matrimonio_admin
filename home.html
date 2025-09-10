@@ -3,24 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Home - Amministrazione</title>
-  <link rel="stylesheet" href="styles.css">
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #f5f5f5;
       color: #333;
-      overflow-x: hidden;
     }
 
-    /* HEADER */
     header {
       background: #2EC4B6;
       color: white;
       padding: 15px 20px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       position: relative;
     }
 
@@ -29,7 +26,7 @@
       font-size: 1.4em;
     }
 
-    /* USER DROPDOWN */
+    /* DROPDOWN UTENTE */
     .user-menu {
       position: relative;
       display: inline-block;
@@ -79,24 +76,33 @@
       background: #f0f0f0;
     }
 
-    /* NAVBAR ORIZZONTALE */
+    /* NAVBAR A SCOMPARSA */
+    .toggle-navbar {
+      background:#3498DB;
+      color:white;
+      border:none;
+      padding:10px 15px;
+      cursor:pointer;
+      font-weight:bold;
+      border-radius: 8px;
+    }
+
     .navbar {
-      display: flex;
-      justify-content: left;
+      display: none;
+      flex-direction: row;
       background: #3498DB;
+      gap: 10px;
       padding: 10px 20px;
-      gap: 15px;
     }
 
     .navbar a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      transition: opacity 0.2s;
+      color:white;
+      text-decoration:none;
+      font-weight:bold;
     }
 
     .navbar a:hover {
-      opacity: 0.7;
+      opacity:0.7;
     }
 
     /* MAIN CONTENT */
@@ -104,46 +110,45 @@
       padding: 20px;
       text-align: center;
     }
-
-    .main-content h2 {
-      margin-top: 0;
-    }
   </style>
 </head>
 <body>
   <!-- HEADER -->
   <header>
     <h1>Home Amministratore</h1>
-    <div class="user-menu">
-      <button id="userBtn" class="user-btn">
-        <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
-        <span>Admin</span>
-      </button>
-      <div id="dropdownMenu" class="dropdown-menu">
-        <a href="profilo.html">Profilo</a>
-        <a href="temaadmin.html">Temi</a>
-        <a href="#" onclick="logout()">Logout</a>
+    <div style="display:flex; align-items:center; gap:15px;">
+      <!-- BOTTONE TOGGLE NAVBAR -->
+      <button class="toggle-navbar" onclick="toggleNavbar()">☰ Menu</button>
+
+      <!-- DROPDOWN UTENTE -->
+      <div class="user-menu">
+        <button id="userBtn" class="user-btn">
+          <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+          <span id="usernameDisplay">Admin</span>
+        </button>
+        <div id="dropdownMenu" class="dropdown-menu">
+          <a href="profilo.html">Profilo</a>
+          <a href="temaadmin.html">Temi</a>
+          <a href="#" onclick="logout()">Logout</a>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- NAVBAR ORIZZONTALE -->
-  <div class="navbar">
-    <a href="index.html" id="linkCoppie">Gestione Coppie</a>
-    <a href="marketplace.html" id="linkMarketplace">Marketplace</a>
+  <!-- NAVBAR SCOMPARSA -->
+  <div id="navbar" class="navbar">
+    <a id="link1" href="#">Link 1</a>
+    <a id="link2" href="#">Link 2</a>
   </div>
 
   <!-- CONTENUTO PRINCIPALE -->
   <div class="main-content">
     <h2>Benvenuto nella tua Home!</h2>
     <p>Qui compariranno le informazioni prese da siti esterni (notizie, aggiornamenti, feed, ecc.).</p>
-    <div id="feed">
-      <p><i>Caricamento informazioni...</i></p>
-    </div>
   </div>
 
   <script>
-    // DROPDOWN UTENTE
+    // ===================== DROPDOWN UTENTE =====================
     const userBtn = document.getElementById("userBtn");
     const dropdownMenu = document.getElementById("dropdownMenu");
 
@@ -151,44 +156,64 @@
       dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
     });
 
-    // Chiudi dropdown quando clicchi un link
     dropdownMenu.querySelectorAll("a").forEach(link => {
       link.addEventListener("click", () => {
         dropdownMenu.style.display = "none";
       });
     });
 
-    // Chiudi dropdown cliccando fuori
     document.addEventListener("click", (event) => {
       if (!userBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
         dropdownMenu.style.display = "none";
       }
     });
 
-    // FEED ESEMPLIFICATIVO
-    async function caricaFeed() {
-      const feed = document.getElementById("feed");
-      try {
-        const res = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=3");
-        const dati = await res.json();
-        feed.innerHTML = dati.map(post => `
-          <div style="margin:15px 0; padding:15px; border:1px solid #ccc; border-radius:8px; background:white;">
-            <h3>${post.title}</h3>
-            <p>${post.body}</p>
-          </div>
-        `).join('');
-      } catch(err) {
-        feed.innerHTML = "<p>Errore nel caricare le informazioni esterne.</p>";
-      }
+    // ===================== NAVBAR =====================
+    const navbar = document.getElementById("navbar");
+    const link1 = document.getElementById("link1");
+    const link2 = document.getElementById("link2");
+
+    function toggleNavbar() {
+      navbar.style.display = navbar.style.display === "flex" ? "none" : "flex";
     }
 
-    document.addEventListener("DOMContentLoaded", caricaFeed);
+    navbar.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => {
+        navbar.style.display = "none";
+      });
+    });
 
-    // FUNZIONE LOGOUT Esempio
+    // ===================== LOGOUT =====================
     function logout() {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("admin_username");
       window.location.href = "login.html";
+    }
+
+    // ===================== LINKS DINAMICI =====================
+    const currentPage = window.location.pathname.split("/").pop();
+
+    if(currentPage.includes("coppie")) {
+      link1.textContent = "Home";
+      link1.href = "index.html";
+      link2.textContent = "Marketplace";
+      link2.href = "marketplace.html";
+    } else if(currentPage.includes("marketplace")) {
+      link1.textContent = "Home";
+      link1.href = "index.html";
+      link2.textContent = "Coppie";
+      link2.href = "index.html"; // sostituisci con la pagina coppie se diversa
+    } else {
+      link1.textContent = "Coppie";
+      link1.href = "index.html";
+      link2.textContent = "Marketplace";
+      link2.href = "marketplace.html";
+    }
+
+    // Mostra username loggato se presente
+    const savedUsername = localStorage.getItem("admin_username");
+    if(savedUsername) {
+      document.getElementById("usernameDisplay").textContent = savedUsername;
     }
   </script>
 </body>
