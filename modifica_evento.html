@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Modifica Coppia</title>
+<title>Modifica Evento</title>
 <link rel="stylesheet" href="style.css">
 <style>
 body {
@@ -220,8 +220,9 @@ footer a:hover {
         document.getElementById("navbar-container").innerHTML = html;
       });
   </script>
+
 <header>
-    <h1>Modifica Coppia</h1>
+    <h1>Modifica Evento</h1>
     <div class="user-menu">
         <button id="userBtn" class="user-btn">
             <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
@@ -237,15 +238,15 @@ footer a:hover {
 
 <div class="container">
     <div class="form-col">
-        <label>Nome coppia:<input type="text" id="nomeCoppia" disabled></label>
-        <label>Foto coppia:<input type="file" id="fotoCoppia"></label>
+        <label>Nome evento:<input type="text" id="nomeEvento" disabled></label>
+        <label>Foto evento:<input type="file" id="fotoEvento"></label>
         <label>Colore sfondo primario:<input type="color" id="sfondo"></label>
         <label>Colore sfondo secondario:<input type="color" id="sfondoSecondario"></label>
         <label>Colore testo:<input type="color" id="testo"></label>
         <label>Font:<select id="font"></select></label>
         <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
         <label>Effetto scritta:<select id="effettoScritta"></select></label>
-        <button id="aggiornaCoppiaBtn">Aggiorna coppia</button>
+        <button id="aggiornaEventoBtn">Aggiorna evento</button>
         <div id="msg"></div>
     </div>
 
@@ -253,7 +254,7 @@ footer a:hover {
         <h3>Anteprima</h3>
         <div id="anteprima">
             <div id="anteprimaFoto">Foto</div>
-            <span id="anteprimaTesto">Titolo Coppia</span>
+            <span id="anteprimaTesto">Titolo Evento</span>
         </div>
     </div>
 </div>
@@ -304,9 +305,9 @@ window.addEventListener('click', (e) => {
     }
 });
 
-// --- Parametri coppia ---
+// --- Parametri evento ---
 const params = new URLSearchParams(window.location.search);
-const nomeCoppiaParam = params.get("coppia");
+const nomeEventoParam = params.get("evento");
 
 // --- Elementi DOM ---
 const anteprimaDiv = document.getElementById("anteprima");
@@ -319,7 +320,7 @@ const inputTesto = document.getElementById("testo");
 const selectFont = document.getElementById("font");
 const selectEffettoSfondo = document.getElementById("effettoSfondo");
 const selectEffettoScritta = document.getElementById("effettoScritta");
-const inputNome = document.getElementById("nomeCoppia");
+const inputNome = document.getElementById("nomeEvento");
 
 let effettiScritta = [];
 let effettiSfondo = [];
@@ -375,13 +376,13 @@ async function caricaFontsEdEffetti() {
     } catch(e){ console.error(e); }
 }
 
-// --- Carica dati coppia ---
-async function caricaDatiCoppia() {
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_coppia?coppia=${nomeCoppiaParam}`);
+// --- Carica dati evento ---
+async function caricaDatiEvento() {
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${nomeEventoParam}`);
     const data = await res.json();
-    if(data.error){ alert("Coppia non trovata"); return; }
+    if(data.error){ alert("Evento non trovato"); return; }
 
-    inputNome.value = nomeCoppiaParam;
+    inputNome.value = nomeEventoParam;
     inputSfondo.value = data.sfondo || "#ffffff";
     inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
     inputTesto.value = data.testo || "#000000";
@@ -455,12 +456,12 @@ function aggiornaAnteprima() {
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
-// --- Aggiorna coppia ---
-document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=>{
-    const fotoFile = document.getElementById("fotoCoppia").files[0];
+// --- Aggiorna evento ---
+document.getElementById("aggiornaEventoBtn").addEventListener("click", async ()=>{
+    const fotoFile = document.getElementById("fotoEvento").files[0];
     const formData = new FormData();
-    formData.append("nome_coppia",nomeCoppiaParam);
-    if(fotoFile) formData.append("foto_coppia",fotoFile);
+    formData.append("nome_evento",nomeEventoParam);
+    if(fotoFile) formData.append("foto_evento",fotoFile);
     formData.append("sfondo",inputSfondo.value);
     formData.append("sfondo_secondario",inputSfondoSecondario.value);
     formData.append("testo",inputTesto.value);
@@ -468,12 +469,12 @@ document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=
     formData.append("effetto_sfondo",selectEffettoSfondo.value||"");
     formData.append("effetto_scritta",selectEffettoScritta.value||"");
 
-    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_coppia",{
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento",{
         method:"POST",
         body:formData
     });
     const data = await res.json();
-    document.getElementById("msg").innerText = data.success ? "Coppia aggiornata!" : "Errore: "+(data.error||"imprevisto");
+    document.getElementById("msg").innerText = data.success ? "Evento aggiornato!" : "Errore: "+(data.error||"imprevisto");
     if(data.success) setTimeout(()=>window.location.href="index.html",1000);
 });
 
@@ -481,7 +482,7 @@ document.getElementById("aggiornaCoppiaBtn").addEventListener("click", async ()=
 window.onload = async () => {
     await applicaTemaAdmin();
     await caricaFontsEdEffetti();
-    await caricaDatiCoppia();
+    await caricaDatiEvento();
 };
 </script>
 
