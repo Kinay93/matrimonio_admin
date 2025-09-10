@@ -21,30 +21,7 @@
 
 <!-- Barra link principale -->
 <nav id="main-nav" style="display:flex; gap:15px; padding:10px 20px; background:#3AAFA9; color:white; font-weight:bold; font-family:'Segoe UI', sans-serif;">
-  <a href="index.html" style="color:white;text-decoration:none;">Home</a>
-  <a href="marketplace.html" style="color:white;text-decoration:none;">Marketplace</a>
-  <a href="coppie.html" style="color:white;text-decoration:none;">Coppie</a>
+  <a href="index.html" data-page="home" style="color:white;text-decoration:none;">Home</a>
+  <a href="marketplace.html" data-page="marketplace" style="color:white;text-decoration:none;">Marketplace</a>
+  <a href="coppie.html" data-page="coppie" style="color:white;text-decoration:none;">Coppie</a>
 </nav>
-
-<script>
-  // Toggle dropdown
-  const userBtn = document.getElementById('user-btn');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-
-  userBtn.addEventListener('click', () => {
-    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-  });
-
-  // Chiudi dropdown se clic fuori
-  window.addEventListener('click', e => {
-    if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
-      dropdownMenu.style.display = 'none';
-    }
-  });
-
-  // Aggiorna link Profilo e Temi con username
-  const username = localStorage.getItem('admin_username') || 'admin';
-  document.getElementById('username-label').textContent = username;
-  document.getElementById('link-profilo').href = `profilo.html?username=${encodeURIComponent(username)}`;
-  document.getElementById('link-temi').href = `temaadmin.html?username=${encodeURIComponent(username)}`;
-</script>
