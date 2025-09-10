@@ -138,6 +138,16 @@
   </style>
 </head>
 <body>
+    <div id="navbar-container"></div>
+
+  <!-- Script per caricare la navbar -->
+  <script>
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-container").innerHTML = html;
+      });
+  </script>
   <!-- HEADER -->
   <header>
     <h1>Home Amministratore</h1>
