@@ -1,0 +1,64 @@
+<!-- Pulsante menu -->
+<button id="menuBtn" class="menu-btn" onclick="toggleMenu()">☰</button>
+
+<!-- Navbar nascosta -->
+<div id="topnav" class="topnav">
+  <a href="#" id="homeLink" onclick="closeMenu()">🏠 Home</a>
+  <a href="#" id="coppieLink" onclick="closeMenu()">🤝 Coppie</a>
+  <a href="#" id="marketLink" onclick="closeMenu()">🛒 Market-Place</a>
+  <a href="#" id="profiloLink" onclick="closeMenu()">👤 Profilo</a>
+  <a href="#" id="temiLink" onclick="closeMenu()">🎨 Temi</a>
+  <a href="login.html" onclick="logout(); closeMenu()">🚪 Logout</a>
+</div>
+
+<script>
+function toggleMenu() {
+  const nav = document.getElementById("topnav");
+  const btn = document.getElementById("menuBtn");
+
+  nav.classList.toggle("active");
+
+  if (nav.classList.contains("active")) {
+    btn.textContent = "❌"; // cambia in X
+  } else {
+    btn.textContent = "☰"; // torna menu
+  }
+}
+
+function closeMenu() {
+  const nav = document.getElementById("topnav");
+  const btn = document.getElementById("menuBtn");
+  nav.classList.remove("active");
+  btn.textContent = "☰"; // torna menu
+}
+
+function setNavLinks() {
+  const username = localStorage.getItem("admin_username") || "";
+
+  document.getElementById("homeLink").href = `home.html?username=${username}`;
+  document.getElementById("coppieLink").href = `coppie.html?username=${username}`;
+  document.getElementById("marketLink").href = `market.html?username=${username}`;
+  document.getElementById("profiloLink").href = `profilo.html?username=${username}`;
+  document.getElementById("temiLink").href = `temiadmin.html?username=${username}`;
+}
+
+function logout() {
+  localStorage.removeItem("auth_token");
+  localStorage.removeItem("admin_username");
+}
+
+setNavLinks();
+</script>
+
+<style>
+/* Pulsante in alto */
+.menu-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #2EC4B6;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 20px;
+  c
