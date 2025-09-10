@@ -111,7 +111,7 @@ window.onload = async () => {
 };
 
 document.getElementById('nuovo-matrimonio').addEventListener('click', () => {
-  window.location.href = 'nuovo_evento.html';
+  window.location.href = `nuovo_evento.html?admin=${encodeURIComponent(username)}`;
 });
 
 async function caricaEventi() {
@@ -140,7 +140,7 @@ async function caricaEventi() {
       imgContainer.appendChild(img);
 
       imgContainer.addEventListener('click', () => {
-        window.location.href = `modifica_evento.html?evento=${encodeURIComponent(evento.nome)}`;
+      window.location.href = `modifica_evento.html?admin=${encodeURIComponent(username)}&evento=${encodeURIComponent(evento.nome)}`;
       });
 
       card.appendChild(imgContainer);
