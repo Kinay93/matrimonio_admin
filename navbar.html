@@ -1,4 +1,4 @@
-<header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#2EC4B6; color:white; font-family:'Segoe UI', sans-serif;">
+<header style="display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#2EC4B6; color:white; font-family:'Segoe UI', sans-serif; position:relative;">
   <!-- Pulsante hamburger -->
   <button id="menu-toggle" style="font-size:24px; background:none; border:none; color:white; cursor:pointer;">☰</button>
 
@@ -19,8 +19,11 @@
   </div>
 </header>
 
+<!-- Overlay mobile -->
+<div id="mobile-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:50;"></div>
+
 <!-- Barra link principale -->
-<nav id="main-nav" style="display:flex; gap:15px; padding:10px 20px; background:#3AAFA9; color:white; font-weight:bold; font-family:'Segoe UI', sans-serif;">
+<nav id="main-nav" style="display:flex; gap:15px; padding:10px 20px; background:#3AAFA9; color:white; font-weight:bold; font-family:'Segoe UI', sans-serif; flex-wrap:wrap;">
   <a href="index.html" data-page="home" style="color:white;text-decoration:none;">Home</a>
   <a href="marketplace.html" data-page="marketplace" style="color:white;text-decoration:none;">Marketplace</a>
   <a href="coppie.html" data-page="coppie" style="color:white;text-decoration:none;">Coppie</a>
