@@ -1,11 +1,11 @@
-// --- Inizializzazione navbar
 function initNavbar() {
     const userBtn = document.getElementById('user-btn');
     const dropdownMenu = document.getElementById('dropdown-menu');
     const menuToggle = document.getElementById('menu-toggle');
     const mainNav = document.getElementById('main-nav');
+    const overlay = document.getElementById('mobile-overlay');
 
-    // Dropdown user
+    // --- Dropdown user
     if(userBtn && dropdownMenu){
         userBtn.addEventListener('click', () => {
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
@@ -18,15 +18,27 @@ function initNavbar() {
         });
     }
 
-    // Hamburger toggle
-    if(menuToggle && mainNav){
+    // --- Hamburger toggle (mobile)
+    if(menuToggle && mainNav && overlay){
         menuToggle.addEventListener('click', () => {
-            mainNav.style.display = mainNav.style.display === 'flex' ? 'none' : 'flex';
-            mainNav.style.flexDirection = 'column';
+            const isOpen = mainNav.style.display === 'flex';
+            if(isOpen){
+                mainNav.style.display = 'none';
+                overlay.style.display = 'none';
+            } else {
+                mainNav.style.display = 'flex';
+                mainNav.style.flexDirection = 'column';
+                overlay.style.display = 'block';
+            }
+        });
+
+        overlay.addEventListener('click', () => {
+            mainNav.style.display = 'none';
+            overlay.style.display = 'none';
         });
     }
 
-    // Aggiorna link Profilo e Temi con username
+    // --- Aggiorna link Profilo e Temi con username
     const username = localStorage.getItem('admin_username') || 'admin';
     const usernameLabel = document.getElementById('username-label');
     const linkProfilo = document.getElementById('link-profilo');
@@ -36,16 +48,27 @@ function initNavbar() {
     if(linkProfilo) linkProfilo.href = `profilo.html?username=${encodeURIComponent(username)}`;
     if(linkTemi) linkTemi.href = `temaadmin.html?username=${encodeURIComponent(username)}`;
 
-    // Nascondi link della pagina corrente
+    // --- Nascondi link della pagina corrente
     const currentPage = window.location.pathname.split('/').pop().replace('.html','');
     mainNav.querySelectorAll('a').forEach(a => {
         if(a.dataset.page === currentPage){
             a.style.display = 'none';
         }
     });
+
+    // --- Nascondi barra se ridimensionamento desktop -> mobile
+    window.addEventListener('resize', () => {
+        if(window.innerWidth > 768){
+            mainNav.style.display = 'flex';
+            mainNav.style.flexDirection = 'row';
+            overlay.style.display = 'none';
+        } else if(mainNav.style.display !== 'flex'){
+            mainNav.style.display = 'none';
+        }
+    });
 }
 
-// --- Dopo aver caricato navbar
+// --- Carica navbar dinamicamente
 document.addEventListener('DOMContentLoaded', () => {
     const placeholder = document.getElementById('navbar-placeholder');
     if(placeholder){
@@ -53,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(res => res.text())
             .then(html => {
                 placeholder.innerHTML = html;
-                initNavbar(); // <--- inizializza eventi solo dopo che il markup è inserito
+                initNavbar();
             })
             .catch(err => console.error('Errore caricamento navbar:', err));
     }
