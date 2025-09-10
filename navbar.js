@@ -7,7 +7,8 @@ function initNavbar() {
 
     // --- Dropdown user
     if(userBtn && dropdownMenu){
-        userBtn.addEventListener('click', () => {
+        userBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // evita chiusura immediata
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
         });
 
@@ -27,7 +28,12 @@ function initNavbar() {
                 overlay.style.display = 'none';
             } else {
                 mainNav.style.display = 'flex';
-                mainNav.style.flexDirection = 'column';
+                // Solo su mobile: colonna
+                if(window.innerWidth <= 768){
+                    mainNav.style.flexDirection = 'column';
+                } else {
+                    mainNav.style.flexDirection = 'row';
+                }
                 overlay.style.display = 'block';
             }
         });
@@ -56,7 +62,7 @@ function initNavbar() {
         }
     });
 
-    // --- Nascondi barra se ridimensionamento desktop -> mobile
+    // --- Aggiorna layout al ridimensionamento
     window.addEventListener('resize', () => {
         if(window.innerWidth > 768){
             mainNav.style.display = 'flex';
