@@ -260,29 +260,45 @@ footer a:hover {
 <footer>
     <a href="index.html" id="home-btn">Menu</a>
 </footer>
-
 <script>
+// --- Controllo autenticazione
 async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token){ window.location.href = "/login_page"; return; }
+    const username = localStorage.getItem("admin_username");
+    if(!token || !username){
+        window.location.href = "login.html";
+        return;
+    }
     try {
-        const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token }});
+        const res = await fetch("/me", { 
+            headers: { "Authorization": "Bearer " + token }
+        });
         const data = await res.json();
-        if(!data.success){ localStorage.removeItem("auth_token"); window.location.href = "/login_page"; }
+        if(!data.success){
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("admin_username");
+            window.location.href = "login.html";
+        }
     } catch(err){
-        localStorage.removeItem("auth_token"); window.location.href = "/login_page";
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("admin_username");
+        window.location.href = "login.html";
     }
 }
 
+// --- Logout
 function logout() {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("admin_username");
     window.location.href = "login.html";
 }
 
-// Dropdown menu
+// --- Dropdown menu
 const userBtn = document.getElementById('userBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
+const username = localStorage.getItem('admin_username') || 'Admin';
+userBtn.querySelector('span').textContent = username;
+
 userBtn.addEventListener('click', () => {
     dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
 });
@@ -292,9 +308,7 @@ window.addEventListener('click', (e) => {
     }
 });
 
-checkAuth();
-
-// --- Elementi DOM ---
+// --- Elementi DOM
 const anteprimaFoto = document.getElementById("anteprimaFoto");
 const anteprimaTesto = document.getElementById("anteprimaTesto");
 
@@ -309,12 +323,12 @@ let effettiScritta = [];
 let effettiSfondo = [];
 let fonts = [];
 
-// Carica fonts ed effetti
+// --- Carica fonts ed effetti
 async function caricaFontsEdEffetti() {
     try {
         const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
         const dataFonts = await resFonts.json();
-        fonts = dataFonts.fonts;
+        fonts = dataFonts.fonts || [];
         selectFont.innerHTML = "";
         fonts.forEach(f=>{
             const o=document.createElement("option");
@@ -344,19 +358,19 @@ async function caricaFontsEdEffetti() {
             o.textContent=f.name || f;
             selectEffettoScritta.appendChild(o);
         });
-
     } catch(e){ console.error(e); }
 }
 
-// Anteprima
+// --- Aggiorna anteprima
 function aggiornaAnteprima() {
     anteprimaFoto.style.backgroundColor = "#ddd";
+    anteprimaFoto.src = anteprimaFoto.src || '';
     anteprimaTesto.style.color = inputTesto.value || "#000000";
     anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
-    // Effetti sfondo e scritta (simili a nuovacoppia)
+    // Qui puoi aggiungere logica effetti sfondo / scritta
 }
 
-// Aggiorna immagine anteprima al selezionare file
+// --- Aggiorna immagine anteprima al selezionare file
 document.getElementById("fotoEvento").addEventListener("change", (e)=>{
     const file = e.target.files[0];
     if(file){
@@ -364,11 +378,11 @@ document.getElementById("fotoEvento").addEventListener("change", (e)=>{
     }
 });
 
-// Event listeners
+// --- Event listeners per input/selector
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
-// Crea evento
+// --- Creazione evento
 document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
     const nome = document.getElementById("nomeEvento").value.trim();
     const fotoFile = document.getElementById("fotoEvento").files[0];
@@ -383,19 +397,30 @@ document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
     formData.append("font", selectFont.value);
     formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
     formData.append("effetto_scritta", selectEffettoScritta.value||"");
+    formData.append("admin", username);
 
-    const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_evento',{
-        method:"POST",
-        body:formData
-    });
-    const data = await res.json();
-    document.getElementById("msg").innerText = data.success ? "Evento creato!" : "Errore: "+(data.error||"imprevisto");
+    try {
+        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_evento',{
+            method:"POST",
+            body:formData
+        });
+        const data = await res.json();
+        document.getElementById("msg").innerText = data.success ? "Evento creato!" : "Errore: "+(data.error||"imprevisto");
 
-    if(data.success) setTimeout(()=>window.location.href="index.html",1000);
+        if(data.success){
+            setTimeout(()=>{
+                window.location.href = `index.html?admin=${encodeURIComponent(username)}`;
+            }, 1000);
+        }
+    } catch(err){
+        console.error(err);
+        document.getElementById("msg").innerText = "Errore creazione evento.";
+    }
 });
 
-// Onload
+// --- Al caricamento pagina
 window.onload = async ()=>{
+    await checkAuth();
     await caricaFontsEdEffetti();
     aggiornaAnteprima();
 };
