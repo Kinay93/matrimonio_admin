@@ -46,15 +46,20 @@ function initNavbar() {
         });
     }
 
-    // --- Aggiorna link dropdown con username
+    // --- Aggiorna link con username
     const username = localStorage.getItem('admin_username') || 'admin';
     const usernameLabel = document.getElementById('username-label');
     const linkProfilo = document.getElementById('link-profilo');
     const linkTemi = document.getElementById('link-temi');
     const linkLogout = document.getElementById('link-logout');
 
+    const linkHome = document.querySelector('#main-nav a[data-page="home"]');
+    const linkMarketplace = document.querySelector('#main-nav a[data-page="marketplace"]');
+    const linkEventi = document.querySelector('#main-nav a[data-page="coppie"]');
+
     if(usernameLabel) usernameLabel.textContent = username;
 
+    // Dropdown links
     if(linkProfilo){
         linkProfilo.addEventListener('click', (e) => {
             e.preventDefault();
@@ -75,6 +80,11 @@ function initNavbar() {
             logout();
         });
     }
+
+    // Navbar main links
+    if(linkHome) linkHome.href = `home.html?admin=${encodeURIComponent(username)}`;
+    if(linkMarketplace) linkMarketplace.href = `marketplace.html?admin=${encodeURIComponent(username)}`;
+    if(linkEventi) linkEventi.href = `index.html?admin=${encodeURIComponent(username)}`;
 
     // --- Nascondi link della pagina corrente
     const currentPage = window.location.pathname.split('/').pop().replace('.html','');
