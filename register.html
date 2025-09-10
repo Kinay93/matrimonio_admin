@@ -153,6 +153,16 @@ footer a:hover { text-decoration: underline; }
     <input type="password" id="password" required>
     <label for="confirmPassword">Conferma Password</label>
     <input type="password" id="confirmPassword" required>
+
+    <!-- ---------- RUOLO ---------- -->
+    <fieldset>
+        <legend>Ruolo</legend>
+        <label><input type="radio" name="ruolo" value="Fotografo" required> Fotografo</label>
+        <label><input type="radio" name="ruolo" value="Musicista"> Musicista</label>
+        <label><input type="radio" name="ruolo" value="Wedding Planner"> Wedding Planner</label>
+        <label><input type="radio" name="ruolo" value="Organizzatore Eventi"> Organizzatore Eventi</label>
+    </fieldset>
+
     <button type="submit" id="registerBtn">Registrati</button>
 </form>
 <div class="social-btn">
@@ -177,6 +187,14 @@ registerForm.addEventListener('submit', async (e) => {
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
+    // Ruolo selezionato (solo uno)
+    const ruoloEl = document.querySelector('input[name="ruolo"]:checked');
+    if(!ruoloEl){
+        msg.textContent = "Seleziona un ruolo!";
+        return;
+    }
+    const ruolo = ruoloEl.value;
+
     if(password !== confirmPassword){
         msg.textContent = "Le password non coincidono!";
         return;
@@ -187,7 +205,7 @@ registerForm.addEventListener('submit', async (e) => {
             method: "POST",
             credentials: "include",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({nome, cognome, username, email, password})
+            body: JSON.stringify({nome, cognome, username, email, password, ruolo})
         }).then(res => res.json());
 
         if(response.success){
