@@ -3,21 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Profilo Amministratore</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Navbar inclusa -->
-  <div id="navbar-placeholder"></div>
-  <script>
-    fetch('navbar.html')
-      .then(res => res.text())
-      .then(html => document.getElementById('navbar-placeholder').innerHTML = html)
-      .catch(err => console.error('Errore caricamento navbar:', err));
-  </script>
+  <!-- Navbar -->
+  <div id="navbar-container"></div>
+  <script src="navbar.js"></script>
 
   <!-- MAIN CONTENT -->
-  <div class="main-content">
+  <div class="main-content" style="padding:20px;">
     <h2>Profilo Admin</h2>
     <div id="profile-info">
       <p><i>Caricamento dati utente...</i></p>
@@ -26,16 +20,19 @@
 
   <script>
     async function caricaProfilo() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const username = urlParams.get('username') || localStorage.getItem('admin_username');
+      const username = localStorage.getItem('admin_username');
       if (!username) {
         document.getElementById('profile-info').innerHTML = "<p>Errore: utente non trovato.</p>";
         return;
       }
 
       try {
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/get_user?username=${encodeURIComponent(username)}`);
+        const token = localStorage.getItem("auth_token");
+        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/get_user?username=${encodeURIComponent(username)}`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
         const data = await res.json();
+
         if(data.success) {
           const u = data.user;
           document.getElementById('profile-info').innerHTML = `
@@ -53,7 +50,32 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", caricaProfilo);
+    async function checkAuth() {
+      const token = localStorage.getItem("auth_token");
+      if(!token) window.location.href = "login.html";
+      try {
+        const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token }});
+        const data = await res.json();
+        if(!data.success){
+          localStorage.removeItem("auth_token");
+          window.location.href = "login.html";
+        }
+      } catch(err) {
+        localStorage.removeItem("auth_token");
+        window.location.href = "login.html";
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("admin_username");
+      window.location.href = "login.html";
+    }
+
+    window.onload = async () => {
+      await checkAuth();
+      caricaProfilo();
+    };
   </script>
 </body>
 </html>
