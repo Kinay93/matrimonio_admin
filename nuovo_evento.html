@@ -260,6 +260,7 @@ footer a:hover {
 <footer>
     <a href="index.html" id="home-btn">Menu</a>
 </footer>
+
 <script>
 // --- Controllo autenticazione
 async function checkAuth() {
@@ -382,7 +383,7 @@ document.getElementById("fotoEvento").addEventListener("change", (e)=>{
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
-// --- Creazione evento
+// --- Creazione evento con token
 document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
     const nome = document.getElementById("nomeEvento").value.trim();
     const fotoFile = document.getElementById("fotoEvento").files[0];
@@ -397,19 +398,23 @@ document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
     formData.append("font", selectFont.value);
     formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
     formData.append("effetto_scritta", selectEffettoScritta.value||"");
-    formData.append("admin", username);
+
+    const token = localStorage.getItem("auth_token");
 
     try {
         const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_evento',{
             method:"POST",
-            body:formData
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
         });
         const data = await res.json();
         document.getElementById("msg").innerText = data.success ? "Evento creato!" : "Errore: "+(data.error||"imprevisto");
 
         if(data.success){
             setTimeout(()=>{
-                window.location.href = `index.html?admin=${encodeURIComponent(username)}`;
+                window.location.href = "index.html";
             }, 1000);
         }
     } catch(err){
