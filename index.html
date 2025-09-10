@@ -6,46 +6,82 @@
 <title>Amministrazione Matrimonio</title>
 <link rel="stylesheet" href="style.css">
 <style>
-/* Tutto il tuo CSS rimane invariato */
 body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; }
-header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#2EC4B6; color:white; flex-wrap:wrap; }
-header h1 { font-size:1.3rem; margin:5px 0; flex:1 1 100%; }
-.center-btn { flex:1 1 100%; text-align:center; margin:5px 0; }
-header button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; background:#007bff; color:white; margin:5px 0; transition:0.3s; }
-header button:hover { background:#0056b3; transform: scale(1.05); }
 
+/* Navbar con dropdown */
+.navbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 20px;
+  background:#2EC4B6;
+  color:white;
+  flex-wrap:wrap;
+}
+.navbar h1 { font-size:1.3rem; margin:0; }
+.navbar .user-menu { position:relative; display:inline-block; }
+.user-btn {
+  display:flex; align-items:center; gap:8px;
+  background:white; border:none; border-radius:20px;
+  padding:6px 12px; cursor:pointer; font-weight:bold; color:#2EC4B6;
+}
+.user-btn img { width:28px; height:28px; border-radius:50%; }
+.dropdown-menu {
+  display:none; position:absolute; right:0; top:45px; background:white;
+  border:1px solid #ddd; border-radius:8px; min-width:150px; box-shadow:0 4px 10px rgba(0,0,0,0.15); z-index:1000;
+}
+.dropdown-menu a {
+  display:block; padding:10px; text-decoration:none; color:#333;
+}
+.dropdown-menu a:hover { background:#f0f0f0; }
+
+/* Bottone Nuovo Evento */
+#nuovo-matrimonio { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; background:#007bff; color:white; transition:0.3s; }
+#nuovo-matrimonio:hover { background:#0056b3; transform: scale(1.05); }
+
+/* Container e grid */
 .container { padding:20px; }
 .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:20px; }
 @media(min-width:1024px){.grid{grid-template-columns:repeat(5,1fr);}}
 
-.evento-card { background:white; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); padding:15px; text-align:center; transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.5s ease; opacity:0; transform:translateY(20px);}
+/* cards */
+.evento-card { background:white; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  padding:15px; text-align:center; transition: transform 0.2s ease, box-shadow 0.3s ease, opacity 0.5s ease;
+  opacity:0; transform:translateY(20px);}
 .evento-card.visible{opacity:1; transform:translateY(0);}
 .evento-card:hover{transform:translateY(-5px); box-shadow:0 6px 15px rgba(0,0,0,0.15);}
-
 .evento-card h3 { margin:0 0 10px; font-size:1rem; }
 .evento-img { width:80px; height:80px; border-radius:50%; background:#ddd; margin:0 auto 10px; overflow:hidden; }
 .evento-img img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s ease; }
 .evento-card:hover .evento-img img { transform:scale(1.1); }
-
-.evento-card button { display:block; width:100%; margin:5px 0; padding:6px; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem; transition:0.3s; }
+.evento-card button { display:block; width:100%; margin:5px 0; padding:6px; border:none; border-radius:6px;
+  cursor:pointer; font-size:0.9rem; transition:0.3s; }
 .btn-genera { background:#28a745; color:white; }
 .btn-genera:hover { background:#218838; transform:scale(1.03); }
 .btn-vedi { background:#6c757d; color:white; }
 .btn-vedi:hover { background:#5a6268; transform:scale(1.03); }
-
 </style>
-	  <script src="navbar.js" defer></script>
-	  <script src="script.js" defer></script>
+<script src="navbar.js" defer></script>
+<script src="script.js" defer></script>
 </head>
 <body>
-<div id="navbar-placeholder"></div>
 
-<header>
+<!-- Navbar -->
+<div class="navbar">
   <h1>Amministrazione Matrimonio</h1>
-  <div class="center-btn">
-    <button id="nuovo-matrimonio">Nuovo Evento</button>
+  <div class="user-menu">
+    <button id="userBtn" class="user-btn">
+      <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+      <span>Admin</span>
+    </button>
+    <div id="dropdownMenu" class="dropdown-menu">
+      <a href="profilo.html">Profilo</a>
+      <a href="temaadmin.html">Temi</a>
+      <a href="#" id="logoutBtn">Logout</a>
+    </div>
   </div>
-</header>
+  <button id="nuovo-matrimonio">Nuovo Evento</button>
+</div>
 
 <div class="container">
   <div class="grid" id="Eventi-grid">
@@ -53,109 +89,98 @@ header button:hover { background:#0056b3; transform: scale(1.05); }
   </div>
 </div>
 
-<div id="qrcode-modal" class="modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:1000;">
-  <span class="close" style="position:absolute; top:10px; right:20px; font-size:30px; color:white; cursor:pointer;">&times;</span>
-  <img id="qrcode-fullscreen" src="" alt="QR Code evento" style="max-width:80%; max-height:80%; border:5px solid #fff;">
-  <a id="download-qrcode" href="" download="qrcode.jpg">
-    <button>Scarica QR</button>
-  </a>
-</div>
-
 <script>
 async function checkAuth() {
-    const token = localStorage.getItem("auth_token");
-    if(!token) window.location.href = "login.html";
-
-    try {
-        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { 
-            headers: { "Authorization": "Bearer " + token }
-        });
-        const data = await res.json();
-        if(!data.success){
-            localStorage.removeItem("auth_token");
-            localStorage.removeItem("admin_username");
-            window.location.href = "login.html";
-        }
-    } catch(err){
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("admin_username");
-        window.location.href = "login.html";
+  const token = localStorage.getItem("auth_token");
+  if(!token) window.location.href = "login.html";
+  try {
+    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const data = await res.json();
+    if(!data.success){
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("admin_username");
+      window.location.href = "login.html";
+    } else {
+      if(data.username) localStorage.setItem("admin_username", data.username);
     }
+  } catch(err){
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("admin_username");
+    window.location.href = "login.html";
+  }
 }
 
-const username = localStorage.getItem('admin_username') || 'Admin';
-
-// --- Tasto Nuovo Evento
-document.getElementById('nuovo-matrimonio').addEventListener('click', ()=>{
-    window.location.href = `nuovo_evento.html`;
+// Dropdown user
+const userBtn = document.getElementById('userBtn');
+const dropdownMenu = document.getElementById('dropdownMenu');
+userBtn.addEventListener('click', () => {
+  dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+});
+window.addEventListener('click', e => {
+  if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.style.display = 'none';
 });
 
-// --- Carica Eventi con token
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  localStorage.removeItem("auth_token");
+  localStorage.removeItem("admin_username");
+  window.location.href = "login.html";
+});
+
+// Nuovo evento
+document.getElementById('nuovo-matrimonio').addEventListener('click', ()=>{
+  window.location.href = 'nuovo_evento.html';
+});
+
+// Carica eventi
 async function caricaEventi() {
-    try {
-        const token = localStorage.getItem("auth_token");
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_eventi?admin=${encodeURIComponent(username)}`, { headers: { "Authorization": "Bearer " + token } });
-        const data = await res.json();
-        const grid = document.getElementById('Eventi-grid');
-        grid.innerHTML = '';
-
-        data.eventi.forEach((evento, index)=>{
-            if(!evento || !evento.nome) return;
-
-            const card = document.createElement('div');
-            card.className = 'evento-card';
-
-            const title = document.createElement('h3');
-            title.textContent = evento.nome;
-            card.appendChild(title);
-
-            const imgContainer = document.createElement('div');
-            imgContainer.className = 'evento-img';
-
-            const img = document.createElement('img');
-            img.src = evento.foto_url || 'https://via.placeholder.com/100';
-            img.alt = evento.nome;
-            imgContainer.appendChild(img);
-
-            imgContainer.addEventListener('click', ()=>{
-                window.location.href = `modifica_evento.html?evento=${encodeURIComponent(evento.nome)}`;
-            });
-
-            card.appendChild(imgContainer);
-
-            const btnGenera = document.createElement('button');
-            btnGenera.textContent = 'Genera QR';
-            btnGenera.className = 'btn-genera';
-            btnGenera.disabled = evento.qr_generato;
-            btnGenera.addEventListener('click', e=>{
-                e.stopPropagation();
-                generaQRCode(evento.nome, btnGenera);
-            });
-            card.appendChild(btnGenera);
-
-            const btnVedi = document.createElement('button');
-            btnVedi.textContent = 'Vedi QR';
-            btnVedi.className = 'btn-vedi';
-            btnVedi.disabled = !evento.qr_generato;
-            btnVedi.addEventListener('click', e=>{
-                e.stopPropagation();
-                vediQRCode(evento.nome);
-            });
-            card.appendChild(btnVedi);
-
-            grid.appendChild(card);
-            setTimeout(()=>card.classList.add('visible'), index*100);
-        });
-
-    } catch(e){
-        console.error('Errore caricamento eventi', e);
-    }
+  try {
+    const token = localStorage.getItem("auth_token");
+    const username = localStorage.getItem("admin_username") || "Admin";
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_eventi?admin=${encodeURIComponent(username)}`,
+      { headers: { "Authorization": "Bearer " + token } });
+    const data = await res.json();
+    const grid = document.getElementById('Eventi-grid');
+    grid.innerHTML = '';
+    (data.eventi || []).forEach((evento,index)=>{
+      if(!evento || !evento.nome) return;
+      const card = document.createElement('div');
+      card.className = 'evento-card';
+      const title = document.createElement('h3');
+      title.textContent = evento.nome;
+      card.appendChild(title);
+      const imgContainer = document.createElement('div');
+      imgContainer.className = 'evento-img';
+      const img = document.createElement('img');
+      img.src = evento.foto_url || 'https://via.placeholder.com/100';
+      img.alt = evento.nome;
+      imgContainer.appendChild(img);
+      imgContainer.addEventListener('click', ()=>window.location.href = `modifica_evento.html?evento=${encodeURIComponent(evento.nome)}`);
+      card.appendChild(imgContainer);
+      const btnGenera = document.createElement('button');
+      btnGenera.textContent = 'Genera QR';
+      btnGenera.className = 'btn-genera';
+      btnGenera.disabled = evento.qr_generato;
+      btnGenera.addEventListener('click', e=>{ e.stopPropagation(); generaQRCode(evento.nome, btnGenera); });
+      card.appendChild(btnGenera);
+      const btnVedi = document.createElement('button');
+      btnVedi.textContent = 'Vedi QR';
+      btnVedi.className = 'btn-vedi';
+      btnVedi.disabled = !evento.qr_generato;
+      btnVedi.addEventListener('click', e=>{ e.stopPropagation(); vediQRCode(evento.nome); });
+      card.appendChild(btnVedi);
+      grid.appendChild(card);
+      setTimeout(()=>card.classList.add('visible'), index*100);
+    });
+  } catch(e){ console.error('Errore caricamento eventi', e); }
 }
 
-// --- Al caricamento pagina
 window.onload = async ()=>{
-    await checkAuth();
-    caricaEventi();
+  await checkAuth();
+  document.querySelector('#userBtn span').textContent = localStorage.getItem('admin_username') || 'Admin';
+  caricaEventi();
 };
 </script>
 </body>
