@@ -8,7 +8,7 @@ function initNavbar() {
     // --- Dropdown user
     if(userBtn && dropdownMenu){
         userBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // evita chiusura immediata
+            e.stopPropagation();
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
         });
 
@@ -28,12 +28,7 @@ function initNavbar() {
                 overlay.style.display = 'none';
             } else {
                 mainNav.style.display = 'flex';
-                // Solo su mobile: colonna
-                if(window.innerWidth <= 768){
-                    mainNav.style.flexDirection = 'column';
-                } else {
-                    mainNav.style.flexDirection = 'row';
-                }
+                mainNav.style.flexDirection = window.innerWidth <= 768 ? 'column' : 'row';
                 overlay.style.display = 'block';
             }
         });
@@ -44,7 +39,7 @@ function initNavbar() {
         });
     }
 
-    // --- Aggiorna link Profilo e Temi con username
+    // --- Recupera username admin da localStorage
     const username = localStorage.getItem('admin_username') || 'admin';
     const usernameLabel = document.getElementById('username-label');
     const linkProfilo = document.getElementById('link-profilo');
@@ -53,6 +48,13 @@ function initNavbar() {
     if(usernameLabel) usernameLabel.textContent = username;
     if(linkProfilo) linkProfilo.href = `profilo.html?username=${encodeURIComponent(username)}`;
     if(linkTemi) linkTemi.href = `temaadmin.html?username=${encodeURIComponent(username)}`;
+
+    // --- Aggiorna link principali con ?admin=username
+    mainNav.querySelectorAll('a[data-page]').forEach(a => {
+        if(a.dataset.page === 'coppie'){
+            a.href = `index.html?admin=${encodeURIComponent(username)}`;
+        }
+    });
 
     // --- Nascondi link della pagina corrente
     const currentPage = window.location.pathname.split('/').pop().replace('.html','');
@@ -87,3 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error('Errore caricamento navbar:', err));
     }
 });
+
+// --- Funzione logout globale
+function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('admin_username');
+    window.location.href = 'login.html';
+}
