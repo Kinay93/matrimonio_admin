@@ -1,255 +1,45 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<title>Home - Amministrazione</title>
-<link rel="stylesheet" href="styles.css">
-<style>
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: #f5f5f5;
-    color: #333;
-    overflow-x: hidden;
-  }
-
-  header {
-    background: #2EC4B6;
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-  }
-
-  header h1 {
-    margin: 0;
-    font-size: 1.4em;
-  }
-
-  /* --- BOTTONE NAVBAR SCOMPARSA --- */
-  .toggle-navbar {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: white;
-    cursor: pointer;
-  }
-
-  /* --- DROPDOWN UTENTE --- */
-  .user-menu {
-    position: relative;
-    display: inline-block;
-  }
-
-  .user-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: white;
-    border: none;
-    border-radius: 20px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #2EC4B6;
-  }
-
-  .user-btn img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-  }
-
-  .dropdown-menu {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 45px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    min-width: 150px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    z-index: 1000;
-  }
-
-  .dropdown-menu a {
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    color: #333;
-    transition: background 0.2s;
-  }
-
-  .dropdown-menu a:hover {
-    background: #f0f0f0;
-  }
-
-  /* --- NAVBAR SCOMPARSA --- */
-  .navbar {
-    display: none;
-    position: fixed;
-    top: 60px; /* sotto l'header */
-    left: 0;
-    width: 100%;
-    background: #2EC4B6;
-    flex-direction: row;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px 0;
-    z-index: 900;
-  }
-
-  .navbar a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1em;
-    padding: 5px 15px;
-    border-radius: 5px;
-    transition: background 0.2s;
-  }
-
-  .navbar a:hover {
-    background: #27a19a;
-  }
-
-  .main-content {
-    padding: 20px;
-    text-align: center;
-  }
-
-  .main-content h2 {
-    margin-top: 0;
-  }
-
-  @media (max-width: 768px) {
-    .main-content { padding: 15px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Home Amministratore</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-<header>
-  <button class="toggle-navbar" onclick="toggleNavbar()">☰</button>
-  <h1>Home Amministratore</h1>
+  <!-- Navbar inclusa -->
+  <div id="navbar-placeholder"></div>
+  <script>
+    fetch('navbar.html')
+      .then(res => res.text())
+      .then(html => document.getElementById('navbar-placeholder').innerHTML = html)
+      .catch(err => console.error('Errore caricamento navbar:', err));
+  </script>
 
-  <div class="user-menu">
-    <button id="userBtn" class="user-btn">
-      <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
-      <span id="usernameDisplay">Admin</span>
-    </button>
-    <div id="dropdownMenu" class="dropdown-menu">
-      <a id="profiloLink" href="#">Profilo</a>
-      <a id="temiLink" href="#">Temi</a>
-      <a href="#" onclick="logout()">Logout</a>
-    </div>
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <h2>Benvenuto nella Home!</h2>
+    <p>Qui compariranno le informazioni prese da siti esterni (notizie, aggiornamenti, feed, ecc.).</p>
+    <div id="feed"><p><i>Caricamento informazioni...</i></p></div>
   </div>
-</header>
 
-<!-- NAVBAR SCOMPARSA ORIZZONTALE -->
-<div id="navbar" class="navbar">
-  <a id="link1" href="#">Link 1</a>
-  <a id="link2" href="#">Link 2</a>
-</div>
-
-<div class="main-content">
-  <h2>Benvenuto nella tua Home!</h2>
-  <p>Qui compariranno le informazioni prese da siti esterni (notizie, aggiornamenti, feed, ecc.).</p>
-  <div id="feed">
-    <p><i>Caricamento informazioni...</i></p>
-  </div>
-</div>
-
-<script>
-  // Mostra username loggato
-  const savedUsername = localStorage.getItem("admin_username") || "Admin";
-  document.getElementById("usernameDisplay").textContent = savedUsername;
-
-  // Aggiorna link Profilo/Temi con username
-  document.getElementById("profiloLink").href = `profilo.html?username=${savedUsername}`;
-  document.getElementById("temiLink").href = `temaadmin.html?username=${savedUsername}`;
-
-  // DROPDOWN
-  const userBtn = document.getElementById("userBtn");
-  const dropdownMenu = document.getElementById("dropdownMenu");
-
-  userBtn.addEventListener("click", () => {
-    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-  });
-
-  dropdownMenu.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => {
-      dropdownMenu.style.display = "none";
-    });
-  });
-
-  document.addEventListener("click", (event) => {
-    if (!userBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
-      dropdownMenu.style.display = "none";
+  <script>
+    async function caricaFeed() {
+      const feed = document.getElementById("feed");
+      try {
+        const res = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=3");
+        const dati = await res.json();
+        feed.innerHTML = dati.map(post => `
+          <div style="margin:15px 0; padding:15px; border:1px solid #ccc; border-radius:8px; background:white;">
+            <h3>${post.title}</h3>
+            <p>${post.body}</p>
+          </div>
+        `).join('');
+      } catch(err) {
+        feed.innerHTML = "<p>Errore nel caricare le informazioni esterne.</p>";
+      }
     }
-  });
-
-  // NAVBAR SCOMPARSA ORIZZONTALE
-  const navbar = document.getElementById("navbar");
-  const link1 = document.getElementById("link1");
-  const link2 = document.getElementById("link2");
-
-  function toggleNavbar() {
-    navbar.style.display = navbar.style.display === "flex" ? "none" : "flex";
-  }
-
-  navbar.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => {
-      navbar.style.display = "none";
-    });
-  });
-
-  // LINKS DINAMICI
-  const currentPage = window.location.pathname.split("/").pop();
-
-  if(currentPage.includes("coppie")) {
-    link1.textContent = "Home";
-    link1.href = "index.html";
-    link2.textContent = "Marketplace";
-    link2.href = "marketplace.html";
-  } else if(currentPage.includes("marketplace")) {
-    link1.textContent = "Home";
-    link1.href = "index.html";
-    link2.textContent = "Coppie";
-    link2.href = "index.html";
-  } else {
-    link1.textContent = "Coppie";
-    link1.href = "index.html";
-    link2.textContent = "Marketplace";
-    link2.href = "marketplace.html";
-  }
-
-  // LOGOUT
-  function logout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("admin_username");
-    window.location.href = "login.html";
-  }
-
-  // Esempio feed
-  async function caricaFeed() {
-    const feed = document.getElementById("feed");
-    try {
-      const res = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=3");
-      const dati = await res.json();
-      feed.innerHTML = dati.map(post => `
-        <div style="margin:15px 0; padding:15px; border:1px solid #ccc; border-radius:8px; background:white;">
-          <h3>${post.title}</h3>
-          <p>${post.body}</p>
-        </div>
-      `).join('');
-    } catch(err) {
-      feed.innerHTML = "<p>Errore nel caricare le informazioni esterne.</p>";
-    }
-  }
-  document.addEventListener("DOMContentLoaded", caricaFeed);
-</script>
+    document.addEventListener("DOMContentLoaded", caricaFeed);
+  </script>
 </body>
 </html>
