@@ -210,16 +210,9 @@ footer a:hover {
 </style>
 </head>
 <body>
-  <div id="navbar-container"></div>
+  <div id="navbar-placeholder"></div>
+  <script src="navbar.js" defer></script>
 
-  <!-- Script per caricare la navbar -->
-  <script>
-    fetch("navbar.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("navbar-container").innerHTML = html;
-      });
-  </script>
 
 <header>
     <h1>Modifica Evento</h1>
