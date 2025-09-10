@@ -1,64 +1,58 @@
-<!-- Pulsante menu -->
-<button id="menuBtn" class="menu-btn" onclick="toggleMenu()">☰</button>
+<div id="navbar-container">
+  <header>
+    <button id="menuBtn" class="toggle-btn">☰</button>
+    <h1 id="pageTitle">Amministrazione</h1>
 
-<!-- Navbar nascosta -->
-<div id="topnav" class="topnav">
-  <a href="#" id="homeLink" onclick="closeMenu()">🏠 Home</a>
-  <a href="#" id="coppieLink" onclick="closeMenu()">🤝 Coppie</a>
-  <a href="#" id="marketLink" onclick="closeMenu()">🛒 Market-Place</a>
-  <a href="#" id="profiloLink" onclick="closeMenu()">👤 Profilo</a>
-  <a href="#" id="temiLink" onclick="closeMenu()">🎨 Temi</a>
-  <a href="login.html" onclick="logout(); closeMenu()">🚪 Logout</a>
+    <div class="user-menu">
+      <button id="userBtn" class="user-btn">
+        <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
+        <span id="usernameDisplay">Admin</span>
+      </button>
+      <div id="dropdownMenu" class="dropdown-menu">
+        <a href="#" id="profiloLink">Profilo</a>
+        <a href="temaadmin.html">Temi</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <nav id="sideNavbar" class="sidebar">
+    <span class="closebtn" onclick="closeSidebar()">×</span>
+    <a href="index.html">Home</a>
+    <a href="marketplace.html">Marketplace</a>
+    <a href="coppie.html">Coppie</a>
+  </nav>
 </div>
 
 <script>
-function toggleMenu() {
-  const nav = document.getElementById("topnav");
-  const btn = document.getElementById("menuBtn");
+  // Dropdown toggle
+  const userBtn = document.getElementById('userBtn');
+  const dropdownMenu = document.getElementById('dropdownMenu');
+  userBtn.addEventListener('click', () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+  });
+  // Chiudi dropdown se clic fuori
+  window.addEventListener('click', e => {
+    if (!userBtn.contains(e.target)) dropdownMenu.style.display = 'none';
+  });
 
-  nav.classList.toggle("active");
+  // Sidebar toggle
+  const sideNavbar = document.getElementById('sideNavbar');
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    sideNavbar.style.width = sideNavbar.style.width === '250px' ? '0' : '250px';
+  });
+  function closeSidebar() { sideNavbar.style.width = '0'; }
 
-  if (nav.classList.contains("active")) {
-    btn.textContent = "❌"; // cambia in X
-  } else {
-    btn.textContent = "☰"; // torna menu
+  // Inserimento username loggato
+  const urlParams = new URLSearchParams(window.location.search);
+  const usernameAdmin = urlParams.get('username') || localStorage.getItem('admin_username') || 'Admin';
+  document.getElementById('usernameDisplay').textContent = usernameAdmin;
+  document.getElementById('profiloLink').href = `profilo.html?username=${usernameAdmin}`;
+
+  // Logout
+  function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('admin_username');
+    window.location.href = 'login.html';
   }
-}
-
-function closeMenu() {
-  const nav = document.getElementById("topnav");
-  const btn = document.getElementById("menuBtn");
-  nav.classList.remove("active");
-  btn.textContent = "☰"; // torna menu
-}
-
-function setNavLinks() {
-  const username = localStorage.getItem("admin_username") || "";
-
-  document.getElementById("homeLink").href = `home.html?username=${username}`;
-  document.getElementById("coppieLink").href = `coppie.html?username=${username}`;
-  document.getElementById("marketLink").href = `market.html?username=${username}`;
-  document.getElementById("profiloLink").href = `profilo.html?username=${username}`;
-  document.getElementById("temiLink").href = `temiadmin.html?username=${username}`;
-}
-
-function logout() {
-  localStorage.removeItem("auth_token");
-  localStorage.removeItem("admin_username");
-}
-
-setNavLinks();
 </script>
-
-<style>
-/* Pulsante in alto */
-.menu-btn {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  background: #2EC4B6;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 20px;
-  c
