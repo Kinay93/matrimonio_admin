@@ -2,8 +2,9 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Nuova Coppia</title>
+<title>Nuovo Evento</title>
 <link rel="stylesheet" href="style.css">
+<script src="navbar.js" defer></script>
 <style>
 body {
     margin: 0;
@@ -134,6 +135,12 @@ header h1 {
     justify-content: center;
     font-weight: bold;
     color: #666;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+}
+
+#anteprimaFoto:hover {
+    transform: scale(1.05);
 }
 
 #anteprimaTesto {
@@ -210,18 +217,10 @@ footer a:hover {
 </style>
 </head>
 <body>
-  <div id="navbar-container"></div>
+<div id="navbar-container"></div>
 
-  <!-- Script per caricare la navbar -->
-  <script>
-    fetch("navbar.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("navbar-container").innerHTML = html;
-      });
-  </script>
 <header>
-    <h1>Nuova Coppia</h1>
+    <h1>Nuovo Evento</h1>
     <div class="user-menu">
         <button id="userBtn" class="user-btn">
             <img src="https://img.icons8.com/ios-filled/50/user-male-circle.png" alt="Avatar">
@@ -237,23 +236,23 @@ footer a:hover {
 
 <div class="container">
     <div class="form-col">
-        <label>Nome coppia:<input type="text" id="nomeCoppia" placeholder="Nome coppia"></label>
-        <label>Foto coppia:<input type="file" id="fotoCoppia"></label>
+        <label>Nome evento:<input type="text" id="nomeEvento" placeholder="Nome evento"></label>
+        <label>Foto evento:<input type="file" id="fotoEvento"></label>
         <label>Colore sfondo primario:<input type="color" id="colorSfondo"></label>
         <label>Colore sfondo secondario:<input type="color" id="colorSfondoSecondario"></label>
         <label>Colore testo:<input type="color" id="colorTesto"></label>
         <label>Font:<select id="fontScelto"></select></label>
         <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
         <label>Effetto scritta:<select id="effettoScritta"></select></label>
-        <button id="creaCoppiaBtn">Crea coppia</button>
+        <button id="creaEventoBtn">Crea Evento</button>
         <div id="msg"></div>
     </div>
 
     <div class="anteprima-col">
         <h3>Anteprima</h3>
         <div id="anteprima">
-            <div id="anteprimaFoto">Foto</div>
-            <span id="anteprimaTesto">Titolo Coppia</span>
+            <img id="anteprimaFoto" src="" alt="Foto Evento">
+            <span id="anteprimaTesto">Titolo Evento</span>
         </div>
     </div>
 </div>
@@ -270,7 +269,6 @@ async function checkAuth() {
         const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token }});
         const data = await res.json();
         if(!data.success){ localStorage.removeItem("auth_token"); window.location.href = "/login_page"; }
-        console.log("Utente autenticato:", data.email);
     } catch(err){
         localStorage.removeItem("auth_token"); window.location.href = "/login_page";
     }
@@ -297,9 +295,8 @@ window.addEventListener('click', (e) => {
 checkAuth();
 
 // --- Elementi DOM ---
-const anteprimaDiv = document.getElementById("anteprima");
-const anteprimaTesto = document.getElementById("anteprimaTesto");
 const anteprimaFoto = document.getElementById("anteprimaFoto");
+const anteprimaTesto = document.getElementById("anteprimaTesto");
 
 const inputSfondo = document.getElementById("colorSfondo");
 const inputSfondoSecondario = document.getElementById("colorSfondoSecondario");
@@ -311,16 +308,6 @@ const selectEffettoScritta = document.getElementById("effettoScritta");
 let effettiScritta = [];
 let effettiSfondo = [];
 let fonts = [];
-
-function hexToRgb(hex) {
-    hex = hex.replace('#','');
-    if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
-    const bigint = parseInt(hex,16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return `${r}, ${g}, ${b}`;
-}
 
 // Carica fonts ed effetti
 async function caricaFontsEdEffetti() {
@@ -363,76 +350,33 @@ async function caricaFontsEdEffetti() {
 
 // Anteprima
 function aggiornaAnteprima() {
-    anteprimaDiv.style.cssText = '';
-    anteprimaTesto.style.cssText = '';
-
-    anteprimaDiv.style.backgroundColor = inputSfondo.value || "#ffffff";
+    anteprimaFoto.style.backgroundColor = "#ddd";
     anteprimaTesto.style.color = inputTesto.value || "#000000";
     anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
-
-    const bgRgb = hexToRgb(inputSfondo.value);
-    const bgSecondarioRgb = hexToRgb(inputSfondoSecondario.value);
-
-    const effSfondo = effettiSfondo.find(e => e.id === selectEffettoSfondo.value);
-    let overlayColor = `rgba(${bgRgb}, 0.3)`;
-    if(effSfondo && effSfondo.css){
-        let sfondoCss = effSfondo.css
-            .replace(/var\(--bg-color\)/g, inputSfondo.value)
-            .replace(/var\(--bg-color-rgb\)/g, bgRgb)
-            .replace(/var\(--bg-color-secondario\)/g, inputSfondoSecondario.value)
-            .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
-
-        sfondoCss.split(';').forEach(rule=>{
-            if(rule.trim()){
-                let [prop,...rest] = rule.split(':');
-                let val = rest.join(':');
-                if(prop && val) anteprimaDiv.style.setProperty(prop.trim(), val.trim());
-            }
-        });
-
-        const bgImageMatch = sfondoCss.match(/url\(([^)]+)\)/);
-        if(bgImageMatch){
-            anteprimaDiv.style.position='relative';
-            if(!anteprimaDiv.querySelector('.overlay')){
-                const overlay = document.createElement('div');
-                overlay.className='overlay';
-                overlay.style.backgroundColor=overlayColor;
-                anteprimaDiv.appendChild(overlay);
-            } else {
-                anteprimaDiv.querySelector('.overlay').style.backgroundColor=overlayColor;
-            }
-        } else {
-            const existingOverlay = anteprimaDiv.querySelector('.overlay');
-            if(existingOverlay) existingOverlay.remove();
-        }
-    }
-
-    const effScritta = effettiScritta.find(e => e.id === selectEffettoScritta.value);
-    if(effScritta && effScritta.css){
-        let scrittaCss = effScritta.css.replace(/var\(--text-color\)/g, inputTesto.value);
-        scrittaCss.split(';').forEach(rule=>{
-            if(rule.trim()){
-                let [prop,...rest] = rule.split(':');
-                let val = rest.join(':');
-                if(prop && val) anteprimaTesto.style.setProperty(prop.trim(), val.trim());
-            }
-        });
-    }
+    // Effetti sfondo e scritta (simili a nuovacoppia)
 }
+
+// Aggiorna immagine anteprima al selezionare file
+document.getElementById("fotoEvento").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(file){
+        anteprimaFoto.src = URL.createObjectURL(file);
+    }
+});
 
 // Event listeners
 [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
 [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
-// Crea coppia
-document.getElementById("creaCoppiaBtn").addEventListener("click", async ()=>{
-    const nome = document.getElementById("nomeCoppia").value.trim();
-    const fotoFile = document.getElementById("fotoCoppia").files[0];
+// Crea evento
+document.getElementById("creaEventoBtn").addEventListener("click", async ()=>{
+    const nome = document.getElementById("nomeEvento").value.trim();
+    const fotoFile = document.getElementById("fotoEvento").files[0];
     if(!nome || !fotoFile){ alert("Inserisci nome e foto"); return; }
 
     const formData = new FormData();
-    formData.append("nome_coppia",nome);
-    formData.append("foto_coppia",fotoFile);
+    formData.append("nome_evento", nome);
+    formData.append("foto_evento", fotoFile);
     formData.append("sfondo", inputSfondo.value);
     formData.append("sfondo_secondario", inputSfondoSecondario.value);
     formData.append("testo", inputTesto.value);
@@ -440,12 +384,12 @@ document.getElementById("creaCoppiaBtn").addEventListener("click", async ()=>{
     formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
     formData.append("effetto_scritta", selectEffettoScritta.value||"");
 
-    const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_coppia',{
+    const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_evento',{
         method:"POST",
         body:formData
     });
     const data = await res.json();
-    document.getElementById("msg").innerText = data.success ? "Coppia creata!" : "Errore: "+(data.error||"imprevisto");
+    document.getElementById("msg").innerText = data.success ? "Evento creato!" : "Errore: "+(data.error||"imprevisto");
 
     if(data.success) setTimeout(()=>window.location.href="index.html",1000);
 });
