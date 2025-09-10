@@ -21,22 +21,23 @@
 
   <script>
     // --- Controllo autenticazione
-console.log(response.token)
 async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token) window.location.href = "login.html";
+    if(!token) return window.location.href = "login.html";
 
     try {
-        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { 
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", {
             headers: { "Authorization": "Bearer " + token }
         });
         const data = await res.json();
+        console.log("CheckAuth response:", data); // <-- DEBUG
         if(!data.success){
             localStorage.removeItem("auth_token");
             localStorage.removeItem("admin_username");
             window.location.href = "login.html";
         }
     } catch(err){
+        console.error("CheckAuth error:", err);
         localStorage.removeItem("auth_token");
         localStorage.removeItem("admin_username");
         window.location.href = "login.html";
