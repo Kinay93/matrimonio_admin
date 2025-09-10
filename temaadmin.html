@@ -80,13 +80,6 @@ async function checkAuth() {
     }
 }
 
-// Dropdown menu utente
-const userBtn = document.getElementById('userBtn');
-const dropdownMenu = document.getElementById('dropdownMenu');
-userBtn.querySelector('span').textContent = localStorage.getItem('admin_username') || 'Admin';
-userBtn.addEventListener('click', () => {
-    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-});
 
 // Logout
 function logout() {
