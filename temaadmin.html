@@ -4,6 +4,30 @@
 <meta charset="UTF-8">
 <title>Admin Matrimonio</title>
 <link rel="stylesheet" href="style.css">
+<style>
+/* Anteprima più proporzionata */
+.preview-box {
+  margin-top: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 600px;
+  min-height: 150px;
+  background: #f0f0f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-sizing: border-box;
+  position: relative;
+}
+.overlay {
+  position: absolute;
+  top:0; left:0; right:0; bottom:0;
+  pointer-events: none;
+  border-radius: 12px;
+}
+</style>
 </head>
 <body>
   <!-- Navbar -->
@@ -44,18 +68,33 @@
 
 <div class="preview-box" id="previewBox">Anteprima Testo</div>
 
-<script src="script.js"></script>
 <script>
 async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token) window.location.href = "login.html";
+    const username = localStorage.getItem("admin_username");
+    if(!token || !username) {
+        window.location.href = "login.html";
+        return;
+    }
+    try {
+        const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token }});
+        const data = await res.json();
+        if(!data.success){
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("admin_username");
+            window.location.href = "login.html";
+        }
+    } catch(err){
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("admin_username");
+        window.location.href = "login.html";
+    }
 }
-
-checkAuth();
 
 // Dropdown menu utente
 const userBtn = document.getElementById('userBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
+userBtn.querySelector('span').textContent = localStorage.getItem('admin_username') || 'Admin';
 userBtn.addEventListener('click', () => {
     dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
 });
@@ -99,7 +138,10 @@ function hexToRgb(hex) {
 // Carica fonts ed effetti
 async function caricaFontsEdEffetti() {
   try {
-    const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts");
+    const token = localStorage.getItem("auth_token");
+    const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", {
+        headers: { "Authorization": "Bearer " + token }
+    });
     const dataFonts = await resFonts.json();
     fonts = dataFonts.fonts;
     fontsSelect.innerHTML = '';
@@ -110,7 +152,9 @@ async function caricaFontsEdEffetti() {
       fontsSelect.appendChild(option);
     });
 
-    const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti");
+    const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", {
+        headers: { "Authorization": "Bearer " + token }
+    });
     const dataEffetti = await resEffetti.json();
     effettiScritta = dataEffetti.scritta;
     effettiSfondo = dataEffetti.sfondo;
@@ -138,6 +182,12 @@ function aggiornaAnteprima() {
   previewBox.style.cssText = '';
   previewBox.style.fontFamily = fontsSelect.value;
   previewBox.style.color = textColorInput.value;
+  previewBox.style.display = 'flex';
+  previewBox.style.alignItems = 'center';
+  previewBox.style.justifyContent = 'center';
+  previewBox.style.fontSize = '24px';
+  previewBox.style.minHeight = '150px';
+  previewBox.style.padding = '20px';
 
   const bgRgb = hexToRgb(bgColorInput.value);
   const bgSecondarioRgb = hexToRgb(bgColorSecondarioInput.value);
@@ -207,9 +257,11 @@ saveBtn.addEventListener('click', async () => {
   formData.append('effetto_sfondo', effettiSfondoSelect.value);
 
   try {
+    const token = localStorage.getItem("auth_token");
     const username = localStorage.getItem('admin_username') || 'default';
     const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/save_theme?admin=${encodeURIComponent(username)}`, {
       method: 'POST',
+      headers: { "Authorization": "Bearer " + token },
       body: formData
     });
     const data = await res.json();
