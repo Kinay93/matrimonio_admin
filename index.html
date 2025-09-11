@@ -51,7 +51,7 @@ body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; 
 .evento-card.visible{opacity:1; transform:translateY(0);}
 .evento-card:hover{transform:translateY(-5px); box-shadow:0 6px 15px rgba(0,0,0,0.15);}
 .evento-card h3 { margin:0 0 10px; font-size:1rem; }
-.evento-img { width:80px; height:80px; border-radius:50%; background:#ddd; margin:0 auto 10px; overflow:hidden; cursor:pointer;}
+.evento-img { width:80px; height:80px; border-radius:50%; background:#ddd; margin:0 auto 10px; overflow:hidden; }
 .evento-img img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s ease; }
 .evento-card:hover .evento-img img { transform:scale(1.1); }
 .evento-card button { display:block; width:100%; margin:5px 0; padding:6px; border:none; border-radius:6px;
@@ -67,7 +67,7 @@ body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; 
 <body>
 
 <!-- Navbar -->
-<div class="navbar">
+<div class="navbar" id="navbar">
   <h1>Amministrazione Matrimonio</h1>
   <div class="user-menu">
     <button id="userBtn" class="user-btn">
@@ -90,6 +90,7 @@ body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; 
 </div>
 
 <script>
+// --- Controllo autenticazione
 async function checkAuth() {
   const token = localStorage.getItem("auth_token");
   if(!token) window.location.href = "login.html";
@@ -106,57 +107,69 @@ async function checkAuth() {
       if(data.username) localStorage.setItem("admin_username", data.username);
     }
   } catch(err){
+    console.error("Errore checkAuth:", err);
     localStorage.removeItem("auth_token");
     localStorage.removeItem("admin_username");
     window.location.href = "login.html";
   }
 }
 
-// Dropdown user stabile
-function setupUserDropdown() {
+// --- Dropdown utente
+function setupDropdown() {
   const userBtn = document.getElementById('userBtn');
   const dropdownMenu = document.getElementById('dropdownMenu');
-  userBtn.querySelector('span').textContent = localStorage.getItem('admin_username') || 'Admin';
-  userBtn.addEventListener('click', e=>{
+
+  userBtn.addEventListener('click', e => {
     e.stopPropagation();
     const isOpen = dropdownMenu.style.display === 'block';
     dropdownMenu.style.display = isOpen ? 'none' : 'block';
   });
-  window.addEventListener('click', e=>{
-    if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
+
+  window.addEventListener('click', e => {
+    if(!userBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
       dropdownMenu.style.display = 'none';
     }
   });
-  const logoutBtn = document.getElementById('logoutBtn');
-  logoutBtn.addEventListener('click', ()=> {
+
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
     localStorage.removeItem("auth_token");
     localStorage.removeItem("admin_username");
     window.location.href = "login.html";
   });
 }
 
-// Nuovo evento
+// --- Nuovo evento
 document.getElementById('nuovo-matrimonio').addEventListener('click', ()=> {
   window.location.href = 'nuovo_evento.html';
 });
 
-// Carica eventi
+// --- Caricamento eventi con debug dettagliato
 async function caricaEventi() {
   try {
     const token = localStorage.getItem("auth_token");
     const username = localStorage.getItem("admin_username") || "Admin";
     console.log("Fetch eventi per admin:", username);
+
     const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_eventi?admin=${encodeURIComponent(username)}`, {
-      headers: { "Authorization": `Bearer ${token}` }
+      headers: { "Authorization": "Bearer " + token }
     });
     const data = await res.json();
     console.log("Response eventi:", data);
+
     const grid = document.getElementById('Eventi-grid');
     grid.innerHTML = '';
-    (data.eventi || []).forEach((evento,index)=>{
+
+    if (!data.success || !Array.isArray(data.eventi)) {
+      console.warn("Nessun evento trovato o formato errato", data);
+      return;
+    }
+
+    data.eventi.forEach((evento,index)=>{
       if(!evento || !evento.nome) return;
+
       const card = document.createElement('div');
       card.className = 'evento-card';
+
       const title = document.createElement('h3');
       title.textContent = evento.nome;
       card.appendChild(title);
@@ -167,40 +180,38 @@ async function caricaEventi() {
       img.src = evento.foto_url || 'https://via.placeholder.com/100';
       img.alt = evento.nome;
       imgContainer.appendChild(img);
-      imgContainer.addEventListener('click', ()=>window.location.href = `modifica_evento.html?evento=${encodeURIComponent(evento.nome)}`);
+
+      imgContainer.addEventListener('click', ()=>window.location.href=`modifica_evento.html?evento=${encodeURIComponent(evento.nome)}`);
       card.appendChild(imgContainer);
 
       const btnGenera = document.createElement('button');
       btnGenera.textContent = 'Genera QR';
       btnGenera.className = 'btn-genera';
       btnGenera.disabled = evento.qr_generato;
-      btnGenera.addEventListener('click', e=>{
-        e.stopPropagation();
-        generaQRCode(evento.nome, btnGenera);
-      });
+      btnGenera.addEventListener('click', e=>{ e.stopPropagation(); generaQRCode(evento.nome, btnGenera); });
       card.appendChild(btnGenera);
 
       const btnVedi = document.createElement('button');
       btnVedi.textContent = 'Vedi QR';
       btnVedi.className = 'btn-vedi';
       btnVedi.disabled = !evento.qr_generato;
-      btnVedi.addEventListener('click', e=>{
-        e.stopPropagation();
-        vediQRCode(evento.nome);
-      });
+      btnVedi.addEventListener('click', e=>{ e.stopPropagation(); vediQRCode(evento.nome); });
       card.appendChild(btnVedi);
 
       grid.appendChild(card);
       setTimeout(()=>card.classList.add('visible'), index*100);
     });
-  } catch(e){ console.error('Errore caricamento eventi', e); }
+  } catch(err) {
+    console.error("Errore caricamento eventi:", err);
+  }
 }
 
-// --- Init
+// --- Onload
 window.addEventListener('DOMContentLoaded', async ()=>{
   await checkAuth();
-  setupUserDropdown();
-  caricaEventi();
+  document.querySelector('#userBtn span').textContent = localStorage.getItem('admin_username') || 'Admin';
+  setupDropdown();
+  await caricaEventi();
 });
 </script>
 </body>
