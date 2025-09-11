@@ -88,7 +88,6 @@ body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; 
     <!-- Eventi generati dinamicamente -->
   </div>
 </div>
-
 <script>
 // --- Controllo autenticazione
 async function checkAuth() {
@@ -143,6 +142,46 @@ document.getElementById('nuovo-matrimonio').addEventListener('click', ()=> {
   window.location.href = 'nuovo_evento.html';
 });
 
+// --- Funzione per sanificare nomi
+function sanitizeName(s){
+  return s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+}
+
+// --- Genera QR
+async function generaQRCode(eventoNome, btn) {
+  try {
+    const token = localStorage.getItem("auth_token");
+    const admin = localStorage.getItem('admin_username') || 'Admin';
+
+    const eventoS = sanitizeName(eventoNome);
+    const adminS = sanitizeName(admin);
+
+    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?evento=${encodeURIComponent(eventoS)}&admin=${encodeURIComponent(adminS)}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if(data.success){
+      btn.disabled = true;
+      alert("QR generato!");
+    } else {
+      alert("Errore generazione QR: " + (data.error||"imprevisto"));
+    }
+  } catch(err){
+    console.error(err);
+    alert("Errore generazione QR.");
+  }
+}
+
+// --- Vedi QR
+function vediQRCode(eventoNome){
+  const admin = localStorage.getItem('admin_username') || 'Admin';
+  const eventoS = sanitizeName(eventoNome);
+  const adminS = sanitizeName(admin);
+
+  const url = `https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?evento=${encodeURIComponent(eventoS)}&admin=${encodeURIComponent(adminS)}`;
+  window.open(url, "_blank");
+}
+
 // --- Caricamento eventi con debug dettagliato
 async function caricaEventi() {
   try {
@@ -179,7 +218,6 @@ async function caricaEventi() {
       const imgContainer = document.createElement('div');
       imgContainer.className = 'evento-img';
       const img = document.createElement('img');
-      // --- prende il path già sanificato
       img.src = evento.foto_url || 'https://via.placeholder.com/100';
       img.alt = evento.nome;
       imgContainer.appendChild(img);
@@ -221,6 +259,7 @@ async function caricaEventi() {
     console.error("Errore caricamento eventi:", err);
   }
 }
+
 // --- Onload
 window.addEventListener('DOMContentLoaded', async ()=>{
   await checkAuth();
@@ -229,5 +268,6 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   await caricaEventi();
 });
 </script>
+
 </body>
 </html>
