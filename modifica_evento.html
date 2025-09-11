@@ -283,24 +283,26 @@
   }
 
   // --- Aggiorna anteprima
-  function aggiornaAnteprima() {
-    anteprimaDiv.style.cssText = '';
-    anteprimaTesto.style.cssText = '';
+function aggiornaAnteprima() {
+  // Mantieni lo sfondo base come inline style
+  const primary = inputSfondo.value || "#ffffff";
+  const secondary = inputSfondoSecondario.value || "#eeeeee";
+  anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
 
-    const primary = inputSfondo.value || "#ffffff";
-    const secondary = inputSfondoSecondario.value || "#eeeeee";
+  // Testo
+  anteprimaTesto.style.color = inputTesto.value || "#000000";
+  anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
 
-    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
-    anteprimaTesto.style.color = inputTesto.value || "#000000";
-    anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
+  // --- Gestione classi effetto sfondo
+  // rimuovo tutte le classi effetto precedenti
+  effettiSfondo.forEach(e => anteprimaDiv.classList.remove(e.id || e));
+  // aggiungo quella selezionata
+  if(selectEffettoSfondo.value) anteprimaDiv.classList.add(selectEffettoSfondo.value);
 
-    if(selectEffettoSfondo.value){
-      anteprimaDiv.className = selectEffettoSfondo.value;
-    }
-    if(selectEffettoScritta.value){
-      anteprimaTesto.className = selectEffettoScritta.value;
-    }
-  }
+  // --- Gestione classi effetto scritta
+  effettiScritta.forEach(e => anteprimaTesto.classList.remove(e.id || e));
+  if(selectEffettoScritta.value) anteprimaTesto.classList.add(selectEffettoScritta.value);
+}
 
   // --- Event listeners per input
   [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
