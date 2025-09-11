@@ -170,36 +170,50 @@ async function caricaEventi() {
       const card = document.createElement('div');
       card.className = 'evento-card';
 
+      // --- Titolo evento
       const title = document.createElement('h3');
       title.textContent = evento.nome;
       card.appendChild(title);
 
+      // --- Foto evento
       const imgContainer = document.createElement('div');
       imgContainer.className = 'evento-img';
       const img = document.createElement('img');
+      // --- prende il path già sanificato
       img.src = evento.foto_url || 'https://via.placeholder.com/100';
       img.alt = evento.nome;
       imgContainer.appendChild(img);
-      
+
+      // --- Click per modifica evento, passa anche admin
       imgContainer.addEventListener('click', () => {
-        window.location.href = `modifica_evento.html?evento=${encodeURIComponent(evento.nome)}&admin=${encodeURIComponent(evento.admin)}`;
+        const adminParam = evento.admin || localStorage.getItem('admin_username') || 'Admin';
+        window.location.href = `modifica_evento.html?evento=${encodeURIComponent(evento.nome)}&admin=${encodeURIComponent(adminParam)}`;
       });
       card.appendChild(imgContainer);
 
+      // --- Pulsante Genera QR
       const btnGenera = document.createElement('button');
       btnGenera.textContent = 'Genera QR';
       btnGenera.className = 'btn-genera';
       btnGenera.disabled = evento.qr_generato;
-      btnGenera.addEventListener('click', e=>{ e.stopPropagation(); generaQRCode(evento.nome, btnGenera); });
+      btnGenera.addEventListener('click', e=>{
+        e.stopPropagation(); 
+        generaQRCode(evento.nome, btnGenera); 
+      });
       card.appendChild(btnGenera);
 
+      // --- Pulsante Vedi QR
       const btnVedi = document.createElement('button');
       btnVedi.textContent = 'Vedi QR';
       btnVedi.className = 'btn-vedi';
       btnVedi.disabled = !evento.qr_generato;
-      btnVedi.addEventListener('click', e=>{ e.stopPropagation(); vediQRCode(evento.nome); });
+      btnVedi.addEventListener('click', e=>{
+        e.stopPropagation(); 
+        vediQRCode(evento.nome); 
+      });
       card.appendChild(btnVedi);
 
+      // --- Aggiungi card alla grid
       grid.appendChild(card);
       setTimeout(()=>card.classList.add('visible'), index*100);
     });
@@ -207,7 +221,6 @@ async function caricaEventi() {
     console.error("Errore caricamento eventi:", err);
   }
 }
-
 // --- Onload
 window.addEventListener('DOMContentLoaded', async ()=>{
   await checkAuth();
