@@ -193,10 +193,10 @@
     return `${r}, ${g}, ${b}`;
   }
 
-  // --- Parametri evento
+  // --- Parametri URL
   const params = new URLSearchParams(window.location.search);
   const nomeEventoParam = params.get("evento");
-  const adminParam = params.get("admin"); // <-- nuovo parametro
+  const adminParam = params.get("admin") || localStorage.getItem("admin_username");
 
   // --- Elementi DOM
   const anteprimaDiv = document.getElementById("anteprima");
@@ -255,27 +255,31 @@
 
   // --- Carica dati evento
   async function caricaDatiEvento() {
-    const token = localStorage.getItem("auth_token");
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${encodeURIComponent(nomeEventoParam)}&admin=${encodeURIComponent(adminParam)}`, { 
-      headers: { "Authorization": "Bearer " + token }
-    });
-    const data = await res.json();
-    if(data.error){ alert("Evento non trovato"); return; }
+    try {
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${encodeURIComponent(nomeEventoParam)}&admin=${encodeURIComponent(adminParam)}`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      if(data.error){ alert("Evento non trovato"); return; }
 
-    document.getElementById("nomeEvento").value = data.nome || "";
-    if(data.foto_url){
-      anteprimaFoto.innerHTML = `<img src="${data.foto_url}" alt="Foto Evento">`;
+      document.getElementById("nomeEvento").value = data.titolo_index || "";
+      if(data.foto_url){
+        anteprimaFoto.innerHTML = `<img src="${data.foto_url}" alt="Foto Evento">`;
+      }
+
+      inputSfondo.value = data.sfondo || "#ffffff";
+      inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
+      inputTesto.value = data.testo || "#000000";
+      selectFont.value = data.font || "Arial";
+      selectEffettoSfondo.value = data.effetto_sfondo || "";
+      selectEffettoScritta.value = data.effetto_scritta || "";
+
+      anteprimaTesto.textContent = data.titolo_index || "Titolo Evento";
+      aggiornaAnteprima();
+    } catch(err){
+      console.error("Errore caricamento dati evento:", err);
     }
-
-    inputSfondo.value = data.sfondo || "#ffffff";
-    inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
-    inputTesto.value = data.testo || "#000000";
-    selectFont.value = data.font || "Arial";
-    selectEffettoSfondo.value = data.effetto_sfondo || "";
-    selectEffettoScritta.value = data.effetto_scritta || "";
-
-    anteprimaTesto.textContent = data.nome || "Titolo Evento";
-    aggiornaAnteprima();
   }
 
   // --- Aggiorna anteprima
@@ -298,7 +302,7 @@
     }
   }
 
-  // --- Event listeners
+  // --- Event listeners per input
   [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
   [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
@@ -307,7 +311,7 @@
     const fotoFile = document.getElementById("fotoEvento").files[0];
     const formData = new FormData();
     formData.append("nome_evento", nomeEventoParam);
-    formData.append("admin", adminParam); // <-- aggiunto
+    formData.append("admin", adminParam);
     if(fotoFile) formData.append("foto_evento", fotoFile);
     formData.append("sfondo", inputSfondo.value);
     formData.append("sfondo_secondario", inputSfondoSecondario.value);
@@ -340,6 +344,7 @@
     await caricaDatiEvento();
   };
 </script>
+
 
 </body>
 </html>
