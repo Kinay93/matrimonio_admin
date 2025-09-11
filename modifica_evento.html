@@ -2,33 +2,140 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Modifica Evento</title>
   <link rel="stylesheet" href="style.css">
   <script src="navbar.js" defer></script>
   <script src="script.js" defer></script>
   <style>
-    /* Stili base (mantieni i tuoi style.css per il resto) */
-    body { margin: 0; font-family: sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
-    .container { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; padding-top: 10px; box-sizing: border-box; }
-    .form-col { flex: 1; display:flex; flex-direction:column; gap:10px; padding:20px; overflow-y:auto; border-right:1px solid #ccc; box-sizing:border-box; }
-    .anteprima-col { flex:1; display:flex; flex-direction:column; align-items:center; padding:20px; box-sizing:border-box; }
-    #anteprima { width:80%; height:80%; display:flex; align-items:center; justify-content:center; border:1px solid #ccc; margin-top:20px; position:relative; max-width:420px; max-height:420px; border-radius:10px; overflow:hidden; background:#fff; }
-    #anteprimaFoto { width:150px; height:150px; background:#ddd; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#666; object-fit:cover; }
-    #anteprimaTesto { position:absolute; top:12px; left:12px; font-size:22px; pointer-events:none; }
-    .overlay { position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; }
-    footer { position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; padding:10px; background:rgba(255,255,255,0.95); box-shadow:0 -2px 6px rgba(0,0,0,0.08); }
-    footer a { text-decoration:none; background:#c235d4; color:#fff; padding:10px 18px; border-radius:20px; font-weight:bold; }
-    @media(max-width:1024px){ .container{flex-direction:column;height:auto} .anteprima-col{position:static;height:auto} }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .form-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .anteprima-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+
+    #anteprima {
+      width: 80%;
+      height: 80%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+      position: relative;
+      max-width: 400px;
+      max-height: 400px;
+    }
+
+    #anteprimaFoto {
+      width: 150px;
+      height: 150px;
+      background-color: #ddd;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #666;
+      overflow: hidden;
+    }
+
+    #anteprimaFoto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #anteprimaTesto {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      background-color: rgba(255,255,255,0.9);
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    }
+
+    footer a {
+      text-decoration: none;
+      background: #c235d4;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      transition: background 0.2s ease;
+    }
+
+    footer a:hover {
+      background: #a91eb9;
+    }
+
+    @media (max-width: 1024px) {
+      .container { flex-direction: column; height: 100vh; }
+      .anteprima-col { width: 100%; height: 40vh; position: fixed; top: 0; left: 0; right: 0; background: white; z-index: 1000; border-bottom: 1px solid #ccc; }
+      .form-col { margin-top: 40vh; flex: 1; overflow-y: auto; border-right: none; border-bottom: 1px solid #ccc; }
+      #anteprima { width: 80%; height: 80%; max-width: none; max-height: none; }
+    }
+
+    @media (max-width: 480px) {
+      .anteprima-col { height: 35vh; }
+      .form-col { margin-top: 35vh; }
+    }
+
+    @media (max-width: 768px) {
+      footer { flex-direction: column; gap: 10px; }
+      footer a { width: 80%; text-align: center; }
+    }
   </style>
 </head>
 <body>
-  <!-- navbar sarà inserita qui da navbar.js -->
   <div id="navbar-placeholder"></div>
 
   <div class="container">
     <div class="form-col">
       <label>Nome evento:<input type="text" id="nomeEvento" disabled></label>
-      <label>Foto evento:<input type="file" id="fotoEvento" accept="image/*"></label>
+      <label>Foto evento:<input type="file" id="fotoEvento"></label>
       <label>Colore sfondo primario:<input type="color" id="sfondo"></label>
       <label>Colore sfondo secondario:<input type="color" id="sfondoSecondario"></label>
       <label>Colore testo:<input type="color" id="testo"></label>
@@ -36,13 +143,13 @@
       <label>Effetto sfondo:<select id="effettoSfondo"></select></label>
       <label>Effetto scritta:<select id="effettoScritta"></select></label>
       <button id="aggiornaEventoBtn">Aggiorna evento</button>
-      <div id="msg" style="margin-top:8px;font-weight:bold"></div>
+      <div id="msg"></div>
     </div>
 
     <div class="anteprima-col">
       <h3>Anteprima</h3>
       <div id="anteprima">
-        <img id="anteprimaFoto" src="" alt="Foto evento">
+        <div id="anteprimaFoto">Foto</div>
         <span id="anteprimaTesto">Titolo Evento</span>
       </div>
     </div>
@@ -52,310 +159,183 @@
     <a href="index.html" id="home-btn">Home</a>
   </footer>
 
-<script>
-/* ========== Helpers & Auth ========== */
-function logout() {
-  localStorage.removeItem("auth_token");
-  localStorage.removeItem("admin_username");
-  window.location.href = "login.html";
-}
+  <script>
+    // --- Controllo autenticazione
+    async function checkAuth() {
+      const token = localStorage.getItem("auth_token");
+      if(!token) window.location.href = "login.html";
 
-async function checkAuth() {
-  const token = localStorage.getItem("auth_token");
-  if(!token) { logout(); return; }
-  try {
-    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { headers: { "Authorization": "Bearer " + token }});
-    const data = await res.json();
-    if(!data || !data.success) { logout(); return; }
-    // opzionale: aggiorna admin_username se server ritorna username
-    if(data.username) localStorage.setItem("admin_username", data.username);
-  } catch(e) {
-    console.error("checkAuth error", e);
-    logout();
-  }
-}
-
-/* ========== Attendi che la navbar sia stata caricata e inizializzata ========== */
-function whenNavbarReady(cb){
-  const interval = setInterval(()=>{
-    const userBtn = document.getElementById('user-btn'); // id usato in navbar.js
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    const mainNav = document.getElementById('main-nav');
-    const logoutLink = document.getElementById('link-logout'); // id usato in navbar.html/js
-    if(userBtn && dropdownMenu && mainNav){
-      clearInterval(interval);
-      cb({ userBtn, dropdownMenu, mainNav, logoutLink });
+      try {
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { 
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        if(!data.success){
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("admin_username");
+          window.location.href = "login.html";
+        }
+      } catch(err){
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("admin_username");
+        window.location.href = "login.html";
+      }
     }
-  }, 50);
-}
 
-/* setup integrazione navbar: mostra username e gestisce dropdown (no crash se elementi non presenti) */
-function setupNavbarIntegration(){
-  whenNavbarReady(({userBtn, dropdownMenu, mainNav, logoutLink})=>{
-    const username = localStorage.getItem('admin_username') || 'Admin';
-    // aggiorna label se presente
-    const usernameLabel = document.getElementById('username-label');
-    if(usernameLabel) usernameLabel.textContent = username;
-    // aggiorna span interno se presente
-    try { const span = userBtn.querySelector('span'); if(span) span.textContent = username; } catch(e){}
+    // --- Utils
+    function hexToRgb(hex) {
+      hex = hex.replace('#','');
+      if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+      const bigint = parseInt(hex,16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return `${r}, ${g}, ${b}`;
+    }
 
-    // toggle dropdown (navbar may already do this, but ensure works)
-    userBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block'; });
+    // --- Parametri evento
+    const params = new URLSearchParams(window.location.search);
+    const nomeEventoParam = params.get("evento");
 
-    window.addEventListener('click', (ev)=>{
-      if(!userBtn.contains(ev.target) && !dropdownMenu.contains(ev.target)){
-        dropdownMenu.style.display = 'none';
+    // --- Elementi DOM
+    const anteprimaDiv = document.getElementById("anteprima");
+    const anteprimaTesto = document.getElementById("anteprimaTesto");
+    const anteprimaFoto = document.getElementById("anteprimaFoto");
+
+    const inputSfondo = document.getElementById("sfondo");
+    const inputSfondoSecondario = document.getElementById("sfondoSecondario");
+    const inputTesto = document.getElementById("testo");
+    const selectFont = document.getElementById("font");
+    const selectEffettoSfondo = document.getElementById("effettoSfondo");
+    const selectEffettoScritta = document.getElementById("effettoScritta");
+
+    let effettiScritta = [];
+    let effettiSfondo = [];
+    let fonts = [];
+
+    // --- Carica fonts ed effetti
+    async function caricaFontsEdEffetti() {
+      try {
+        const token = localStorage.getItem("auth_token");
+        const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { headers: { "Authorization": "Bearer " + token }});
+        const dataFonts = await resFonts.json();
+        fonts = dataFonts.fonts || [];
+        selectFont.innerHTML = "";
+        fonts.forEach(f=>{
+          const o=document.createElement("option");
+          o.value=f.css_family || f;
+          o.textContent=f.name || f;
+          o.style.fontFamily = f.css_family || f;
+          selectFont.appendChild(o);
+        });
+
+        const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { headers: { "Authorization": "Bearer " + token }});
+        const dataEffetti = await resEffetti.json();
+        effettiSfondo = dataEffetti.sfondo || [];
+        effettiScritta = dataEffetti.scritta || [];
+
+        selectEffettoSfondo.innerHTML = '';
+        effettiSfondo.forEach(f=>{
+          const o=document.createElement("option");
+          o.value=f.id || f;
+          o.textContent=f.name || f;
+          selectEffettoSfondo.appendChild(o);
+        });
+
+        selectEffettoScritta.innerHTML = '';
+        effettiScritta.forEach(f=>{
+          const o=document.createElement("option");
+          o.value=f.id || f;
+          o.textContent=f.name || f;
+          selectEffettoScritta.appendChild(o);
+        });
+      } catch(e){ console.error(e); }
+    }
+
+    // --- Carica dati evento
+    async function caricaDatiEvento() {
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${nomeEventoParam}`, { headers: { "Authorization": "Bearer " + token }});
+      const data = await res.json();
+      if(data.error){ alert("Evento non trovato"); return; }
+
+      document.getElementById("nomeEvento").value = data.nome || "";
+      if(data.foto_url){
+        anteprimaFoto.innerHTML = `<img src="${data.foto_url}" alt="Foto Evento">`;
+      }
+
+      inputSfondo.value = data.sfondo || "#ffffff";
+      inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
+      inputTesto.value = data.testo || "#000000";
+      selectFont.value = data.font || "Arial";
+      selectEffettoSfondo.value = data.effetto_sfondo || "";
+      selectEffettoScritta.value = data.effetto_scritta || "";
+
+      anteprimaTesto.textContent = data.nome || "Titolo Evento";
+      aggiornaAnteprima();
+    }
+
+    // --- Aggiorna anteprima
+    function aggiornaAnteprima() {
+      anteprimaDiv.style.cssText = '';
+      anteprimaTesto.style.cssText = '';
+
+      const primary = inputSfondo.value || "#ffffff";
+      const secondary = inputSfondoSecondario.value || "#eeeeee";
+
+      anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
+      anteprimaTesto.style.color = inputTesto.value || "#000000";
+      anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
+
+      // applica classi per effetti
+      if(selectEffettoSfondo.value){
+        anteprimaDiv.className = selectEffettoSfondo.value;
+      }
+      if(selectEffettoScritta.value){
+        anteprimaTesto.className = selectEffettoScritta.value;
+      }
+    }
+
+    // --- Event listeners
+    [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
+    [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
+
+    // --- Aggiorna evento
+    document.getElementById("aggiornaEventoBtn").addEventListener("click", async ()=>{
+      const fotoFile = document.getElementById("fotoEvento").files[0];
+      const formData = new FormData();
+      formData.append("nome_evento", nomeEventoParam);
+      if(fotoFile) formData.append("foto_evento", fotoFile);
+      formData.append("sfondo", inputSfondo.value);
+      formData.append("sfondo_secondario", inputSfondoSecondario.value);
+      formData.append("testo", inputTesto.value);
+      formData.append("font", selectFont.value);
+      formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
+      formData.append("effetto_scritta", selectEffettoScritta.value||"");
+
+      const token = localStorage.getItem("auth_token");
+
+      try {
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento", {
+          method:"POST",
+          headers: { "Authorization": `Bearer ${token}` },
+          body: formData
+        });
+        const data = await res.json();
+        document.getElementById("msg").innerText = data.success ? "Evento aggiornato!" : "Errore: "+(data.error||"imprevisto");
+        if(data.success) setTimeout(()=>window.location.href="index.html",1000);
+      } catch(err){
+        console.error(err);
+        document.getElementById("msg").innerText = "Errore aggiornamento evento.";
       }
     });
 
-    // override/attach logout action
-    if(logoutLink){
-      logoutLink.addEventListener('click', (e)=>{ e.preventDefault(); logout(); });
-    }
-  });
-}
-
-/* ========== DOM elements ========== */
-const params = new URLSearchParams(window.location.search);
-const nomeEventoParam = params.get("evento");
-
-const inputNome = document.getElementById("nomeEvento");
-const inputFoto = document.getElementById("fotoEvento");
-const inputSfondo = document.getElementById("sfondo");
-const inputSfondoSecondario = document.getElementById("sfondoSecondario");
-const inputTesto = document.getElementById("testo");
-const selectFont = document.getElementById("font");
-const selectEffettoSfondo = document.getElementById("effettoSfondo");
-const selectEffettoScritta = document.getElementById("effettoScritta");
-const btnAggiorna = document.getElementById("aggiornaEventoBtn");
-const msgDiv = document.getElementById("msg");
-
-const anteprima = document.getElementById("anteprima");
-const anteprimaFoto = document.getElementById("anteprimaFoto");
-const anteprimaTesto = document.getElementById("anteprimaTesto");
-
-/* ========== Fonts & Effetti ========== */
-let fonts = [], effettiSfondo = [], effettiScritta = [];
-
-async function caricaFontsEdEffetti(){
-  const token = localStorage.getItem("auth_token");
-  try {
-    const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { headers: { "Authorization": "Bearer " + token }});
-    const dataFonts = await resFonts.json();
-    fonts = dataFonts.fonts || [];
-    selectFont.innerHTML = "";
-    fonts.forEach(f=>{
-      const o = document.createElement("option");
-      o.value = f.css_family || f;
-      o.textContent = f.name || f;
-      o.style.fontFamily = f.css_family || "";
-      selectFont.appendChild(o);
-    });
-  } catch(e){ console.warn("get_fonts failed", e); }
-
-  try {
-    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { headers: { "Authorization": "Bearer " + token }});
-    const data = await res.json();
-    effettiSfondo = data.sfondo || [];
-    effettiScritta = data.scritta || [];
-    selectEffettoSfondo.innerHTML = "";
-    effettiSfondo.forEach(e => { const o=document.createElement("option"); o.value = e.id || ""; o.textContent = e.name || e.id || ""; selectEffettoSfondo.appendChild(o); });
-    selectEffettoScritta.innerHTML = "";
-    effettiScritta.forEach(e => { const o=document.createElement("option"); o.value = e.id || ""; o.textContent = e.name || e.id || ""; selectEffettoScritta.appendChild(o); });
-  } catch(e){ console.warn("get_effetti failed", e); }
-}
-
-/* ========== Carica dati evento dal server ========== */
-async function caricaDatiEvento(){
-  if(!nomeEventoParam){
-    msgDiv.textContent = "Parametro evento mancante nell'URL";
-    return;
-  }
-  const token = localStorage.getItem("auth_token");
-  try {
-    const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${encodeURIComponent(nomeEventoParam)}`, { headers: { "Authorization": "Bearer " + token }});
-    if(!res.ok){ console.warn("get_evento non ok", res.status); }
-    const data = await res.json();
-    if(data.error){ msgDiv.textContent = "Evento non trovato: " + (data.error||""); return; }
-
-    // riempi i campi con i dati ricevuti
-    inputNome.value = nomeEventoParam;
-    inputSfondo.value = data.sfondo || "#ffffff";
-    inputSfondoSecondario.value = data.sfondo_secondario || data.sfondo_secondario || "#eeeeee";
-    inputTesto.value = data.testo || "#000000";
-    selectFont.value = data.font || selectFont.value || "Arial";
-    selectEffettoSfondo.value = data.effetto_sfondo || "";
-    selectEffettoScritta.value = data.effetto_scritta || "";
-
-    // foto: se presente mostra
-    if(data.foto_url){
-      // se è un URL pubblico
-      anteprimaFoto.src = data.foto_url;
-    } else {
-      anteprimaFoto.src = "";
-      anteprimaFoto.style.background = "#ddd";
-    }
-    anteprimaTesto.textContent = data.titolo_index || nomeEventoParam;
-    aggiornaAnteprima();
-  } catch(e){
-    console.error("caricaDatiEvento error", e);
-    msgDiv.textContent = "Errore caricamento evento.";
-  }
-}
-
-/* ========== Anteprima in tempo reale ========== */
-function hexToRgb(hex){
-  if(!hex) return "255,255,255";
-  hex = hex.replace('#','');
-  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('');
-  const n = parseInt(hex,16);
-  return `${(n>>16)&255},${(n>>8)&255},${n&255}`;
-}
-
-function applyEffettoScritta(effId){
-  const eff = effettiScritta.find(e => String(e.id) === String(effId));
-  if(!eff || !eff.css) return;
-  // eff.css expected as "prop:value;prop2:value2;"
-  eff.css.split(';').forEach(rule=>{
-    if(!rule.trim()) return;
-    const [prop, ...rest] = rule.split(':');
-    const val = rest.join(':').trim();
-    if(prop && val){
-      anteprimaTesto.style.setProperty(prop.trim(), val);
-    }
-  });
-}
-
-function applyEffettoSfondo(effId){
-  const eff = effettiSfondo.find(e => String(e.id) === String(effId));
-  if(!eff || !eff.css) return;
-  // applichiamo regole di sfondo al contenitore #anteprima
-  eff.css.split(';').forEach(rule=>{
-    if(!rule.trim()) return;
-    const [prop, ...rest] = rule.split(':');
-    const val = rest.join(':').trim();
-    if(prop && val){
-      anteprima.style.setProperty(prop.trim(), val);
-    }
-  });
-}
-
-function aggiornaAnteprima(){
-  // ripulisce prima le proprietà dinamiche usate
-  anteprima.style.background = inputSfondo.value || "#ffffff";
-  anteprima.style.removeProperty('background-image');
-  anteprima.style.removeProperty('background-size');
-  anteprima.style.removeProperty('background-position');
-  anteprima.style.removeProperty('background-repeat');
-  anteprima.style.removeProperty('filter');
-
-  anteprimaTesto.style.color = inputTesto.value || "#000000";
-  anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
-
-  // applica effetti (se presenti) - prima reset
-  anteprimaTesto.style.cssText += ""; // nulla, serve a mantenere l'oggetto
-  // restore minimal props (we rely on inline styles above)
-
-  // effetto scritta
-  if(selectEffettoScritta.value){
-    applyEffettoScritta(selectEffettoScritta.value);
-  }
-
-  // effetto sfondo
-  if(selectEffettoSfondo.value){
-    // per sicurezza: usa i placeholders --bg-color e --bg-color-rgb
-    const bgRgb = hexToRgb(inputSfondo.value || "#ffffff");
-    const bgSecondRgb = hexToRgb(inputSfondoSecondario.value || "#eeeeee");
-
-    // alcuni effetti possono contenere url() o gradienti già impostati: applichiamoli tramite applyEffettoSfondo
-    applyEffettoSfondo(selectEffettoSfondo.value);
-
-    // se l'effetto non ha overlay, possiamo creare un overlay leggero
-    // (la logica qui rimane compatibile con i css passati dal server)
-    // se l'effetto ha url(...) la proprietà background-image verrà impostata da applyEffettoSfondo
-  }
-
-  // se l'utente ha caricato un'immagine locale -> rimostralo
-  // (anteprimaFoto.src è aggiornata nell'event listener filechange)
-}
-
-/* file input preview */
-inputFoto.addEventListener('change', (e)=>{
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  try {
-    const url = URL.createObjectURL(f);
-    anteprimaFoto.src = url;
-    anteprimaFoto.style.objectFit = 'cover';
-  } catch(e){ console.error(e); }
-});
-
-/* input listeners per aggiornamento in tempo reale */
-[inputSfondo, inputSfondoSecondario, inputTesto].forEach(el => el.addEventListener('input', aggiornaAnteprima));
-[selectFont, selectEffettoSfondo, selectEffettoScritta].forEach(el => el.addEventListener('change', aggiornaAnteprima));
-
-/* ========== Salvataggio evento (POST) ========== */
-btnAggiorna.addEventListener('click', async ()=>{
-  btnAggiorna.disabled = true;
-  msgDiv.textContent = "";
-  const token = localStorage.getItem("auth_token");
-  const admin = localStorage.getItem("admin_username") || "";
-
-  if(!admin){
-    msgDiv.textContent = "Utente admin non presente (login).";
-    btnAggiorna.disabled = false; return;
-  }
-
-  const fd = new FormData();
-  fd.append("nome_evento", nomeEventoParam);
-  fd.append("admin", admin);
-  const f = inputFoto.files[0];
-  if(f) fd.append("foto_evento", f);
-  fd.append("sfondo", inputSfondo.value || "");
-  fd.append("sfondo_secondario", inputSfondoSecondario.value || "");
-  fd.append("testo", inputTesto.value || "");
-  fd.append("font", selectFont.value || "");
-  fd.append("effetto_sfondo", selectEffettoSfondo.value || "");
-  fd.append("effetto_scritta", selectEffettoScritta.value || "");
-
-  try {
-    const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento", {
-      method: "POST",
-      headers: { "Authorization": "Bearer " + token },
-      body: fd
-    });
-    const data = await res.json();
-    if(data && data.success){
-      msgDiv.style.color = "green";
-      msgDiv.textContent = "Evento aggiornato!";
-      setTimeout(()=> window.location.href = "index.html", 900);
-    } else {
-      msgDiv.style.color = "red";
-      msgDiv.textContent = "Errore aggiornamento: " + (data && (data.error||data.message) ? (data.error||data.message) : "imprevisto");
-    }
-  } catch(e){
-    console.error("aggiorna_evento error", e);
-    msgDiv.style.color = "red";
-    msgDiv.textContent = "Errore connessione durante salvataggio.";
-  } finally {
-    btnAggiorna.disabled = false;
-  }
-});
-
-/* ========== Inizializzazione pagina ========== */
-window.addEventListener('DOMContentLoaded', async ()=>{
-  // 1) integra navbar (quando pronta)
-  setupNavbarIntegration();
-
-  // 2) auth
-  await checkAuth();
-
-  // 3) carica fonts/effetti (prima di caricare dati evento così select hanno i valori)
-  await caricaFontsEdEffetti();
-
-  // 4) carica dati evento e inizializza anteprima
-  await caricaDatiEvento();
-});
-</script>
+    // --- Onload
+    window.onload = async () => {
+      await checkAuth();
+      await caricaFontsEdEffetti();
+      await caricaDatiEvento();
+    };
+  </script>
 </body>
 </html>
