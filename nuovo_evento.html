@@ -234,7 +234,22 @@ async function caricaFontsEdEffetti() {
         console.error("caricaFontsEdEffetti error:", err);
     }
 }
+  const effSfondo = effettiSfondo.find(e => e.id === effettiSfondoSelect.value);
+  let overlayColor = `rgba(${bgRgb},0.3)`;
+  if(effSfondo && effSfondo.css){
+    let sfondoCss = effSfondo.css
+      .replace(/var\(--sfondo\)/g, bgColorInput.value)
+      .replace(/var\(--sfondo-rgb\)/g, bgRgb)
+      .replace(/var\(--sfondo-secondario\)/g, bgColorSecondarioInput.value)
+      .replace(/var\(--sfondo-secondario-rgb\)/g, bgSecondarioRgb);
 
+    sfondoCss.split(';').forEach(rule => {
+      if(rule.trim()){
+        let [prop, ...rest] = rule.split(':');
+        let val = rest.join(':');
+        if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
+      }
+    });
 // --- Aggiorna anteprima (applica gradient + testo + font)
 function aggiornaAnteprima() {
     const bg1 = inputSfondo.value || '#ffffff';
