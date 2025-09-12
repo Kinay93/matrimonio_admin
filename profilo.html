@@ -4,58 +4,74 @@
   <meta charset="UTF-8">
   <title>Profilo Amministratore</title>
   <link rel="stylesheet" href="style.css">
-	  <script src="navbar.js" defer></script>
-	  <script src="script.js" defer></script>
+  <script src="navbar.js" defer></script>
 </head>
 <body>
   <!-- Navbar -->
-    <div id="navbar-placeholder"></div>
-  
+  <div id="navbar-placeholder"></div>
+
   <!-- MAIN CONTENT -->
-  <div class="main-content" style="padding:20px;">
+  <div class="main-content" style="padding:20px; max-width:600px; margin:auto;">
     <h2>Profilo Admin</h2>
     <div id="profile-info">
       <p><i>Caricamento dati utente...</i></p>
     </div>
+
+    <hr style="margin:20px 0;">
+
+    <h3>Aggiorna Dati</h3>
+    <form id="updateUserForm">
+      <label for="newEmail">Nuova Email:</label><br>
+      <input type="email" id="newEmail" placeholder="Lascia vuoto se non vuoi cambiare" style="width:100%;padding:8px;margin:8px 0;"><br>
+
+      <label for="newNome">Nome:</label><br>
+      <input type="text" id="newNome" placeholder="Lascia vuoto se non vuoi cambiare" style="width:100%;padding:8px;margin:8px 0;"><br>
+
+      <label for="newCognome">Cognome:</label><br>
+      <input type="text" id="newCognome" placeholder="Lascia vuoto se non vuoi cambiare" style="width:100%;padding:8px;margin:8px 0;"><br>
+
+      <label for="newPassword">Nuova Password:</label><br>
+      <input type="password" id="newPassword" placeholder="Lascia vuoto se non vuoi cambiare" style="width:100%;padding:8px;margin:8px 0;"><br>
+
+      <button type="submit">Aggiorna Profilo</button>
+    </form>
   </div>
 
   <script>
     async function checkAuth() {
-    const token = localStorage.getItem("auth_token");
-    if(!token) window.location.href = "login.html";
+      const token = localStorage.getItem("auth_token");
+      if (!token) window.location.href = "login.html";
 
-    try {
+      try {
         const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { 
-            headers: { "Authorization": "Bearer " + token }
+          headers: { "Authorization": "Bearer " + token }
         });
         const data = await res.json();
-        if(!data.success){
-            localStorage.removeItem("auth_token");
-            localStorage.removeItem("admin_username");
-            window.location.href = "login.html";
+        if (!data.success) {
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("admin_username");
+          window.location.href = "login.html";
+        } else {
+          if (data.user?.username) {
+            localStorage.setItem("admin_username", data.user.username);
+          }
         }
-    } catch(err){
+      } catch (err) {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("admin_username");
         window.location.href = "login.html";
+      }
     }
-}
 
     async function caricaProfilo() {
-      const username = localStorage.getItem('admin_username');
-      if (!username) {
-        document.getElementById('profile-info').innerHTML = "<p>Errore: utente non trovato.</p>";
-        return;
-      }
-
       try {
         const token = localStorage.getItem("auth_token");
-        const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/get_user?username=${encodeURIComponent(username)}`, {
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", {
           headers: { "Authorization": "Bearer " + token }
         });
         const data = await res.json();
 
-        if(data.success) {
+        if (data.success) {
           const u = data.user;
           document.getElementById('profile-info').innerHTML = `
             <p><b>Username:</b> ${u.username}</p>
@@ -66,17 +82,53 @@
         } else {
           document.getElementById('profile-info').innerHTML = "<p>Utente non trovato.</p>";
         }
-      } catch(err) {
+      } catch (err) {
         document.getElementById('profile-info').innerHTML = "<p>Errore di connessione.</p>";
         console.error(err);
       }
     }
 
-    function logout() {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("admin_username");
-      window.location.href = "login.html";
-    }
+    // --- Aggiorna Profilo
+    document.getElementById("updateUserForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("auth_token");
+      const username = localStorage.getItem("admin_username");
+
+      const payload = {
+        username: username,
+        email: document.getElementById("newEmail").value || null,
+        nome: document.getElementById("newNome").value || null,
+        cognome: document.getElementById("newCognome").value || null,
+        password: document.getElementById("newPassword").value || null
+      };
+
+      // rimuovo i campi vuoti/null per non sovrascrivere inutilmente
+      Object.keys(payload).forEach(k => {
+        if (payload[k] === null || payload[k] === "") delete payload[k];
+      });
+
+      try {
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/update_user_storage", {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Profilo aggiornato con successo!");
+          document.getElementById("updateUserForm").reset();
+          caricaProfilo();
+        } else {
+          alert("Errore aggiornamento profilo: " + (data.error || "imprevisto"));
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Errore di connessione.");
+      }
+    });
 
     window.onload = async () => {
       await checkAuth();
