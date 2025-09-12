@@ -67,295 +67,226 @@ footer a { text-decoration:none; background:#c235d4; color:white; padding:10px 2
 </footer>
 
 <script>
-/*
-  Fixes applicati:
-  - waitForNavbar + setupNavbarBindings: aggancia correttamente il toggle della dropdown
-  - formData ora include 'tipo' e 'admin' (se presente)
-  - debug console.log sulla response dal server per vedere esatto errore
-*/
-
-// --- Controllo autenticazione
-async function checkAuth() {
+  // --- Controllo autenticazione
+  async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token) {
-        console.warn("Token mancante: redirect a login");
-        window.location.href = "login.html";
-        return;
-    }
+    if(!token) window.location.href = "login.html";
+
     try {
-        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", {
-            headers: { "Authorization": "Bearer " + token }
-        });
-        const data = await res.json();
-        console.log("checkAuth /me:", data);
-        if(!data.success){
-            localStorage.removeItem("auth_token");
-            localStorage.removeItem("admin_username");
-            window.location.href = "login.html";
-        } else {
-            if(data.username) localStorage.setItem("admin_username", data.username);
-        }
-    } catch(err){
-        console.error("Errore checkAuth:", err);
+      const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { 
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      if(!data.success){
         localStorage.removeItem("auth_token");
         localStorage.removeItem("admin_username");
         window.location.href = "login.html";
-    }
-}
-
-// --- Attende la navbar caricata e restituisce elementi utili
-function waitForNavbar(callback, timeout = 4000) {
-    const start = Date.now();
-    const iv = setInterval(() => {
-        // supporta diversi nomi di id (user-btn / userBtn, dropdown-menu / dropdownMenu)
-        const userBtn = document.querySelector('#user-btn, #userBtn');
-        const dropdown = document.querySelector('#dropdown-menu, #dropdownMenu');
-        const logoutLink = document.querySelector('#link-logout, #logoutBtn, a[data-action="logout"]');
-        const mainNav = document.querySelector('#main-nav');
-        if (userBtn && dropdown && mainNav) {
-            clearInterval(iv);
-            callback({ userBtn, dropdown, logoutLink, mainNav });
-            return;
-        }
-        if (Date.now() - start > timeout) {
-            clearInterval(iv);
-            console.warn('waitForNavbar: timeout, la navbar potrebbe avere id diversi o non essere caricata.');
-        }
-    }, 60);
-}
-
-// --- Imposta i binding per la dropdown della navbar
-function setupNavbarBindings({ userBtn, dropdown, logoutLink }) {
-    try {
-        // Aggiorna label username se presente #username-label o lo span interno
-        const usernameLabel = document.querySelector('#username-label') || (userBtn ? userBtn.querySelector('span') : null);
-        if (usernameLabel) {
-            usernameLabel.textContent = localStorage.getItem('admin_username') || usernameLabel.textContent || 'Admin';
-        }
-
-        // Toggle dropdown on user button click
-        userBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = dropdown.style.display === 'block' || dropdown.classList.contains('open');
-            if (isOpen) {
-                dropdown.style.display = 'none';
-                dropdown.classList.remove('open');
-            } else {
-                dropdown.style.display = 'block';
-                dropdown.classList.add('open');
-            }
-        });
-
-        // Close dropdown clicking outside
-        window.addEventListener('click', (e) => {
-            if (!userBtn.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
-                dropdown.classList.remove('open');
-            }
-        });
-
-        // Logout binding
-        if (logoutLink) {
-            logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
-        } else {
-            // fallback: cerca link "Logout" dentro dropdown
-            const possible = Array.from(dropdown.querySelectorAll('a')).find(a => /logout/i.test(a.textContent));
-            if (possible) possible.addEventListener('click', (e) => { e.preventDefault(); logout(); });
-        }
-    } catch (err) {
-        console.error("setupNavbarBindings error:", err);
-    }
-}
-
-// --- Logout
-function logout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("admin_username");
-    window.location.href = "login.html";
-}
-
-// --- DOM elements
-const anteprima = document.getElementById("anteprima");
-const anteprimaFoto = document.getElementById("anteprimaFoto");
-const anteprimaTesto = document.getElementById("anteprimaTesto");
-const inputSfondo = document.getElementById("colorSfondo");
-const inputSfondoSecondario = document.getElementById("colorSfondoSecondario");
-const inputTesto = document.getElementById("colorTesto");
-const selectFont = document.getElementById("fontScelto");
-const selectEffettoSfondo = document.getElementById("effettoSfondo");
-const selectEffettoScritta = document.getElementById("effettoScritta");
-const tipoEventoInput = document.getElementById("tipoEvento");
-
-let effettiScritta = [];
-let effettiSfondo = [];
-let fonts = [];
-
-// --- Carica fonts ed effetti da API (invia token quando presente)
-async function caricaFontsEdEffetti() {
-    const token = localStorage.getItem("auth_token");
-    const headers = token ? { "Authorization": "Bearer " + token } : {};
-    try {
-        const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { headers });
-        const dataFonts = await resFonts.json();
-        fonts = dataFonts.fonts || [];
-        selectFont.innerHTML = '';
-        fonts.forEach(f => {
-            const o = document.createElement('option');
-            o.value = f.css_family || f.name || f;
-            o.textContent = f.name || f.css_family || f;
-            o.style.fontFamily = f.css_family || '';
-            selectFont.appendChild(o);
-        });
-
-        const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { headers });
-        const dataEffetti = await resEffetti.json();
-        effettiSfondo = dataEffetti.sfondo || [];
-        effettiScritta = dataEffetti.scritta || [];
-
-        selectEffettoSfondo.innerHTML = '';
-        effettiSfondo.forEach(e => {
-            const o = document.createElement('option');
-            o.value = e.id || e.name || '';
-            o.textContent = e.name || e.id || '';
-            selectEffettoSfondo.appendChild(o);
-        });
-
-        selectEffettoScritta.innerHTML = '';
-        effettiScritta.forEach(e => {
-            const o = document.createElement('option');
-            o.value = e.id || e.name || '';
-            o.textContent = e.name || e.id || '';
-            selectEffettoScritta.appendChild(o);
-        });
-    } catch (err) {
-        console.error("caricaFontsEdEffetti error:", err);
-    }
-}
- 
-// --- Aggiorna anteprima (applica gradient + testo + font)
-function aggiornaAnteprima() {
-    const bg1 = inputSfondo.value || '#ffffff';
-    const bg2 = inputSfondoSecondario.value || bg1;
-    anteprima.style.background = `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`;
-
-    const textColor = inputTesto.value || '#000';
-    anteprimaTesto.style.color = textColor;
-    anteprimaTesto.style.fontFamily = selectFont.value || 'Arial';
-
-    // Effetto scritta (se presente)
-    const eff = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
-    if (eff && eff.css) {
-        eff.css.split(';').forEach(rule => {
-            if (!rule.trim()) return;
-            const [propRaw, ...valParts] = rule.split(':');
-            const prop = propRaw && propRaw.trim();
-            const val = valParts.join(':') && valParts.join(':').trim();
-            if (prop && val) anteprimaTesto.style.setProperty(prop, val.replace(/var\(--text-color\)/g, textColor));
-        });
-    }
-  const effSfondo = effettiSfondo.find(e => e.id === effettiSfondoSelect.value);
-  let overlayColor = `rgba(${bgRgb},0.3)`;
-  if(effSfondo && effSfondo.css){
-    let sfondoCss = effSfondo.css
-      .replace(/var\(--sfondo\)/g, bgColorInput.value)
-      .replace(/var\(--sfondo-rgb\)/g, bgRgb)
-      .replace(/var\(--sfondo-secondario\)/g, bgColorSecondarioInput.value)
-      .replace(/var\(--sfondo-secondario-rgb\)/g, bgSecondarioRgb);
-
-    sfondoCss.split(';').forEach(rule => {
-      if(rule.trim()){
-        let [prop, ...rest] = rule.split(':');
-        let val = rest.join(':');
-        if(prop && val) previewBox.style.setProperty(prop.trim(), val.trim());
       }
-    });
-  }
-}
-
-// --- gestione file immagine (anteprima)
-document.getElementById("fotoEvento").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        anteprimaFoto.src = URL.createObjectURL(file);
+    } catch(err){
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("admin_username");
+      window.location.href = "login.html";
     }
-});
+  }
 
-// listeners per aggiornare anteprima
-[inputSfondo, inputSfondoSecondario, inputTesto].forEach(el => el.addEventListener('input', aggiornaAnteprima));
-[selectFont, selectEffettoSfondo, selectEffettoScritta].forEach(el => el.addEventListener('change', aggiornaAnteprima));
+  // --- Utils
+  function hexToRgb(hex) {
+    hex = hex.replace('#','');
+    if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+    const bigint = parseInt(hex,16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `${r}, ${g}, ${b}`;
+  }
 
-// --- Creazione evento (POST con token) - ora include tipo e admin
-document.getElementById("creaEventoBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById("nomeEvento").value.trim();
+  // --- Parametri URL
+  const params = new URLSearchParams(window.location.search);
+  const nomeEventoParam = params.get("evento");
+  const adminParam = params.get("admin") || localStorage.getItem("admin_username");
+
+  // --- Elementi DOM
+  const anteprimaDiv = document.getElementById("anteprima");
+  const anteprimaTesto = document.getElementById("anteprimaTesto");
+  const anteprimaFoto = document.getElementById("anteprimaFoto");
+
+  const inputSfondo = document.getElementById("sfondo");
+  const inputSfondoSecondario = document.getElementById("sfondoSecondario");
+  const inputTesto = document.getElementById("testo");
+  const selectFont = document.getElementById("font");
+  const selectEffettoSfondo = document.getElementById("effettoSfondo");
+  const selectEffettoScritta = document.getElementById("effettoScritta");
+
+  let effettiScritta = [];
+  let effettiSfondo = [];
+  let fonts = [];
+
+  // --- Carica fonts ed effetti
+  async function caricaFontsEdEffetti() {
+    try {
+      const token = localStorage.getItem("auth_token");
+      const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { headers: { "Authorization": "Bearer " + token }});
+      const dataFonts = await resFonts.json();
+      fonts = dataFonts.fonts || [];
+      selectFont.innerHTML = "";
+      fonts.forEach(f=>{
+        const o=document.createElement("option");
+        o.value=f.css_family || f;
+        o.textContent=f.name || f;
+        o.style.fontFamily = f.css_family || f;
+        selectFont.appendChild(o);
+      });
+
+      const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { headers: { "Authorization": "Bearer " + token }});
+      const dataEffetti = await resEffetti.json();
+      effettiSfondo = dataEffetti.sfondo || [];
+      effettiScritta = dataEffetti.scritta || [];
+
+      selectEffettoSfondo.innerHTML = '';
+      effettiSfondo.forEach(f=>{
+        const o=document.createElement("option");
+        o.value=f.id || f;
+        o.textContent=f.name || f;
+        selectEffettoSfondo.appendChild(o);
+      });
+
+      selectEffettoScritta.innerHTML = '';
+      effettiScritta.forEach(f=>{
+        const o=document.createElement("option");
+        o.value=f.id || f;
+        o.textContent=f.name || f;
+        selectEffettoScritta.appendChild(o);
+      });
+    } catch(e){ console.error(e); }
+  }
+
+  // --- Carica dati evento
+  async function caricaDatiEvento() {
+    try {
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${encodeURIComponent(nomeEventoParam)}&admin=${encodeURIComponent(adminParam)}`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      if(data.error){ alert("Evento non trovato"); return; }
+
+      document.getElementById("nomeEvento").value = data.titolo_index || "";
+      if(data.foto_url){
+        anteprimaFoto.innerHTML = `<img src="${data.foto_url}" alt="Foto Evento">`;
+      }
+
+      inputSfondo.value = data.sfondo || "#ffffff";
+      inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
+      inputTesto.value = data.testo || "#000000";
+      selectFont.value = data.font || "Arial";
+      selectEffettoSfondo.value = data.effetto_sfondo || "";
+      selectEffettoScritta.value = data.effetto_scritta || "";
+
+      anteprimaTesto.textContent = data.titolo_index || "Titolo Evento";
+      aggiornaAnteprima();
+    } catch(err){
+      console.error("Errore caricamento dati evento:", err);
+    }
+  }
+
+  // --- Aggiorna anteprima
+  function aggiornaAnteprima() {
+    const primary = inputSfondo.value || "#ffffff";
+    const secondary = inputSfondoSecondario.value || "#eeeeee";
+    const textColor = inputTesto.value || "#000000";
+
+    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
+    anteprimaTesto.style.color = textColor;
+    anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
+
+    // Reset stile inline prima di applicare effetti
+    anteprimaDiv.removeAttribute("style");
+    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
+    anteprimaTesto.removeAttribute("style");
+    anteprimaTesto.style.color = textColor;
+    anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
+
+    const bgRgb = hexToRgb(primary);
+    const bgSecondarioRgb = hexToRgb(secondary);
+
+    // --- Effetto scritta inline
+    const effScritta = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
+    if(effScritta && effScritta.css){
+      effScritta.css.split(";").forEach(rule=>{
+        if(rule.trim()){
+          const [propRaw,...valParts] = rule.split(":");
+          const prop = propRaw && propRaw.trim();
+          const val = valParts.join(":") && valParts.join(":").trim();
+          if(prop && val){
+            anteprimaTesto.style.setProperty(prop,val.replace(/var\(--text-color\)/g,textColor));
+          }
+        }
+      });
+    }
+
+    // --- Effetto sfondo inline
+    const effSfondo = effettiSfondo.find(e => String(e.id) === String(selectEffettoSfondo.value));
+    if(effSfondo && effSfondo.css){
+      let sfondoCss = effSfondo.css
+        .replace(/var\(--bg-color\)/g, primary)
+        .replace(/var\(--bg-color-rgb\)/g, bgRgb)
+        .replace(/var\(--bg-color-secondario\)/g, secondary)
+        .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
+
+      sfondoCss.split(";").forEach(rule=>{
+        if(rule.trim()){
+          const [propRaw,...valParts] = rule.split(":");
+          const prop = propRaw && propRaw.trim();
+          const val = valParts.join(":") && valParts.join(":").trim();
+          if(prop && val){
+            anteprimaDiv.style.setProperty(prop,val);
+          }
+        }
+      });
+    }
+  }
+
+  // --- Event listeners per input
+  [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
+  [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
+
+  // --- Aggiorna evento
+  document.getElementById("aggiornaEventoBtn").addEventListener("click", async ()=>{
     const fotoFile = document.getElementById("fotoEvento").files[0];
-    if (!nome || !fotoFile) { alert("Inserisci nome e foto"); return; }
-
     const formData = new FormData();
-    formData.append("nome_evento", nome);
-    formData.append("foto_evento", fotoFile);
-    formData.append("sfondo", inputSfondo.value || '');
-    formData.append("sfondo_secondario", inputSfondoSecondario.value || '');
-    formData.append("testo", inputTesto.value || '');
-    formData.append("font", selectFont.value || '');
-    formData.append("effetto_sfondo", selectEffettoSfondo.value || '');
-    formData.append("effetto_scritta", selectEffettoScritta.value || '');
-
-    // aggiungo tipo (server lo richiede)
-    formData.append("tipo", tipoEventoInput.value || "evento");
-
-    // admin - utile se server lo richiede esplicitamente
-    const adminName = localStorage.getItem('admin_username');
-    if (adminName) formData.append("admin", adminName);
+    formData.append("nome_evento", nomeEventoParam);
+    formData.append("admin", adminParam);
+    if(fotoFile) formData.append("foto_evento", fotoFile);
+    formData.append("sfondo", inputSfondo.value);
+    formData.append("sfondo_secondario", inputSfondoSecondario.value);
+    formData.append("testo", inputTesto.value);
+    formData.append("font", selectFont.value);
+    formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
+    formData.append("effetto_scritta", selectEffettoScritta.value||"");
 
     const token = localStorage.getItem("auth_token");
-    const headers = token ? { "Authorization": `Bearer ${token}` } : {};
 
     try {
-        const res = await fetch('https://matrimonioapp.ew.r.appspot.com/admin/crea_evento', {
-            method: "POST",
-            headers, // non impostare Content-Type: fetch lo gestisce per FormData
-            body: formData
-        });
-
-        // debug: stampa status e body
-        const text = await res.text();
-        let json;
-        try { json = JSON.parse(text); } catch(_) { json = { raw: text }; }
-        console.log('crea_evento response status:', res.status, json);
-
-        if (!res.ok) {
-            document.getElementById("msg").innerText = "Errore server: " + (json.error || JSON.stringify(json));
-            return;
-        }
-
-        if (json.success) {
-            document.getElementById("msg").innerText = "Evento creato!";
-            setTimeout(() => { window.location.href = "index.html"; }, 800);
-        } else {
-            document.getElementById("msg").innerText = "Errore: " + (json.error || 'imprevisto');
-        }
-    } catch (err) {
-        console.error('Errore fetch crea_evento:', err);
-        document.getElementById("msg").innerText = "Errore creazione evento (client).";
+      const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento", {
+        method:"POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      document.getElementById("msg").innerText = data.success ? "Evento aggiornato!" : "Errore: "+(data.error||"imprevisto");
+      if(data.success) setTimeout(()=>window.location.href="index.html",1000);
+    } catch(err){
+      console.error(err);
+      document.getElementById("msg").innerText = "Errore aggiornamento evento.";
     }
-});
+  });
 
-// --- Init
-window.addEventListener("DOMContentLoaded", async () => {
+  // --- Onload
+  window.onload = async () => {
     await checkAuth();
     await caricaFontsEdEffetti();
-    aggiornaAnteprima();
-
-    // binding navbar
-    waitForNavbar((found) => {
-        setupNavbarBindings(found);
-        console.log('Navbar bindings applicati');
-    }, 3500);
-});
+    await caricaDatiEvento();
+  };
 </script>
 </body>
 </html>
