@@ -207,10 +207,10 @@ function aggiornaAnteprima() {
   const bgRgb = hexToRgb(bgColorInput.value);
   const bgSecondarioRgb = hexToRgb(bgColorSecondarioInput.value);
 
-  previewBox.style.setProperty('--bg-color', bgColorInput.value);
-  previewBox.style.setProperty('--bg-color-rgb', bgRgb);
-  previewBox.style.setProperty('--bg-color-secondario', bgColorSecondarioInput.value);
-  previewBox.style.setProperty('--bg-color-secondario-rgb', bgSecondarioRgb);
+  previewBox.style.setProperty('--sfondo', bgColorInput.value);
+  previewBox.style.setProperty('--sfondo-rgb', bgRgb);
+  previewBox.style.setProperty('--sfondo-secondario', bgColorSecondarioInput.value);
+  previewBox.style.setProperty('--sfondo-secondario-rgb', bgSecondarioRgb);
 
   const effScritta = effettiScritta.find(e => e.id === effettiScrittaSelect.value);
   if(effScritta && effScritta.css){
@@ -228,10 +228,10 @@ function aggiornaAnteprima() {
   let overlayColor = `rgba(${bgRgb},0.3)`;
   if(effSfondo && effSfondo.css){
     let sfondoCss = effSfondo.css
-      .replace(/var\(--bg-color\)/g, bgColorInput.value)
-      .replace(/var\(--bg-color-rgb\)/g, bgRgb)
-      .replace(/var\(--bg-color-secondario\)/g, bgColorSecondarioInput.value)
-      .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
+      .replace(/var\(--sfondo\)/g, bgColorInput.value)
+      .replace(/var\(--sfondo-rgb\)/g, bgRgb)
+      .replace(/var\(--sfondo-secondario\)/g, bgColorSecondarioInput.value)
+      .replace(/var\(--sfondo-secondario-rgb\)/g, bgSecondarioRgb);
 
     sfondoCss.split(';').forEach(rule => {
       if(rule.trim()){
