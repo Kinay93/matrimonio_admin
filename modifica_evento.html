@@ -162,7 +162,7 @@
   // --- Controllo autenticazione
   async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token) window.location.href = "login.html";
+    if(!token) return window.location.href = "login.html";
 
     try {
       const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { 
@@ -172,12 +172,12 @@
       if(!data.success){
         localStorage.removeItem("auth_token");
         localStorage.removeItem("admin_username");
-        window.location.href = "login.html";
+        return window.location.href = "login.html";
       }
     } catch(err){
       localStorage.removeItem("auth_token");
       localStorage.removeItem("admin_username");
-      window.location.href = "login.html";
+      return window.location.href = "login.html";
     }
   }
 
@@ -217,43 +217,50 @@
   async function caricaFontsEdEffetti() {
     try {
       const token = localStorage.getItem("auth_token");
-      const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", { headers: { "Authorization": "Bearer " + token }});
+      
+      const resFonts = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_fonts", {
+        headers: { "Authorization": "Bearer " + token }
+      });
       const dataFonts = await resFonts.json();
       fonts = dataFonts.fonts || [];
       selectFont.innerHTML = "";
       fonts.forEach(f=>{
-        const o=document.createElement("option");
-        o.value=f.css_family || f;
-        o.textContent=f.name || f;
+        const o = document.createElement("option");
+        o.value = f.css_family || f;
+        o.textContent = f.name || f;
         o.style.fontFamily = f.css_family || f;
         selectFont.appendChild(o);
       });
 
-      const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", { headers: { "Authorization": "Bearer " + token }});
+      const resEffetti = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/get_effetti", {
+        headers: { "Authorization": "Bearer " + token }
+      });
       const dataEffetti = await resEffetti.json();
       effettiSfondo = dataEffetti.sfondo || [];
       effettiScritta = dataEffetti.scritta || [];
 
       selectEffettoSfondo.innerHTML = '';
       effettiSfondo.forEach(f=>{
-        const o=document.createElement("option");
-        o.value=f.id || f;
-        o.textContent=f.name || f;
+        const o = document.createElement("option");
+        o.value = f.id || f;
+        o.textContent = f.name || f;
         selectEffettoSfondo.appendChild(o);
       });
 
       selectEffettoScritta.innerHTML = '';
       effettiScritta.forEach(f=>{
-        const o=document.createElement("option");
-        o.value=f.id || f;
-        o.textContent=f.name || f;
+        const o = document.createElement("option");
+        o.value = f.id || f;
+        o.textContent = f.name || f;
         selectEffettoScritta.appendChild(o);
       });
+
     } catch(e){ console.error(e); }
   }
 
-  // --- Carica dati evento
+  // --- Carica dati evento (solo se nomeEventoParam esiste)
   async function caricaDatiEvento() {
+    if(!nomeEventoParam) return;
     try {
       const token = localStorage.getItem("auth_token");
       const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${encodeURIComponent(nomeEventoParam)}&admin=${encodeURIComponent(adminParam)}`, {
@@ -276,6 +283,7 @@
 
       anteprimaTesto.textContent = data.titolo_index || "Titolo Evento";
       aggiornaAnteprima();
+
     } catch(err){
       console.error("Errore caricamento dati evento:", err);
     }
@@ -287,14 +295,11 @@
     const secondary = inputSfondoSecondario.value || "#eeeeee";
     const textColor = inputTesto.value || "#000000";
 
-    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
-    anteprimaTesto.style.color = textColor;
-    anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
-
-    // Reset stile inline prima di applicare effetti
+    // Reset stili inline
     anteprimaDiv.removeAttribute("style");
-    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
     anteprimaTesto.removeAttribute("style");
+
+    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
     anteprimaTesto.style.color = textColor;
     anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
 
@@ -342,36 +347,73 @@
   [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
   [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
 
-  // --- Aggiorna evento
-  document.getElementById("aggiornaEventoBtn").addEventListener("click", async ()=>{
-    const fotoFile = document.getElementById("fotoEvento").files[0];
-    const formData = new FormData();
-    formData.append("nome_evento", nomeEventoParam);
-    formData.append("admin", adminParam);
-    if(fotoFile) formData.append("foto_evento", fotoFile);
-    formData.append("sfondo", inputSfondo.value);
-    formData.append("sfondo_secondario", inputSfondoSecondario.value);
-    formData.append("testo", inputTesto.value);
-    formData.append("font", selectFont.value);
-    formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
-    formData.append("effetto_scritta", selectEffettoScritta.value||"");
+  // --- Creazione evento (solo se bottone esiste)
+  const creaBtn = document.getElementById("creaEventoBtn");
+  if(creaBtn){
+    creaBtn.addEventListener("click", async ()=>{
+      const fotoFile = document.getElementById("fotoEvento").files[0];
+      const formData = new FormData();
+      formData.append("admin", adminParam);
+      formData.append("nome_evento", document.getElementById("nomeEvento").value);
+      if(fotoFile) formData.append("foto_evento", fotoFile);
+      formData.append("sfondo", inputSfondo.value);
+      formData.append("sfondo_secondario", inputSfondoSecondario.value);
+      formData.append("testo", inputTesto.value);
+      formData.append("font", selectFont.value);
+      formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
+      formData.append("effetto_scritta", selectEffettoScritta.value||"");
 
-    const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
 
-    try {
-      const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento", {
-        method:"POST",
-        headers: { "Authorization": `Bearer ${token}` },
-        body: formData
-      });
-      const data = await res.json();
-      document.getElementById("msg").innerText = data.success ? "Evento aggiornato!" : "Errore: "+(data.error||"imprevisto");
-      if(data.success) setTimeout(()=>window.location.href="index.html",1000);
-    } catch(err){
-      console.error(err);
-      document.getElementById("msg").innerText = "Errore aggiornamento evento.";
-    }
-  });
+      try {
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/crea_evento", {
+          method:"POST",
+          headers: { "Authorization": `Bearer ${token}` },
+          body: formData
+        });
+        const data = await res.json();
+        document.getElementById("msg").innerText = data.success ? "Evento creato!" : "Errore: "+(data.error||"imprevisto");
+        if(data.success) setTimeout(()=>window.location.href="index.html",1000);
+      } catch(err){
+        console.error(err);
+        document.getElementById("msg").innerText = "Errore creazione evento.";
+      }
+    });
+  }
+
+  // --- Aggiornamento evento (solo se bottone esiste)
+  const aggiornaBtn = document.getElementById("aggiornaEventoBtn");
+  if(aggiornaBtn){
+    aggiornaBtn.addEventListener("click", async ()=>{
+      const fotoFile = document.getElementById("fotoEvento").files[0];
+      const formData = new FormData();
+      formData.append("nome_evento", nomeEventoParam);
+      formData.append("admin", adminParam);
+      if(fotoFile) formData.append("foto_evento", fotoFile);
+      formData.append("sfondo", inputSfondo.value);
+      formData.append("sfondo_secondario", inputSfondoSecondario.value);
+      formData.append("testo", inputTesto.value);
+      formData.append("font", selectFont.value);
+      formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
+      formData.append("effetto_scritta", selectEffettoScritta.value||"");
+
+      const token = localStorage.getItem("auth_token");
+
+      try {
+        const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento", {
+          method:"POST",
+          headers: { "Authorization": `Bearer ${token}` },
+          body: formData
+        });
+        const data = await res.json();
+        document.getElementById("msg").innerText = data.success ? "Evento aggiornato!" : "Errore: "+(data.error||"imprevisto");
+        if(data.success) setTimeout(()=>window.location.href="index.html",1000);
+      } catch(err){
+        console.error(err);
+        document.getElementById("msg").innerText = "Errore aggiornamento evento.";
+      }
+    });
+  }
 
   // --- Onload
   window.onload = async () => {
@@ -380,6 +422,5 @@
     await caricaDatiEvento();
   };
 </script>
-
 </body>
 </html>
