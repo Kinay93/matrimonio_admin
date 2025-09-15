@@ -235,28 +235,38 @@ async function caricaFontsEdEffetti() {
     }
 }
 
-// --- Aggiorna anteprima (applica gradient + testo + font)
-function aggiornaAnteprima() {
-    const bg1 = inputSfondo.value || '#ffffff';
-    const bg2 = inputSfondoSecondario.value || bg1;
-    anteprima.style.background = `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`;
+ // --- Aggiorna anteprima
+  function aggiornaAnteprima() {
+    const primary = inputSfondo.value || "#ffffff";
+    const secondary = inputSfondoSecondario.value || "#eeeeee";
+    const textColor = inputTesto.value || "#000000";
 
-    const textColor = inputTesto.value || '#000';
+    // Reset stili inline
+    anteprimaDiv.removeAttribute("style");
+    anteprimaTesto.removeAttribute("style");
+
+    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
     anteprimaTesto.style.color = textColor;
-    anteprimaTesto.style.fontFamily = selectFont.value || 'Arial';
+    anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
 
-    // Effetto scritta (se presente)
-    const eff = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
-    if (eff && eff.css) {
-        eff.css.split(';').forEach(rule => {
-            if (!rule.trim()) return;
-            const [propRaw, ...valParts] = rule.split(':');
-            const prop = propRaw && propRaw.trim();
-            const val = valParts.join(':') && valParts.join(':').trim();
-            if (prop && val) anteprimaTesto.style.setProperty(prop, val.replace(/var\(--text-color\)/g, textColor));
-        });
+    const bgRgb = hexToRgb(primary);
+    const bgSecondarioRgb = hexToRgb(secondary);
+
+    // --- Effetto scritta inline
+    const effScritta = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
+    if(effScritta && effScritta.css){
+      effScritta.css.split(";").forEach(rule=>{
+        if(rule.trim()){
+          const [propRaw,...valParts] = rule.split(":");
+          const prop = propRaw && propRaw.trim();
+          const val = valParts.join(":") && valParts.join(":").trim();
+          if(prop && val){
+            anteprimaTesto.style.setProperty(prop,val.replace(/var\(--text-color\)/g,textColor));
+          }
+        }
+      });
     }
-}
+
 
 // --- gestione file immagine (anteprima)
 document.getElementById("fotoEvento").addEventListener("change", (e) => {
