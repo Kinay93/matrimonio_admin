@@ -162,10 +162,10 @@
   // --- Controllo autenticazione
   async function checkAuth() {
     const token = localStorage.getItem("auth_token");
-    if(!token) window.location.href = "login.html";
+    if(!token) return window.location.href = "login.html";
 
     try {
-      const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", { 
+      const res = await fetch("https://matrimonioapp.ew.r.appspot.com/me", {
         headers: { "Authorization": "Bearer " + token }
       });
       const data = await res.json();
@@ -173,6 +173,8 @@
         localStorage.removeItem("auth_token");
         localStorage.removeItem("admin_username");
         window.location.href = "login.html";
+      } else {
+        if(data.username) localStorage.setItem('admin_username', data.username);
       }
     } catch(err){
       localStorage.removeItem("auth_token");
@@ -183,6 +185,7 @@
 
   // --- Utils
   function hexToRgb(hex) {
+    if(!hex) return "255, 255, 255";
     hex = hex.replace('#','');
     if(hex.length === 3) hex = hex.split('').map(c => c+c).join('');
     const bigint = parseInt(hex,16);
@@ -194,7 +197,7 @@
 
   // --- Parametri URL
   const params = new URLSearchParams(window.location.search);
-  const nomeEventoParam = params.get("evento");
+  const nomeEventoParam = params.get("evento"); // se esiste -> siamo in modifica
   const adminParam = params.get("admin") || localStorage.getItem("admin_username");
 
   // --- Elementi DOM
@@ -223,8 +226,8 @@
       selectFont.innerHTML = "";
       fonts.forEach(f=>{
         const o=document.createElement("option");
-        o.value=f.css_family || f;
-        o.textContent=f.name || f;
+        o.value = f.css_family || f;
+        o.textContent = f.name || f;
         o.style.fontFamily = f.css_family || f;
         selectFont.appendChild(o);
       });
@@ -237,23 +240,24 @@
       selectEffettoSfondo.innerHTML = '';
       effettiSfondo.forEach(f=>{
         const o=document.createElement("option");
-        o.value=f.id || f;
-        o.textContent=f.name || f;
+        o.value = f.id || f;
+        o.textContent = f.name || f;
         selectEffettoSfondo.appendChild(o);
       });
 
       selectEffettoScritta.innerHTML = '';
       effettiScritta.forEach(f=>{
         const o=document.createElement("option");
-        o.value=f.id || f;
-        o.textContent=f.name || f;
+        o.value = f.id || f;
+        o.textContent = f.name || f;
         selectEffettoScritta.appendChild(o);
       });
-    } catch(e){ console.error(e); }
+    } catch(e){ console.error("caricaFontsEdEffetti:", e); }
   }
 
-  // --- Carica dati evento
+  // --- Carica dati evento (solo per modifica)
   async function caricaDatiEvento() {
+    if(!nomeEventoParam) return; // se è nuovo evento non fare nulla
     try {
       const token = localStorage.getItem("auth_token");
       const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/get_evento?evento=${encodeURIComponent(nomeEventoParam)}&admin=${encodeURIComponent(adminParam)}`, {
@@ -262,124 +266,188 @@
       const data = await res.json();
       if(data.error){ alert("Evento non trovato"); return; }
 
-      document.getElementById("nomeEvento").value = data.titolo_index || "";
+      // Popola campi con i dati ricevuti
+      const titolo = data.titolo_index || data.evento_nome || nomeEventoParam || "";
+      document.getElementById("nomeEvento").value = titolo;
+
       if(data.foto_url){
         anteprimaFoto.innerHTML = `<img src="${data.foto_url}" alt="Foto Evento">`;
+      } else {
+        anteprimaFoto.innerHTML = 'Foto';
       }
 
       inputSfondo.value = data.sfondo || "#ffffff";
       inputSfondoSecondario.value = data.sfondo_secondario || "#eeeeee";
       inputTesto.value = data.testo || "#000000";
-      selectFont.value = data.font || "Arial";
+
+      // se il font è presente tra le options lo selezioniamo, altrimenti lasciamo fallback
+      if (data.font && selectFont.querySelector(`option[value="${data.font}"]`)) {
+        selectFont.value = data.font;
+      } else {
+        selectFont.value = data.font || selectFont.value || "Arial";
+      }
+
       selectEffettoSfondo.value = data.effetto_sfondo || "";
       selectEffettoScritta.value = data.effetto_scritta || "";
 
-      anteprimaTesto.textContent = data.titolo_index || "Titolo Evento";
+      anteprimaTesto.textContent = titolo || "Titolo Evento";
       aggiornaAnteprima();
     } catch(err){
-      console.error("Errore caricamento dati evento:", err);
+      console.error("caricaDatiEvento error:", err);
     }
   }
 
-  // --- Aggiorna anteprima
+  // --- Aggiorna anteprima applicando gradient + effetti
   function aggiornaAnteprima() {
+    // rimuoviamo overlay precedente se presente
+    const oldOverlay = anteprimaDiv.querySelector('.overlay');
+    if(oldOverlay) oldOverlay.remove();
+
     const primary = inputSfondo.value || "#ffffff";
     const secondary = inputSfondoSecondario.value || "#eeeeee";
     const textColor = inputTesto.value || "#000000";
 
-    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
+    // base gradient
+    anteprimaDiv.style.cssText = '';
+    anteprimaDiv.style.position = 'relative';
+    anteprimaDiv.style.display = 'flex';
+    anteprimaDiv.style.alignItems = 'center';
+    anteprimaDiv.style.justifyContent = 'center';
+    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`;
+
+    // testo
+    anteprimaTesto.style.cssText = '';
     anteprimaTesto.style.color = textColor;
     anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
 
-    // Reset stile inline prima di applicare effetti
-    anteprimaDiv.removeAttribute("style");
-    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
-    anteprimaTesto.removeAttribute("style");
-    anteprimaTesto.style.color = textColor;
-    anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
-
-    const bgRgb = hexToRgb(primary);
-    const bgSecondarioRgb = hexToRgb(secondary);
-
-    // --- Effetto scritta inline
-    const effScritta = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
-    if(effScritta && effScritta.css){
-      effScritta.css.split(";").forEach(rule=>{
-        if(rule.trim()){
-          const [propRaw,...valParts] = rule.split(":");
-          const prop = propRaw && propRaw.trim();
-          const val = valParts.join(":") && valParts.join(":").trim();
-          if(prop && val){
-            anteprimaTesto.style.setProperty(prop,val.replace(/var\(--text-color\)/g,textColor));
-          }
-        }
+    // effetto scritta (inline)
+    const effW = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
+    if(effW && effW.css){
+      effW.css.split(';').forEach(rule => {
+        if(!rule.trim()) return;
+        const [propRaw, ...valParts] = rule.split(':');
+        const prop = propRaw && propRaw.trim();
+        const val = valParts.join(':') && valParts.join(':').trim();
+        if(prop && val) anteprimaTesto.style.setProperty(prop, val.replace(/var\(--text-color\)/g, textColor));
       });
     }
 
-    // --- Effetto sfondo inline
-    const effSfondo = effettiSfondo.find(e => String(e.id) === String(selectEffettoSfondo.value));
-    if(effSfondo && effSfondo.css){
-      let sfondoCss = effSfondo.css
+    // effetto sfondo (inline)
+    const effB = effettiSfondo.find(e => String(e.id) === String(selectEffettoSfondo.value));
+    if(effB && effB.css){
+      let cssStr = effB.css
         .replace(/var\(--bg-color\)/g, primary)
-        .replace(/var\(--bg-color-rgb\)/g, bgRgb)
+        .replace(/var\(--bg-color-rgb\)/g, hexToRgb(primary))
         .replace(/var\(--bg-color-secondario\)/g, secondary)
-        .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
+        .replace(/var\(--bg-color-secondario-rgb\)/g, hexToRgb(secondary));
 
-      sfondoCss.split(";").forEach(rule=>{
-        if(rule.trim()){
-          const [propRaw,...valParts] = rule.split(":");
-          const prop = propRaw && propRaw.trim();
-          const val = valParts.join(":") && valParts.join(":").trim();
-          if(prop && val){
-            anteprimaDiv.style.setProperty(prop,val);
-          }
-        }
+      cssStr.split(';').forEach(rule => {
+        if(!rule.trim()) return;
+        const [propRaw, ...valParts] = rule.split(':');
+        const prop = propRaw && propRaw.trim();
+        const val = valParts.join(':') && valParts.join(':').trim();
+        if(prop && val) anteprimaDiv.style.setProperty(prop, val);
       });
+
+      // se c'è una url(...) nello sfondo, aggiungiamo overlay semitrasparente
+      const bgImageMatch = cssStr.match(/url\((['"]?)([^'")]+)\1\)/);
+      if(bgImageMatch){
+        const overlay = document.createElement('div');
+        overlay.className = 'overlay';
+        overlay.style.position = 'absolute';
+        overlay.style.top = 0;
+        overlay.style.left = 0;
+        overlay.style.right = 0;
+        overlay.style.bottom = 0;
+        overlay.style.pointerEvents = 'none';
+        overlay.style.backgroundColor = `rgba(${hexToRgb(primary)},0.25)`;
+        anteprimaDiv.appendChild(overlay);
+      }
     }
   }
 
-  // --- Event listeners per input
-  [inputSfondo,inputSfondoSecondario,inputTesto].forEach(el => el.addEventListener("input", aggiornaAnteprima));
-  [selectFont,selectEffettoSfondo,selectEffettoScritta].forEach(el => el.addEventListener("change", aggiornaAnteprima));
+  // --- Anteprima immagine quando selezioni file
+  const fotoInput = document.getElementById("fotoEvento");
+  if(fotoInput){
+    fotoInput.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.alt = 'Foto Evento';
+      img.onload = () => URL.revokeObjectURL(img.src);
+      anteprimaFoto.innerHTML = '';
+      anteprimaFoto.appendChild(img);
+    });
+  }
 
-  // --- Aggiorna evento
-  document.getElementById("aggiornaEventoBtn").addEventListener("click", async ()=>{
+  // --- Event listeners
+  [inputSfondo, inputSfondoSecondario, inputTesto].forEach(el => { if(el) el.addEventListener('input', aggiornaAnteprima); });
+  [selectFont, selectEffettoSfondo, selectEffettoScritta].forEach(el => { if(el) el.addEventListener('change', aggiornaAnteprima); });
+
+  // --- Pulsante (crea o aggiorna secondo contesto)
+  document.getElementById("aggiornaEventoBtn").addEventListener("click", async () => {
     const fotoFile = document.getElementById("fotoEvento").files[0];
     const formData = new FormData();
-    formData.append("nome_evento", nomeEventoParam);
-    formData.append("admin", adminParam);
+
+    // se siamo in modifica -> invia nome_evento e admin: usa aggiornamento
+    if(nomeEventoParam){
+      formData.append("nome_evento", nomeEventoParam);
+      formData.append("admin", adminParam);
+    } else {
+      // creazione: richiediamo il nome dal campo nomeEvento (non disabilitato per nuovo evento idealmente)
+      const nome = (document.getElementById("nomeEvento").value || "").trim();
+      if(!nome){
+        alert("Inserisci il nome dell'evento nel campo Nome evento.");
+        return;
+      }
+      formData.append("nome_evento", nome);
+      formData.append("tipo", "evento"); // default tipo
+      formData.append("admin", adminParam);
+    }
+
     if(fotoFile) formData.append("foto_evento", fotoFile);
     formData.append("sfondo", inputSfondo.value);
     formData.append("sfondo_secondario", inputSfondoSecondario.value);
     formData.append("testo", inputTesto.value);
     formData.append("font", selectFont.value);
-    formData.append("effetto_sfondo", selectEffettoSfondo.value||"");
-    formData.append("effetto_scritta", selectEffettoScritta.value||"");
+    formData.append("effetto_sfondo", selectEffettoSfondo.value || "");
+    formData.append("effetto_scritta", selectEffettoScritta.value || "");
 
     const token = localStorage.getItem("auth_token");
-
     try {
-      const res = await fetch("https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento", {
-        method:"POST",
+      const endpoint = nomeEventoParam ? "https://matrimonioapp.ew.r.appspot.com/admin/aggiorna_evento" : "https://matrimonioapp.ew.r.appspot.com/admin/crea_evento";
+      const res = await fetch(endpoint, {
+        method: "POST",
         headers: { "Authorization": `Bearer ${token}` },
         body: formData
       });
       const data = await res.json();
-      document.getElementById("msg").innerText = data.success ? "Evento aggiornato!" : "Errore: "+(data.error||"imprevisto");
-      if(data.success) setTimeout(()=>window.location.href="index.html",1000);
+      document.getElementById("msg").innerText = data.success ? (nomeEventoParam ? "Evento aggiornato!" : "Evento creato!") : "Errore: "+(data.error||"imprevisto");
+      if(data.success) setTimeout(()=>window.location.href="index.html", 900);
     } catch(err){
-      console.error(err);
-      document.getElementById("msg").innerText = "Errore aggiornamento evento.";
+      console.error("save error:", err);
+      document.getElementById("msg").innerText = "Errore nella richiesta.";
     }
   });
 
-  // --- Onload
-  window.onload = async () => {
+  // --- Init
+  window.addEventListener("DOMContentLoaded", async () => {
     await checkAuth();
     await caricaFontsEdEffetti();
-    await caricaDatiEvento();
-  };
-</script>
 
+    // Se sono in modifica carico i dati, altrimenti imposto valori di default e aggiorno anteprima subito
+    if(nomeEventoParam){
+      await caricaDatiEvento();
+    } else {
+      // nuovo evento: svuota il campo (non dovrebbe essere disabled) e mostra anteprima base
+      document.getElementById("nomeEvento").value = "";
+      inputSfondo.value = inputSfondo.value || "#ffffff";
+      inputSfondoSecondario.value = inputSfondoSecondario.value || "#eeeeee";
+      inputTesto.value = inputTesto.value || "#000000";
+      aggiornaAnteprima();
+    }
+  });
+</script>
 </body>
 </html>
