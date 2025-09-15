@@ -142,41 +142,62 @@ document.getElementById('nuovo-matrimonio').addEventListener('click', ()=> {
   window.location.href = 'nuovo_evento.html';
 });
 
-// --- Funzione per sanificare nomi
+// --- Funzione per sanificare nomi (usata per qrcode/eventi in URL)
 function sanitizeName(s){
-  return s.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  if(!s) return "";
+  return String(s).trim().replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
 }
 
 // --- Genera QR
-async function generaQRCode(eventoNome, btn) {
+async function generaQRCode(eventoNome, btn, btnVediRef) {
   try {
+    btn.disabled = true; // evita doppi click
     const token = localStorage.getItem("auth_token");
     const admin = localStorage.getItem('admin_username') || 'Admin';
 
     const eventoS = sanitizeName(eventoNome);
     const adminS = sanitizeName(admin);
 
+    console.log("generaQRCode -> evento:", eventoS, "admin:", adminS);
+
     const res = await fetch(`https://matrimonioapp.ew.r.appspot.com/admin/genera_qrcode?evento=${encodeURIComponent(eventoS)}&admin=${encodeURIComponent(adminS)}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
     if(data.success){
+      // se il server ritorna qr_url lo usiamo per il pulsante Vedi
+      if(data.qr_url){
+        // memorizza l'url sul bottone Vedi
+        btnVediRef.dataset.qrUrl = data.qr_url;
+      }
       btn.disabled = true;
+      btnVediRef.disabled = false;
+      // aggiorna stato visibile (se vuoi mantenere stato lato client)
+      btnVediRef.classList.remove('disabled');
       alert("QR generato!");
     } else {
+      btn.disabled = false;
       alert("Errore generazione QR: " + (data.error||"imprevisto"));
     }
   } catch(err){
     console.error(err);
+    btn.disabled = false;
     alert("Errore generazione QR.");
   }
 }
 
 // --- Vedi QR
-function vediQRCode(eventoNome){
+function vediQRCode(eventoNome, btnVediRef) {
   const admin = localStorage.getItem('admin_username') || 'Admin';
   const eventoS = sanitizeName(eventoNome);
   const adminS = sanitizeName(admin);
+
+  // se il bottone ha qrUrl (pubblico) lo apriamo, altrimenti fallback all'endpoint di servizio
+  const publicUrl = btnVediRef && btnVediRef.dataset && btnVediRef.dataset.qrUrl;
+  if(publicUrl){
+    window.open(publicUrl, "_blank");
+    return;
+  }
 
   const url = `https://matrimonioapp.ew.r.appspot.com/admin/get_qrcode?evento=${encodeURIComponent(eventoS)}&admin=${encodeURIComponent(adminS)}`;
   window.open(url, "_blank");
@@ -218,13 +239,22 @@ async function caricaEventi() {
       const imgContainer = document.createElement('div');
       imgContainer.className = 'evento-img';
       const img = document.createElement('img');
-      img.src = evento.foto_url || 'https://via.placeholder.com/100';
+
+      // se foto_url è un percorso relativo (non pubblico) prova a trasformarlo in URL pubblico,
+      // altrimenti usa direttamente quello restituito.
+      let fotoSrc = evento.foto_url || '';
+      if(fotoSrc && !/^https?:\/\//.test(fotoSrc)) {
+        // prova a normalizzare: se il backend salva percorsi come "config/eventi/..." trasformali
+        // nella public url del bucket (modifica se il tuo bucket ha un nome diverso)
+        fotoSrc = `https://storage.googleapis.com/matrimonio_app_bucket/${encodeURI(fotoSrc)}`;
+      }
+      img.src = fotoSrc || 'https://via.placeholder.com/100';
       img.alt = evento.nome;
       imgContainer.appendChild(img);
 
       // --- Click per modifica evento, passa anche admin
       imgContainer.addEventListener('click', () => {
-        const adminParam = evento.admin || localStorage.getItem('admin_username') || 'Admin';
+        const adminParam = localStorage.getItem('admin_username') || 'Admin';
         window.location.href = `modifica_evento.html?evento=${encodeURIComponent(evento.nome)}&admin=${encodeURIComponent(adminParam)}`;
       });
       card.appendChild(imgContainer);
@@ -233,22 +263,37 @@ async function caricaEventi() {
       const btnGenera = document.createElement('button');
       btnGenera.textContent = 'Genera QR';
       btnGenera.className = 'btn-genera';
-      btnGenera.disabled = evento.qr_generato;
-      btnGenera.addEventListener('click', e=>{
-        e.stopPropagation(); 
-        generaQRCode(evento.nome, btnGenera); 
-      });
-      card.appendChild(btnGenera);
 
       // --- Pulsante Vedi QR
       const btnVedi = document.createElement('button');
       btnVedi.textContent = 'Vedi QR';
       btnVedi.className = 'btn-vedi';
-      btnVedi.disabled = !evento.qr_generato;
-      btnVedi.addEventListener('click', e=>{
-        e.stopPropagation(); 
-        vediQRCode(evento.nome); 
+
+      // determino se già c'è il QR (gestisco vari possibili formati: booleano/string/qr_url)
+      const hasQr = !!(evento.qr_generato === true || evento.qr_generato === 'true' || evento.qr_url);
+      btnGenera.disabled = hasQr;
+      btnVedi.disabled = !hasQr;
+
+      // se c'è qr_url pubblico lo assegno al bottone Vedi per apertura diretta
+      if(evento.qr_url && typeof evento.qr_url === 'string' && evento.qr_url.trim()){
+        btnVedi.dataset.qrUrl = evento.qr_url;
+      }
+
+      // aggiungo listeners (con stopPropagation per non scatenare il click dell'immagine)
+      btnGenera.addEventListener('click', e=>{
+        e.stopPropagation();
+        // disabilito subito per evitare doppio click; generaQRCode gestirà il riabilitare in caso di errore
+        btnGenera.disabled = true;
+        generaQRCode(evento.nome, btnGenera, btnVedi);
       });
+
+      btnVedi.addEventListener('click', e=>{
+        e.stopPropagation();
+        vediQRCode(evento.nome, btnVedi);
+      });
+
+      // aggiungo i bottoni alla card
+      card.appendChild(btnGenera);
       card.appendChild(btnVedi);
 
       // --- Aggiungi card alla grid
@@ -268,6 +313,5 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   await caricaEventi();
 });
 </script>
-
 </body>
 </html>
