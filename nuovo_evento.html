@@ -235,7 +235,7 @@ async function caricaFontsEdEffetti() {
     }
 }
 
-  // --- Aggiorna anteprima
+ // --- Aggiorna anteprima
   function aggiornaAnteprima() {
     const primary = inputSfondo.value || "#ffffff";
     const secondary = inputSfondoSecondario.value || "#eeeeee";
@@ -266,29 +266,7 @@ async function caricaFontsEdEffetti() {
         }
       });
     }
-
-    // --- Effetto sfondo inline
-    const effSfondo = effettiSfondo.find(e => String(e.id) === String(selectEffettoSfondo.value));
-    if(effSfondo && effSfondo.css){
-      let sfondoCss = effSfondo.css
-        .replace(/var\(--bg-color\)/g, primary)
-        .replace(/var\(--bg-color-rgb\)/g, bgRgb)
-        .replace(/var\(--bg-color-secondario\)/g, secondary)
-        .replace(/var\(--bg-color-secondario-rgb\)/g, bgSecondarioRgb);
-
-      sfondoCss.split(";").forEach(rule=>{
-        if(rule.trim()){
-          const [propRaw,...valParts] = rule.split(":");
-          const prop = propRaw && propRaw.trim();
-          const val = valParts.join(":") && valParts.join(":").trim();
-          if(prop && val){
-            anteprimaDiv.style.setProperty(prop,val);
-          }
-        }
-      });
-    }
   }
-
 
 // --- gestione file immagine (anteprima)
 document.getElementById("fotoEvento").addEventListener("change", (e) => {
