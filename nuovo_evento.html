@@ -235,45 +235,28 @@ async function caricaFontsEdEffetti() {
     }
 }
 
- // --- Aggiorna anteprima
+// --- Aggiorna anteprima (applica gradient + testo + font)
 function aggiornaAnteprima() {
-  const primary = inputSfondo.value || "#ffffff";
-  const secondary = inputSfondoSecondario.value || "#eeeeee";
-  const textColor = inputTesto.value || "#000000";
+    const bg1 = inputSfondo.value || '#ffffff';
+    const bg2 = inputSfondoSecondario.value || bg1;
+    anteprima.style.background = `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`;
 
-  // --- Resetta classi effetti precedenti
-  effettiSfondo.forEach(e => anteprimaDiv.classList.remove(e.id || e));
-  effettiScritta.forEach(e => anteprimaTesto.classList.remove(e.id || e));
+    const textColor = inputTesto.value || '#000';
+    anteprimaTesto.style.color = textColor;
+    anteprimaTesto.style.fontFamily = selectFont.value || 'Arial';
 
-  // --- Applica effetto sfondo tramite classe se selezionato
-  const selectedBgEffect = selectEffettoSfondo.value;
-  if (selectedBgEffect) {
-    anteprimaDiv.classList.add(selectedBgEffect);
-  } else {
-    // Se nessun effetto sfondo, usa gradient base
-    anteprimaDiv.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
-  }
-
-  // --- Imposta font e colore testo base
-  anteprimaTesto.style.color = textColor;
-  anteprimaTesto.style.fontFamily = selectFont.value || "Arial";
-
-  // --- Applica effetto scritta inline se presente
-  const effScritta = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
-  if(effScritta && effScritta.css){
-    effScritta.css.split(";").forEach(rule => {
-      if(rule.trim()){
-        const [propRaw,...valParts] = rule.split(":");
-        const prop = propRaw && propRaw.trim();
-        const val = valParts.join(":") && valParts.join(":").trim();
-        if(prop && val){
-          anteprimaTesto.style.setProperty(prop, val.replace(/var\(--text-color\)/g, textColor));
-        }
-      }
-    });
-  }
+    // Effetto scritta (se presente)
+    const eff = effettiScritta.find(e => String(e.id) === String(selectEffettoScritta.value));
+    if (eff && eff.css) {
+        eff.css.split(';').forEach(rule => {
+            if (!rule.trim()) return;
+            const [propRaw, ...valParts] = rule.split(':');
+            const prop = propRaw && propRaw.trim();
+            const val = valParts.join(':') && valParts.join(':').trim();
+            if (prop && val) anteprimaTesto.style.setProperty(prop, val.replace(/var\(--text-color\)/g, textColor));
+        });
+    }
 }
-
 
 // --- gestione file immagine (anteprima)
 document.getElementById("fotoEvento").addEventListener("change", (e) => {
